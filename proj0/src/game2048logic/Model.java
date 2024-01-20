@@ -3,8 +3,6 @@ package game2048logic;
 import game2048rendering.Board;
 import game2048rendering.Side;
 import game2048rendering.Tile;
-import net.sf.saxon.functions.ConstantFunction;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Formatter;
 
@@ -82,24 +80,11 @@ public class Model {
         return board;
     }
 
-    /** Check whether the tile is empty */
-    public boolean is_empty(int x,int y) {
-        return tile(x, y) == null;
-    }
-
-
     /** Returns true if at least one space on the Board is empty.
      *  Empty spaces are stored as null.
      * */
     public boolean emptySpaceExists() {
-        int board_size = size();
-        for (int x = 0; x < board_size ; x++){
-            for (int y = 0; y < board_size; y++){
-                if (is_empty(x, y)) {
-                    return true;
-                }
-            }
-        }
+        // TODO: Task 2. Fill in this function.
         return false;
     }
 
@@ -109,25 +94,9 @@ public class Model {
      * given a Tile object t, we get its value with t.value().
      */
     public boolean maxTileExists() {
-        int board_size = size();
-        for (int x = 0; x < board_size ; x++) {
-            for (int y = 0; y < board_size; y++) {
-                if (is_empty(x, y)) {
-                    continue;
-                }
-                if (tile(x, y).value() == MAX_PIECE) {
-                    return true;
-                }
-            }
-        }
+        // TODO: Task 3. Fill in this function.
         return false;
     }
-
-    /** Check whether the tile has the same value with neighbour tiles */
-    public boolean can_move(Tile tile0, Tile tile1) {
-        return tile0.value() == tile1.value();
-    }
-
 
     /**
      * Returns true if there are any valid moves on the board.
@@ -136,46 +105,7 @@ public class Model {
      * 2. There are two adjacent tiles with the same value.
      */
     public boolean atLeastOneMoveExists() {
-        if (emptySpaceExists()){
-            return true;
-        }
-
-        int board_size = size();
-        for (int x = 0;x < board_size; x++) {
-            for (int y =0; y < board_size; y++) {
-                Tile current_tile = tile(x, y);
-
-                // if current tile is right-most tile
-                if (x == board_size - 1) {
-                    // if it is the top-right tile
-                    if (y == board_size - 1) {
-                        continue;
-                    }
-                    Tile tile0 = tile(x, y + 1); // only need to check above tile
-                    if (can_move(current_tile, tile0)) {
-                        return true;
-                    }
-                }
-                else {
-                    // if current tile is not the top-most tile and not right-most tile
-                    if (y < board_size - 1) {
-                        Tile tile0 = tile(x, y + 1), tile1 = tile(x + 1, y); // need to check both above tile and RHS tile
-                        if (can_move(current_tile, tile0) || can_move(current_tile, tile1)) {
-                            return true;
-                        }
-                    }
-                    // if current tile is the top-most tile and not right-most tile
-                    else {
-                        Tile tile1 = tile(x + 1, y); // only need to check the RHS tile
-                        if (can_move(current_tile, tile1)) {
-                            return true;
-                        }
-                    }
-                }
-
-            }
-        }
-
+        // TODO: Fill in this function.
         return false;
     }
 
@@ -196,31 +126,8 @@ public class Model {
     public void moveTileUpAsFarAsPossible(int x, int y) {
         Tile currTile = board.tile(x, y);
         int myValue = currTile.value();
-        int targetY = y, board_size = board.size();
+        int targetY = y;
 
-        // move upper until there is tile or reach the edge
-        while (targetY < board_size - 1) {
-            // upper tile is not empty
-            if (!is_empty(x , targetY + 1)) {
-                Tile upper_tile = board.tile(x, targetY + 1);
-                int upper_value = upper_tile.value();
-                // if they have the same value, move and merge those two tile
-                if (myValue == upper_value) {
-                    targetY += 1;
-                    board.move(x , targetY, currTile);
-                    return;
-                } else {
-                    break;
-                }
-            }
-            // upper tile is empty, looking for next tile
-            else {
-                targetY += 1;
-            }
-        }
-;
-        // got the target Y we can move the tile now
-        board.move(x, targetY, currTile);
         // TODO: Tasks 5, 6, and 10. Fill in this function.
     }
 

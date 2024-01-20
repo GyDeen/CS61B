@@ -67,7 +67,6 @@ public class Tile {
         }
     }
 
-
     @Override
     public String toString() {
         return String.format("Tile %d at position (%d, %d)", value(), x(), y());
