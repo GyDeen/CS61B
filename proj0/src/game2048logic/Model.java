@@ -3,6 +3,8 @@ package game2048logic;
 import game2048rendering.Board;
 import game2048rendering.Side;
 import game2048rendering.Tile;
+import net.sf.saxon.functions.ConstantFunction;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Formatter;
 
@@ -80,11 +82,24 @@ public class Model {
         return board;
     }
 
+    /** Check whether the tile is empty */
+    public boolean is_empty(int x,int y) {
+        return tile(x, y) == null;
+    }
+
+
     /** Returns true if at least one space on the Board is empty.
      *  Empty spaces are stored as null.
      * */
     public boolean emptySpaceExists() {
-        // TODO: Task 2. Fill in this function.
+        int board_size = size();
+        for (int x = 0; x < board_size ; x++){
+            for (int y = 0; y < board_size; y++){
+                if (is_empty(x, y)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -94,9 +109,25 @@ public class Model {
      * given a Tile object t, we get its value with t.value().
      */
     public boolean maxTileExists() {
-        // TODO: Task 3. Fill in this function.
+        int board_size = size();
+        for (int x = 0; x < board_size ; x++) {
+            for (int y = 0; y < board_size; y++) {
+                if (is_empty(x, y)) {
+                    continue;
+                }
+                if (tile(x, y).value() == MAX_PIECE) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
+
+    /** Check whether the tile has the same value with neighbour tiles */
+    public boolean can_move(Tile tile0, Tile tile1) {
+        return tile0.value() == tile1.value();
+    }
+
 
     /**
      * Returns true if there are any valid moves on the board.
@@ -105,7 +136,37 @@ public class Model {
      * 2. There are two adjacent tiles with the same value.
      */
     public boolean atLeastOneMoveExists() {
-        // TODO: Fill in this function.
+        if (emptySpaceExists()){
+            return true;
+        }
+
+        int x = 0, y = 0, board_size = size();
+        for (;x < board_size; x++) {
+            for (; y < board_size; y++) {
+                Tile current_tile = tile(x, y);
+                if (y == board_size - 1) {
+                    y = 0;
+                }
+
+                if (x < board_size - 1) {
+                    // if the tile is not the top-most tile
+                    if (y < board_size - 1) {
+                        Tile tile0 = tile(x, y + 1), tile1 = tile(x + 1, y);
+                        if (can_move(current_tile, tile0) || can_move(current_tile, tile1)) {
+                            return true;
+                        }
+                    }
+                    // if the tile is the top-most tile
+                    else {
+                        Tile tile1 = tile(x + 1, y);
+                        if (can_move(current_tile, tile1)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
