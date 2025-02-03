@@ -123,6 +123,12 @@ public class Model {
         return false;
     }
 
+    /** Check whether the tile has the same value with neighbour tiles */
+    public boolean can_move(Tile tile0, Tile tile1) {
+        return tile0.value() == tile1.value();
+    }
+
+
     /**
      * Returns true if there are any valid moves on the board.
      * There are two ways that there can be valid moves:
@@ -130,7 +136,37 @@ public class Model {
      * 2. There are two adjacent tiles with the same value.
      */
     public boolean atLeastOneMoveExists() {
-        // TODO: Fill in this function.
+        if (emptySpaceExists()){
+            return true;
+        }
+
+        int x = 0, y = 0, board_size = size();
+        for (;x < board_size; x++) {
+            for (; y < board_size; y++) {
+                Tile current_tile = tile(x, y);
+                if (y == board_size - 1) {
+                    y = 0;
+                }
+
+                if (x < board_size - 1) {
+                    // if the tile is not the top-most tile
+                    if (y < board_size - 1) {
+                        Tile tile0 = tile(x, y + 1), tile1 = tile(x + 1, y);
+                        if (can_move(current_tile, tile0) || can_move(current_tile, tile1)) {
+                            return true;
+                        }
+                    }
+                    // if the tile is the top-most tile
+                    else {
+                        Tile tile1 = tile(x + 1, y);
+                        if (can_move(current_tile, tile1)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
