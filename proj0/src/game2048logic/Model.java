@@ -140,30 +140,39 @@ public class Model {
             return true;
         }
 
-        int x = 0, y = 0, board_size = size();
-        for (;x < board_size; x++) {
-            for (; y < board_size; y++) {
+        int board_size = size();
+        for (int x = 0;x < board_size; x++) {
+            for (int y =0; y < board_size; y++) {
                 Tile current_tile = tile(x, y);
-                if (y == board_size - 1) {
-                    y = 0;
-                }
 
-                if (x < board_size - 1) {
-                    // if the tile is not the top-most tile
+                // if current tile is right-most tile
+                if (x == board_size - 1) {
+                    // if it is the top-right tile
+                    if (y == board_size - 1) {
+                        continue;
+                    }
+                    Tile tile0 = tile(x, y + 1); // only need to check above tile
+                    if (can_move(current_tile, tile0)) {
+                        return true;
+                    }
+                }
+                else {
+                    // if current tile is not the top-most tile and not right-most tile
                     if (y < board_size - 1) {
-                        Tile tile0 = tile(x, y + 1), tile1 = tile(x + 1, y);
+                        Tile tile0 = tile(x, y + 1), tile1 = tile(x + 1, y); // need to check both above tile and RHS tile
                         if (can_move(current_tile, tile0) || can_move(current_tile, tile1)) {
                             return true;
                         }
                     }
-                    // if the tile is the top-most tile
+                    // if current tile is the top-most tile and not right-most tile
                     else {
-                        Tile tile1 = tile(x + 1, y);
+                        Tile tile1 = tile(x + 1, y); // only need to check the RHS tile
                         if (can_move(current_tile, tile1)) {
                             return true;
                         }
                     }
                 }
+
             }
         }
 
