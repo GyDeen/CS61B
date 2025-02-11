@@ -196,8 +196,31 @@ public class Model {
     public void moveTileUpAsFarAsPossible(int x, int y) {
         Tile currTile = board.tile(x, y);
         int myValue = currTile.value();
-        int targetY = y;
+        int targetY = y, board_size = board.size();
 
+        // move upper until there is tile or reach the edge
+        while (targetY < board_size - 1) {
+            // upper tile is not empty
+            if (!is_empty(x , targetY + 1)) {
+                Tile upper_tile = board.tile(x, targetY + 1);
+                int upper_value = upper_tile.value();
+                // if they have the same value, move and merge those two tile
+                if (myValue == upper_value) {
+                    targetY += 1;
+                    board.move(x , targetY, currTile);
+                    return;
+                } else {
+                    break;
+                }
+            }
+            // upper tile is empty, looking for next tile
+            else {
+                targetY += 1;
+            }
+        }
+;
+        // got the target Y we can move the tile now
+        board.move(x, targetY, currTile);
         // TODO: Tasks 5, 6, and 10. Fill in this function.
     }
 
