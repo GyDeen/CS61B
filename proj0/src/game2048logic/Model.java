@@ -185,14 +185,14 @@ public class Model {
     /** Getting all the tiles for the input, if the x is -1 means getting the column,
      * and if the y is -1 means getting the row. One of them have to be -1.
      */
-    public List<Tile> get_row_or_column(int row, int column) {
+    public List<int[]> get_row_or_column(int row, int column) {
         int i = 0, size = board.size();
-        List<Tile> lst_tile = new ArrayList<>();
+        List<int[]> lst_positions = new ArrayList<>();
         if (row == -1) {
             // get the row tiles
             while (i < size) {
                 if (!is_empty(i, column)) {
-                    lst_tile.add(board.tile(i, column));
+                    lst_positions.add(new int[]{i, column});
                 }
                 i++;
             }
@@ -201,14 +201,14 @@ public class Model {
             // get the column tiles
             while (i < size) {
                 if (!is_empty(row, i)) {
-                    lst_tile.add(board.tile(row, i));
+                    lst_positions.add(new int[]{row, i});
                 }
                 i++;
             }
 
         }
 
-        return lst_tile;
+        return lst_positions;
     }
 
     /** increment the score*/
@@ -234,7 +234,6 @@ public class Model {
         Tile currTile = board.tile(x, y);
         int myValue = currTile.value();
         int targetY = y, board_size = board.size();
-        List<Tile> column_tiles = get_row_or_column(x, -1); // getting all the tiles at the same column
 
         // move upper until there is tile or reach the edge
         while (targetY < board_size - 1) {
@@ -260,7 +259,6 @@ public class Model {
 ;
         // got the target Y we can move the tile now
         board.move(x, targetY, currTile);
-        // TODO: Tasks 5, 6, and 10. Fill in this function.
     }
 
     /** Handles the movements of the tilt in column x of the board
@@ -269,7 +267,13 @@ public class Model {
      * so we are tilting the tiles in this column up.
      * */
     public void tiltColumn(int x) {
-        // TODO: Task 7. Fill in this function.
+        List<int[]> column_tiles = get_row_or_column(x, -1); // get the tiles on column x
+        int size_of_column_tiles = column_tiles.size();
+
+        for (int i = size_of_column_tiles - 1; i >= 0; i--) {
+            int m = column_tiles.get(i)[0], n = column_tiles.get(i)[1];
+            moveTileUpAsFarAsPossible(m, n);
+        }
     }
 
     public void tilt(Side side) {
