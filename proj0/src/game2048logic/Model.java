@@ -182,14 +182,14 @@ public class Model {
     }
 
 
-    /** Getting all the tiles for the input, if the x is -1 means getting the column,
+    /** Getting all the tiles position based on the input, if the x is -1 means getting the column,
      * and if the y is -1 means getting the row. One of them have to be -1.
      */
     public List<int[]> get_row_or_column(int row, int column) {
         int i = 0, size = board.size();
         List<int[]> lst_positions = new ArrayList<>();
         if (row == -1) {
-            // get the row tiles
+            // get the row tiles position
             while (i < size) {
                 if (!is_empty(i, column)) {
                     lst_positions.add(new int[]{i, column});
@@ -198,7 +198,7 @@ public class Model {
             }
         }
         else if (column == -1) {
-            // get the column tiles
+            // get the column tiles position
             while (i < size) {
                 if (!is_empty(row, i)) {
                     lst_positions.add(new int[]{row, i});
@@ -234,6 +234,9 @@ public class Model {
         Tile currTile = board.tile(x, y);
         int myValue = currTile.value();
         int targetY = y, board_size = board.size();
+        if (targetY == board_size - 1) {
+            return;
+        }
 
         // move upper until there is tile or reach the edge
         while (targetY < board_size - 1) {
@@ -242,7 +245,7 @@ public class Model {
                 Tile upper_tile = board.tile(x, targetY + 1);
                 int upper_value = upper_tile.value();
                 // if they have the same value, move and merge those two tile
-                if (myValue == upper_value) {
+                if (myValue == upper_value && !upper_tile.wasMerged()) {
                     targetY += 1;
                     increment_score(myValue * 2);
                     board.move(x , targetY, currTile);

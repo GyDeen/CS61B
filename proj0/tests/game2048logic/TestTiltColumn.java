@@ -74,22 +74,22 @@ public class TestTiltColumn {
     @GradedTest(number = "11.3")
     public void testMergingColumnWithScore() {
         int[][] board = {
-                {0, 0, 0, 0},
                 {2, 0, 0, 0},
                 {2, 0, 0, 0},
-                {0, 0, 0, 0}
+                {2, 0, 0, 0},
+                {2, 0, 0, 0}
         };
         Model before = new Model(board, 0);
         before.tiltColumn(0);
 
         int[][] result = {
                 {4, 0, 0, 0},
-                {0, 0, 0, 0},
+                {4, 0, 0, 0},
                 {0, 0, 0, 0},
                 {0, 0, 0, 0}
         };
 
-        Model after = new Model(result, 4);
+        Model after = new Model(result, 8);
         assertWithMessage("Boards should match:").that(before.toString()).isEqualTo(after.toString());
     }
 
