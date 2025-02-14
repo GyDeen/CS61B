@@ -6,7 +6,9 @@ import game2048rendering.Tile;
 import net.sf.saxon.functions.ConstantFunction;
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.List;
 
 
 /** The state of a game of 2048.
@@ -179,6 +181,41 @@ public class Model {
         return false;
     }
 
+
+    /** Getting all the tiles for the input, if the x is -1 means getting the column,
+     * and if the y is -1 means getting the row. One of them have to be -1.
+     */
+    public List<Tile> get_row_or_column(int row, int column) {
+        int i = 0, size = board.size();
+        List<Tile> lst_tile = new ArrayList<>();
+        if (row == -1) {
+            // get the row tiles
+            while (i < size) {
+                if (!is_empty(i, column)) {
+                    lst_tile.add(board.tile(i, column));
+                }
+                i++;
+            }
+        }
+        else if (column == -1) {
+            // get the column tiles
+            while (i < size) {
+                if (!is_empty(row, i)) {
+                    lst_tile.add(board.tile(row, i));
+                }
+                i++;
+            }
+
+        }
+
+        return lst_tile;
+    }
+
+    /** increment the score*/
+    public void increment_score(int x) {
+        this.score += x;
+    }
+
     /**
      * Moves the tile at position (x, y) as far up as possible.
      *
@@ -197,6 +234,7 @@ public class Model {
         Tile currTile = board.tile(x, y);
         int myValue = currTile.value();
         int targetY = y, board_size = board.size();
+        List<Tile> column_tiles = get_row_or_column(x, -1); // getting all the tiles at the same column
 
         // move upper until there is tile or reach the edge
         while (targetY < board_size - 1) {
@@ -207,6 +245,7 @@ public class Model {
                 // if they have the same value, move and merge those two tile
                 if (myValue == upper_value) {
                     targetY += 1;
+                    increment_score(myValue * 2);
                     board.move(x , targetY, currTile);
                     return;
                 } else {
