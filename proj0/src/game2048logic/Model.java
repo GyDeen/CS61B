@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 
+import static game2048rendering.Side.*;
+
 
 /** The state of a game of 2048.
  *  @author P. N. Hilfinger + Josh Hug
@@ -273,14 +275,42 @@ public class Model {
         List<int[]> column_tiles = get_row_or_column(x, -1); // get the tiles on column x
         int size_of_column_tiles = column_tiles.size();
 
-        for (int i = size_of_column_tiles - 1; i >= 0; i--) {
+        for (int i = size_of_column_tiles - 1; i >= 0; i--) {  // tilt all tiles on selecting at column
             int m = column_tiles.get(i)[0], n = column_tiles.get(i)[1];
             moveTileUpAsFarAsPossible(m, n);
         }
     }
 
+    /** Helper method for tilt that tilt always towards up */
+    public void tilt_up() {
+        int board_size = board.size();
+        for (int i = 0; i < board_size; i++) { // tilt up all columns
+            tiltColumn(i);
+        }
+    }
+
     public void tilt(Side side) {
-        // TODO: Tasks 8 and 9. Fill in this function.
+        switch (side) {
+            case NORTH:
+                tilt_up();
+                break;
+            case SOUTH:
+                board.setViewingPerspective(SOUTH);
+                tilt_up();
+                board.setViewingPerspective(NORTH);
+                break;
+            case WEST:
+                board.setViewingPerspective(WEST);
+                tilt_up();
+                board.setViewingPerspective(NORTH);
+                break;
+            case EAST:
+                board.setViewingPerspective(EAST);
+                tilt_up();
+                board.setViewingPerspective(NORTH);
+                break;
+        }
+        
     }
 
     /** Tilts every column of the board toward SIDE.
