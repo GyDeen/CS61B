@@ -87,7 +87,7 @@ public class Model {
     }
 
     /** Check whether the tile is empty */
-    public boolean is_empty(int x,int y) {
+    public boolean is_empty(int x, int y) {
         return tile(x, y) == null;
     }
 
@@ -97,8 +97,8 @@ public class Model {
      * */
     public boolean emptySpaceExists() {
         int board_size = size();
-        for (int x = 0; x < board_size ; x++){
-            for (int y = 0; y < board_size; y++){
+        for (int x = 0; x < board_size; x++) {
+            for (int y = 0; y < board_size; y++) {
                 if (is_empty(x, y)) {
                     return true;
                 }
@@ -114,7 +114,7 @@ public class Model {
      */
     public boolean maxTileExists() {
         int board_size = size();
-        for (int x = 0; x < board_size ; x++) {
+        for (int x = 0; x < board_size; x++) {
             for (int y = 0; y < board_size; y++) {
                 if (is_empty(x, y)) {
                     continue;
@@ -140,13 +140,13 @@ public class Model {
      * 2. There are two adjacent tiles with the same value.
      */
     public boolean atLeastOneMoveExists() {
-        if (emptySpaceExists()){
+        if (emptySpaceExists()) {
             return true;
         }
 
         int board_size = size();
-        for (int x = 0;x < board_size; x++) {
-            for (int y =0; y < board_size; y++) {
+        for (int x = 0; x < board_size; x++) {
+            for (int y = 0; y < board_size; y++) {
                 Tile current_tile = tile(x, y);
 
                 // if current tile is right-most tile
@@ -159,8 +159,7 @@ public class Model {
                     if (can_move(current_tile, tile0)) {
                         return true;
                     }
-                }
-                else {
+                } else {
                     // if current tile is not the top-most tile and not right-most tile
                     if (y < board_size - 1) {
                         Tile tile0 = tile(x, y + 1), tile1 = tile(x + 1, y); // need to check both above tile and RHS tile
@@ -198,8 +197,7 @@ public class Model {
                 }
                 i++;
             }
-        }
-        else if (column == -1) {
+        } else if (column == -1) {
             // get the column tiles position
             while (i < size) {
                 if (!is_empty(row, i)) {
@@ -243,14 +241,14 @@ public class Model {
         // move upper until there is tile or reach the edge
         while (targetY < board_size - 1) {
             // upper tile is not empty
-            if (!is_empty(x , targetY + 1)) {
+            if (!is_empty(x ,targetY + 1)) {
                 Tile upper_tile = board.tile(x, targetY + 1);
                 int upper_value = upper_tile.value();
                 // if they have the same value, move and merge those two tile
                 if (myValue == upper_value && !upper_tile.wasMerged()) {
                     targetY += 1;
                     increment_score(myValue * 2);
-                    board.move(x , targetY, currTile);
+                    board.move(x ,targetY, currTile);
                     return;
                 } else {
                     break;
@@ -261,9 +259,14 @@ public class Model {
                 targetY += 1;
             }
         }
-;
-        // got the target Y we can move the tile now
-        board.move(x, targetY, currTile);
+
+        // only move the tile if it has available moves
+        if (targetY != y) {
+            board.move(x, targetY, currTile);
+        } else {
+            return;
+        }
+
     }
 
     /** Handles the movements of the tilt in column x of the board
@@ -291,9 +294,6 @@ public class Model {
 
     public void tilt(Side side) {
         switch (side) {
-            case NORTH:
-                tilt_up();
-                break;
             case SOUTH:
                 board.setViewingPerspective(SOUTH);
                 tilt_up();
@@ -309,8 +309,10 @@ public class Model {
                 tilt_up();
                 board.setViewingPerspective(NORTH);
                 break;
+            default:
+                tilt_up();
+                break;
         }
-        
     }
 
     /** Tilts every column of the board toward SIDE.
