@@ -19,8 +19,9 @@ public class AutograderBuddy {
      */
     public static TETile[][] getWorldFromInput(String input) {
 
-        throw new RuntimeException("Please fill out AutograderBuddy!");
+        // Optional: Complete this method if you are submitting to the autograder
 
+        throw new RuntimeException("Please fill out AutograderBuddy!");
     }
 
 

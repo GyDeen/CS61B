@@ -34,7 +34,7 @@ public class TimeSeries extends TreeMap<Integer, Double> {
     }
 
     /**
-     * Returns all years for this TimeSeries (in any order).
+     *  Returns all years for this time series in ascending order.
      */
     public List<Integer> years() {
         // TODO: Fill in this method.
@@ -42,8 +42,8 @@ public class TimeSeries extends TreeMap<Integer, Double> {
     }
 
     /**
-     * Returns all data for this TimeSeries (in any order).
-     * Must be in the same order as years().
+     *  Returns all data for this time series. Must correspond to the
+     *  order of years().
      */
     public List<Double> data() {
         // TODO: Fill in this method.

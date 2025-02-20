@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import deque.*;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -30,9 +32,9 @@ public class PreconditionTest {
     private static Stream<Field> getBadFields(Class<?> c, Class<?> nodeClass) {
         return Reflection.getFields(c)
                 .filter(f -> !(f.getType().isPrimitive()
-                        || f.getType().equals(nodeClass)
-                        || f.isSynthetic()
-                        || f.getType().equals(Object.class)));
+                                || f.getType().equals(nodeClass)
+                                || f.isSynthetic()
+                                || f.getType().equals(Object.class)));
     }
 
     @Test

@@ -359,6 +359,85 @@ public class TestRedBlackTree {
         
     }
 
+    @Test
+    public void testLeftMostInsertion() {
+        // something new
+        RedBlackTree<Integer> rbtree = new TestableRedBlackTree();
+
+        rbtree.insert(9);
+        rbtree.insert(8);
+        rbtree.insert(7);
+        rbtree.insert(6);
+        rbtree.insert(5);
+        rbtree.insert(4);
+        rbtree.insert(3);
+        rbtree.insert(2);
+        rbtree.insert(1);
+
+        /*
+        LLRB Tree Representation:
+            (6)
+            ├── (4)
+            │   ├── (2)*
+            │   │   ├── (1)
+            │   │   └── (3)
+            │   └── (5)
+            └── (8)
+                ├── (7)
+                └── (9)
+
+         */
+
+        // root
+        assertThat(rbtree.root).isNotNull();
+        assertThat(rbtree.root.isBlack).isTrue();
+        assertThat(rbtree.root.item).isEqualTo(6);
+
+        // left
+        assertThat(rbtree.root.left).isNotNull();
+        assertThat(rbtree.root.left.isBlack).isTrue();
+        assertThat(rbtree.root.left.item).isEqualTo(4);
+
+        // left.left
+        assertThat(rbtree.root.left.left).isNotNull();
+        assertThat(rbtree.root.left.left.isBlack).isFalse();
+        assertThat(rbtree.root.left.left.item).isEqualTo(2);
+
+        // left.left.left
+        assertThat(rbtree.root.left.left.left).isNotNull();
+        assertThat(rbtree.root.left.left.left.isBlack).isTrue();
+        assertThat(rbtree.root.left.left.left.item).isEqualTo(1);
+
+        // left.left.right
+        assertThat(rbtree.root.left.left.right).isNotNull();
+        assertThat(rbtree.root.left.left.right.isBlack).isTrue();
+        assertThat(rbtree.root.left.left.right.item).isEqualTo(3);
+
+        // left.right
+        assertThat(rbtree.root.left.right).isNotNull();
+        assertThat(rbtree.root.left.right.isBlack).isTrue();
+        assertThat(rbtree.root.left.right.item).isEqualTo(5);
+
+        // right
+        assertThat(rbtree.root.right).isNotNull();
+        assertThat(rbtree.root.right.isBlack).isTrue();
+        assertThat(rbtree.root.right.item).isEqualTo(8);
+
+        // right.left
+        assertThat(rbtree.root.right.left).isNotNull();
+        assertThat(rbtree.root.right.left.isBlack).isTrue();
+        assertThat(rbtree.root.right.left.item).isEqualTo(7);
+
+        // right.right
+        assertThat(rbtree.root.right.right).isNotNull();
+        assertThat(rbtree.root.right.right.isBlack).isTrue();
+        assertThat(rbtree.root.right.right.item).isEqualTo(9);
+
+        assertWithMessage("Number of Calls to Flip Colors after inserting (9, 8, 7, 6, 5, 4, 3, 2, 1) in order").that(callsToFlipColors).isEqualTo(5);
+        assertWithMessage("Number of Calls to Rotate Left after inserting (9, 8, 7, 6, 5, 4, 3, 2, 1) in order").that(callsToRotateLeft).isEqualTo(0);
+        assertWithMessage("Number of Calls to Rotate Right after inserting (9, 8, 7, 6, 5, 4, 3, 2, 1) in order").that(callsToRotateRight).isEqualTo(5);
+    }
+
 
     /*
      * Just super neat class to test the number of times your LLRB Tree implementation makes calls to it's

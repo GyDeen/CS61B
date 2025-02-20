@@ -3,7 +3,7 @@ package bomb;
 import common.IntList;
 import edu.princeton.cs.algs4.StdRandom;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
 
@@ -54,7 +54,7 @@ public class Bomb {
 
     public void phase2(String password) {
         Random r = new Random(1337);
-        Set<Integer> numbers = new HashSet<>();
+        Set<Integer> numbers = new LinkedHashSet<>();
         while (numbers.size() < 100000) {
             numbers.add(r.nextInt());
         }

@@ -27,7 +27,6 @@ public abstract class NgordnetQueryHandler implements Route {
         int startYear;
         int endYear;
         int k;
-        NgordnetQueryType ngordnetQueryType;
 
         try {
             startYear = Integer.parseInt(qm.get("startYear").value());
@@ -47,13 +46,7 @@ public abstract class NgordnetQueryHandler implements Route {
             k = 0;
         }
 
-        try {
-            ngordnetQueryType = NgordnetQueryType.valueOf(qm.get("ngordnetQueryType").value());
-        } catch (RuntimeException e) {
-            ngordnetQueryType = NgordnetQueryType.HYPONYMS;
-        }
-
-        return new NgordnetQuery(words, startYear, endYear, k, ngordnetQueryType);
+        return new NgordnetQuery(words, startYear, endYear, k);
     }
 
     @Override

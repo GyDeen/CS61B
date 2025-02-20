@@ -44,6 +44,24 @@ public class NGramMapTest {
     }
 
     @Test
+    public void testOnShortFile() {
+        // creates an NGramMap from a large dataset
+        NGramMap ngm = new NGramMap(SHORTER_WORDS_FILE,
+                TOTAL_COUNTS_FILE);
+
+        // returns the count of the number of occurrences of economically per year between 2000 and 2010.
+        TimeSeries econCount = ngm.countHistory("economically", 2000, 2010);
+        assertThat(econCount.get(2000)).isWithin(1E-10).of(294258.0);
+        assertThat(econCount.get(2010)).isWithin(1E-10).of(222744.0);
+
+        TimeSeries totalCounts = ngm.totalCountHistory();
+        assertThat(totalCounts.get(1999)).isWithin(1E-10).of(22668397698.0);
+
+        // returns the relative weight of the word academic in each year between 1999 and 2010.
+        TimeSeries academicWeight = ngm.weightHistory("academic", 1999, 2010);
+        assertThat(academicWeight.get(1999)).isWithin(1E-7).of(969087.0 / 22668397698.0);
+    }
+    @Test
     public void testOnLargeFile() {
         // creates an NGramMap from a large dataset
         NGramMap ngm = new NGramMap(TOP_14337_WORDS_FILE,

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import deque.*;
+
 /** Performs some basic linked list tests. */
 public class LinkedListDeque61BTest {
 
