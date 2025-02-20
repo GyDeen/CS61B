@@ -3,7 +3,28 @@ package deque;
 import java.util.List;
 
 public class LinkedListDeque61B<T> implements Deque61B<T>{
+
+    private class Node {
+        T item;
+        Node prev;
+        Node next;
+
+        // Constructor for Node class
+        public Node(T item) {
+            this.item = item;
+            this.prev = null;
+            this.next = null;
+        }
+    }
+
+    private Node sentinal;
+    private int size;
+
     public LinkedListDeque61B() {
+        sentinal = new Node(null);
+        sentinal.next = sentinal;
+        sentinal.prev = sentinal;
+        size = 0;
     }
 
     @Override
