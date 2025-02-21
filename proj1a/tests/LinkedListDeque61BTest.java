@@ -61,9 +61,28 @@ public class LinkedListDeque61BTest {
 
     // Below, you'll write your own tests for LinkedListDeque61B.
     @Test
-    public void testAddFirst() {
+    public void testAddFirstAndRemoveFirst() {
         Deque61B<String> lld1 = new LinkedListDeque61B<>();
 
+        lld1.addFirst("back"); // after this call we expect: ["back"]
+
+        lld1.addFirst("middle"); // after this call we expect: ["middle", "back"]
+
+        lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
+        assertThat(lld1.toList()).containsExactly("front", "middle", "back").inOrder();
+        assertThat(lld1.size()).isEqualTo(3);
+
+        lld1.removeFirst();
+        assertThat(lld1.toList()).containsExactly("middle", "back").inOrder();
+        assertThat(lld1.size()).isEqualTo(2);
+
+        lld1.removeFirst();
+        assertThat(lld1.toList()).containsExactly("back").inOrder();
+        assertThat(lld1.size()).isEqualTo(1);
+
+        lld1.removeFirst();
+        assertThat(lld1.isEmpty()).isTrue();
+        assertThat(lld1.size()).isEqualTo(0);
 
     }
 

@@ -11,9 +11,9 @@ public class LinkedListDeque61B<T> implements Deque61B<T> {
         Node next;
 
         // Constructor for Node class
-        public Node(T item, Node n) {
+        public Node(T item, Node p) {
             this.item = item;
-            this.prev = n;
+            this.prev = p;
             this.next = null;
         }
     }
@@ -32,18 +32,21 @@ public class LinkedListDeque61B<T> implements Deque61B<T> {
     @Override
     public void addFirst(T x) {
         Node new_node = new Node(x, sentinel);
-        Node current_node = sentinel.next;
 
+        new_node.next = sentinel.next;
         sentinel.next = new_node;
-        new_node.next = current_node;
-        current_node.prev = new_node;
+        new_node.next.prev = new_node; // updating original node
 
-        this.size++;
+        this.size++; //updating the size
     }
 
     @Override
     public void addLast(T x) {
-        // Add last logic here
+        Node new_node = new Node(x, sentinel.prev);
+
+        sentinel.prev = new_node;
+        new_node.next = sentinel;
+        sentinel.prev.prev.next = new_node;
     }
 
     @Override
