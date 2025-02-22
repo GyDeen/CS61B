@@ -84,6 +84,11 @@ public class LinkedListDeque61BTest {
         assertThat(lld1.isEmpty()).isTrue();
         assertThat(lld1.size()).isEqualTo(0);
 
+        // edge case: there is no more node
+        lld1.removeFirst();
+        assertThat(lld1.isEmpty()).isTrue();
+        assertThat(lld1.size()).isEqualTo(0);
+
     }
 
 }

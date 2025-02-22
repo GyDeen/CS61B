@@ -47,6 +47,8 @@ public class LinkedListDeque61B<T> implements Deque61B<T> {
         sentinel.prev = new_node;
         new_node.next = sentinel;
         sentinel.prev.prev.next = new_node;
+
+        this.size++;
     }
 
     @Override
@@ -54,6 +56,8 @@ public class LinkedListDeque61B<T> implements Deque61B<T> {
         List<T> new_list = new LinkedList<>();
 
         Node current = sentinel.next;
+
+        // add item to the list except the sentinel (last_node.next == sentinel)
         while (current != sentinel) {
             new_list.add(current.item);
             current = current.next;
@@ -74,8 +78,19 @@ public class LinkedListDeque61B<T> implements Deque61B<T> {
 
     @Override
     public T removeFirst() {
-        // Remove first logic here
-        return null;
+
+        // when there is no more node
+        if (sentinel.next == sentinel) {
+            return null;
+        }
+
+        Node remove_node = sentinel.next;
+
+        sentinel.next = remove_node.next;
+        remove_node.next.prev = sentinel;
+
+        this.size--;
+        return remove_node.item;
     }
 
     @Override
