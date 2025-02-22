@@ -178,4 +178,64 @@ public class LinkedListDeque61BTest {
         assertThat(lld1.get(4)).isEqualTo(null);
         assertThat(lld1.size()).isEqualTo(4);
     }
+
+    @Test
+    public void testGetRecursiveOnly() {
+        Deque61B<String> lld1 = new LinkedListDeque61B<>();
+
+        lld1.addFirst("back"); // after this call we expect: ["back"]
+
+        lld1.addFirst("middle"); // after this call we expect: ["middle", "back"]
+
+        lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
+
+        assertThat(lld1.getRecursive(0)).isEqualTo("front");
+        assertThat(lld1.getRecursive(1)).isEqualTo("middle");
+        assertThat(lld1.getRecursive(2)).isEqualTo("back");
+    }
+
+    @Test
+    public void testGetRecursiveWithRemove() {
+        Deque61B<Integer> lld1 = new LinkedListDeque61B<>();
+
+        lld1.addFirst(5);
+        lld1.addFirst(3);
+        lld1.addFirst(726);
+        lld1.addFirst(512); // it should be [512, 726, 3, 5]
+
+        assertThat(lld1.get(3)).isEqualTo(5);
+        assertThat(lld1.get(1)).isEqualTo(726);
+
+        lld1.removeLast(); // it should be [512, 726, 3]
+        assertThat(lld1.getRecursive(3)).isEqualTo(null); // index out of bound, it should return null
+        assertThat(lld1.getRecursive(0)).isEqualTo(512);
+        assertThat(lld1.size()).isEqualTo(3);
+
+        lld1.removeFirst(); // it should be [726, 3]
+        assertThat(lld1.getRecursive(0)).isEqualTo(726);
+        assertThat(lld1.getRecursive(1)).isEqualTo(3);
+        assertThat(lld1.getRecursive(2)).isEqualTo(null); // index out of bound
+        assertThat(lld1.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testGetRecursiveWithAddFirstAndLastWithRemove() {
+        Deque61B<Double> lld1 = new LinkedListDeque61B<>();
+
+        lld1.addFirst(5.13);
+        lld1.addLast(7.26);
+        lld1.addLast(10.25);
+        lld1.addFirst(20.04);
+        lld1.addLast(19.7); // it should be [20.04, 5.13, 7.26, 10.25, 19.7]
+
+        assertThat(lld1.getRecursive(2)).isEqualTo(7.26);
+        assertThat(lld1.getRecursive(5)).isEqualTo(null);
+        assertThat(lld1.getRecursive(0)).isEqualTo(20.04);
+        assertThat(lld1.size()).isEqualTo(5);
+
+        lld1.removeFirst(); // it should be [5.13, 7.26, 10.25, 19.7]
+        assertThat(lld1.getRecursive(3)).isEqualTo(19.7);
+        assertThat(lld1.getRecursive(4)).isEqualTo(null);
+        assertThat(lld1.size()).isEqualTo(4);
+    }
 }
