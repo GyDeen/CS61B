@@ -120,6 +120,7 @@ public class LinkedListDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test whether get() works correctly")
     public void testGetOnly() {
         Deque61B<String> lld1 = new LinkedListDeque61B<>();
 
@@ -135,6 +136,7 @@ public class LinkedListDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test whether get() works correctly with both remove() methods")
     public void testGetWithRemove() {
         Deque61B<Integer> lld1 = new LinkedListDeque61B<>();
 
@@ -159,6 +161,7 @@ public class LinkedListDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test whether get() works correctly with both remove and add after constructed queue")
     public void testGetWithAddFirstAndLastWithRemove() {
         Deque61B<Double> lld1 = new LinkedListDeque61B<>();
 
@@ -180,6 +183,7 @@ public class LinkedListDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test whether getRecursively() works correctly")
     public void testGetRecursiveOnly() {
         Deque61B<String> lld1 = new LinkedListDeque61B<>();
 
@@ -195,6 +199,7 @@ public class LinkedListDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test whether getRecursively() works correctly with both remove() methods")
     public void testGetRecursiveWithRemove() {
         Deque61B<Integer> lld1 = new LinkedListDeque61B<>();
 
@@ -219,6 +224,7 @@ public class LinkedListDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test whether getRecursively() works correctly with both remove and add after constructed queue")
     public void testGetRecursiveWithAddFirstAndLastWithRemove() {
         Deque61B<Double> lld1 = new LinkedListDeque61B<>();
 
