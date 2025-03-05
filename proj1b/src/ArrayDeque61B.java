@@ -30,13 +30,21 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
         if (size == items.length) {
             resize(size * 2);
         }
+
         front = Math.floorMod(front - 1, items.length);
-        items[front] = x;
+        items[front + 1] = x;
         size++;
     }
 
     @Override
     public void addLast(T x) {
+        if (size == items.length) {
+            resize(size * 2);
+        }
+
+        items[back] = x;
+        back = Math.floorMod(back + 1, items.length);
+        size++;
 
     }
 
