@@ -56,10 +56,7 @@ public interface Deque61B<T> {
     T removeLast();
 
     /**
-     * The Deque61B abstract data type does not typically have a get method,
-     * but we've included this extra operation to provide you with some
-     * extra programming practice. Gets the element, iteratively. Returns
-     * null if index is out of bounds. Does not alter the deque.
+     *get desire element in a constant time
      *
      * @param index index to get
      * @return element at {@code index} in the deque

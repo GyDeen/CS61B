@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.lang.Math;
 
@@ -20,15 +22,20 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
     }
 
     // there is no enough space for new item, double current array
-    public void resize(int size) {
+    public void resizeUp(int size) {
 
     }
+
+    public void resizeDown(int size) {
+
+    }
+
 
 
     @Override
     public void addFirst(T x) {
         if (size == items.length) {
-            resize(size * 2);
+            resizeUp(size * 2);
         }
 
         front = Math.floorMod(front - 1, items.length);
@@ -39,7 +46,7 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
     @Override
     public void addLast(T x) {
         if (size == items.length) {
-            resize(size * 2);
+            resizeUp(size * 2);
         }
 
         items[back] = x;
@@ -50,36 +57,55 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
 
     @Override
     public List<T> toList() {
-        return List.of();
+        return new ArrayList<>(Arrays.asList(items));
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
     public T removeFirst() {
-        return null;
+        if (size == items.length / 2) {
+            resizeDown(size / 2);
+        }
+
+        front = Math.floorMod(front - 1, items.length);
+        T removed = items[front + 1];
+        items[front + 1] = null;
+        size--;
+
+        return removed;
     }
 
     @Override
     public T removeLast() {
-        return null;
+        if (size == items.length / 2) {
+            resizeDown(size / 2);
+        }
+
+        T removed = items[back];
+        back = Math.floorMod(back + 1, items.length);
+        size--;
+        return removed;
     }
 
     @Override
     public T get(int index) {
-        return null;
+        if (index > size || index < 0) {
+            return null;
+        }
+        return items[index];
     }
 
     @Override
     public T getRecursive(int index) {
-        return null;
+        throw new UnsupportedOperationException("No need to implement getRecursive for proj 1b");
     }
 }
