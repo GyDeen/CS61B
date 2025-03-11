@@ -22,11 +22,24 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
     }
 
     // there is no enough space for new item, double current array
-    public void resizeUp(int size) {
+    public void resizeUp(int newSize) {
+        T[] newItems = (T[]) new Object[newSize];
+
+        // placing front at index 0 of the new array
+        for (int i = 0; i < size / 2; i++) {
+            newItems[i] = items[Math.floorMod(front + 1 + i, items.length)];
+        }
+
+        front = newSize - 1;
+        back = size;
+        items = newItems;
 
     }
 
-    public void resizeDown(int size) {
+    public void resizeDown(int newSize) {
+        T[] newItems = (T[]) new Object[newSize];
+
+
 
     }
 
@@ -72,11 +85,15 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
 
     @Override
     public T removeFirst() {
-        if (size == items.length / 2) {
-            resizeDown(size / 2);
+        if (size == 0) {
+            return null;
         }
 
-        front = Math.floorMod(front - 1, items.length);
+        if (size == items.length / 4) {
+            resizeDown(items.length / 2);
+        }
+
+        front = Math.floorMod(front, items.length);
         T removed = items[front + 1];
         items[front + 1] = null;
         size--;
@@ -86,12 +103,17 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
 
     @Override
     public T removeLast() {
-        if (size == items.length / 2) {
-            resizeDown(size / 2);
+        if (size == 0) {
+            return null;
         }
 
-        T removed = items[back];
-        back = Math.floorMod(back + 1, items.length);
+        if (size == items.length / 4) {
+            resizeDown(items.length / 2);
+        }
+
+        T removed = items[back - 1];
+        items[back - 1] = null;
+        back = Math.floorMod(back - 1, items.length);
         size--;
         return removed;
     }
