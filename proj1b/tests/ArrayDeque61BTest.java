@@ -57,13 +57,14 @@ public class ArrayDeque61BTest {
 
          /* I've decided to add in comments the state after each call for the convenience of the
             person reading this test. Some programmers might consider this excessively verbose. */
-        lld1.addLast(0);   // [0]
-        lld1.addLast(1);   // [0, 1]
-        lld1.addFirst(-1); // [-1, 0, 1]
-        lld1.addLast(2);   // [-1, 0, 1, 2]
-        lld1.addFirst(-2); // [-2, -1, 0, 1, 2]
+        lld1.addLast(0);
+        lld1.addLast(1);
+        lld1.addFirst(-1);
+        lld1.addLast(2);
+        lld1.addFirst(-2);
+        lld1.addLast(3);
 
-        assertThat(lld1.toList()).containsExactly(-2, -1, 0, 1, 2).inOrder();
+        assertThat(lld1.toList()).containsExactly(3,null,null,-2,-1,0,1,2).inOrder();
     }
 
 
@@ -80,15 +81,15 @@ public class ArrayDeque61BTest {
 
 
         lld1.removeFirst();
-        assertThat(lld1.toList()).containsExactly("middle", "back").inOrder();
+        assertThat(lld1.toList()).containsExactly(null,null,null,"middle", "back",null,null,null).inOrder();
         assertThat(lld1.size()).isEqualTo(2);
 
         lld1.removeFirst();
-        assertThat(lld1.toList()).containsExactly("back").inOrder();
+        assertThat(lld1.toList()).containsExactly(null,null,null,null, "back",null,null,null).inOrder();
         assertThat(lld1.size()).isEqualTo(1);
 
         lld1.removeFirst();
-        assertThat(lld1.isEmpty()).isTrue();
+        assertThat(lld1.toList()).containsExactly(null,null,null,null,null,null,null,null).inOrder();
         assertThat(lld1.size()).isEqualTo(0);
 
         // edge case: already empty
