@@ -1,10 +1,11 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.lang.Math;
 
 
-public class ArrayDeque61B<T> implements Deque61B<T> {
+public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
     private T[] items;
     private int size;
     private int front;
@@ -13,6 +14,31 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
     private static final int INITIAL_CAPACITY = 8;
     private static final int INITIAL_FRONT = 4;
     private static final int INITIAL_BACK = 5;
+
+
+    public Iterator<T> iterator() {
+        return new ArrayDeque61BIterator();
+    }
+
+
+    private class ArrayDeque61BIterator implements Iterator<T> {
+        private int index = Math.floorMod(front, items.length);
+        private int checkedItems = 0;
+
+        @Override
+        public boolean hasNext() {
+            return checkedItems < size;
+        }
+
+        @Override
+        public T next() {
+            T returnItem = items[index];
+            index = Math.floorMod(index + 1, items.length);
+            checkedItems++;
+            return returnItem;
+
+        }
+    }
 
     public ArrayDeque61B() {
         items = (T[]) new Object[INITIAL_CAPACITY];
