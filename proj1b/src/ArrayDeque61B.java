@@ -51,9 +51,11 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
     public void resizeUp(int newSize) {
         T[] newItems = (T[]) new Object[newSize];
 
+        int start = newSize / 4;
+
         // placing front at index 0 of the new array
         for (int i = 0; i < size / 2; i++) {
-            newItems[i] = items[Math.floorMod(front + 1 + i, items.length)];
+            newItems[newSize + i] = items[Math.floorMod(front + i, items.length)];
         }
 
         front = newSize - 1;
@@ -64,9 +66,10 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
 
     public void resizeDown(int newSize) {
         T[] newItems = (T[]) new Object[newSize];
+        int newStart = newSize / 4;
 
         for (int i = 0; i <= size / 2; i++) {
-            newItems[i] = items[Math.floorMod(front + i + 1, items.length)];
+            newItems[newStart + i] = items[Math.floorMod(front + i, items.length)];
         }
 
         front = newSize - 1;
@@ -115,13 +118,15 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
         return size;
     }
 
+
+    // need to handle cases such as addLast then removeFirst immediately
     @Override
     public T removeFirst() {
         if (size == 0) {
             return null;
         }
 
-        if (size == items.length / 4) {
+        if (size == items.length / 4 && items.length > 16) {
             resizeDown(items.length / 2);
         }
         T removed = items[front + 1];
@@ -138,7 +143,7 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
             return null;
         }
 
-        if (size == items.length / 4) {
+        if (size == items.length / 4 && items.length > 16) {
             resizeDown(items.length / 2);
         }
 
