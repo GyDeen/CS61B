@@ -39,7 +39,13 @@ public class ArrayDeque61B<T> implements Deque61B<T> {
     public void resizeDown(int newSize) {
         T[] newItems = (T[]) new Object[newSize];
 
+        for (int i = 0; i < size / 2; i++) {
+            newItems[i] = items[Math.floorMod(back - 1 - i, items.length)];
+        }
 
+        front = newSize - 1;
+        back = size;
+        items = newItems;
 
     }
 
