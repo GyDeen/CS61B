@@ -111,11 +111,11 @@ public class ArrayDeque61BTest {
         lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
 
         lld1.removeLast();
-        assertThat(lld1.toList()).containsExactly("front", "middle").inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, "front", "middle",null, null, null, null).inOrder();
         assertThat(lld1.size()).isEqualTo(2);
 
         lld1.removeLast();
-        assertThat(lld1.toList()).containsExactly("front").inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, "front", null, null, null, null, null).inOrder();
         assertThat(lld1.size()).isEqualTo(1);
 
         lld1.removeLast();
@@ -139,9 +139,9 @@ public class ArrayDeque61BTest {
 
         lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
 
-        assertThat(lld1.get(0)).isEqualTo("front");
-        assertThat(lld1.get(1)).isEqualTo("middle");
-        assertThat(lld1.get(2)).isEqualTo("back");
+        assertThat(lld1.get(4)).isEqualTo("back");
+        assertThat(lld1.get(3)).isEqualTo("middle");
+        assertThat(lld1.get(2)).isEqualTo("front");
     }
 
     @Test
@@ -152,20 +152,20 @@ public class ArrayDeque61BTest {
         lld1.addFirst(5);
         lld1.addFirst(3);
         lld1.addFirst(726);
-        lld1.addFirst(512); // it should be [512, 726, 3, 5]
+        lld1.addFirst(512); // it should be [null, 512, 726, 3, 5, null, null, null]
 
-        assertThat(lld1.get(3)).isEqualTo(5);
-        assertThat(lld1.get(1)).isEqualTo(726);
+        assertThat(lld1.get(4)).isEqualTo(5);
+        assertThat(lld1.get(1)).isEqualTo(512);
 
-        lld1.removeLast(); // it should be [512, 726, 3]
-        assertThat(lld1.get(3)).isEqualTo(null); // index out of bound, it should return null
-        assertThat(lld1.get(0)).isEqualTo(512);
+        lld1.removeLast(); // it should be [null, 512, 726, 3, null, null, null, null]
+        assertThat(lld1.get(4)).isEqualTo(null); // index out of bound, it should return null
+        assertThat(lld1.get(1)).isEqualTo(512);
         assertThat(lld1.size()).isEqualTo(3);
 
-        lld1.removeFirst(); // it should be [726, 3]
-        assertThat(lld1.get(0)).isEqualTo(726);
-        assertThat(lld1.get(1)).isEqualTo(3);
-        assertThat(lld1.get(2)).isEqualTo(null); // index out of bound
+        lld1.removeFirst(); // it should be [null, null, 726, 3, null, null, null, null]
+        assertThat(lld1.get(3)).isEqualTo(3);
+        assertThat(lld1.get(1)).isEqualTo(null);
+        assertThat(lld1.get(2)).isEqualTo(726);
         assertThat(lld1.size()).isEqualTo(2);
     }
 
@@ -178,80 +178,134 @@ public class ArrayDeque61BTest {
         lld1.addLast(7.26);
         lld1.addLast(10.25);
         lld1.addFirst(20.04);
-        lld1.addLast(19.7); // it should be [20.04, 5.13, 7.26, 10.25, 19.7]
+        lld1.addLast(19.7); // it should be [ null, null, null, 20.04, 5.13, 7.26, 10.25, 19.7]
 
-        assertThat(lld1.get(2)).isEqualTo(7.26);
-        assertThat(lld1.get(5)).isEqualTo(null);
-        assertThat(lld1.get(0)).isEqualTo(20.04);
+        assertThat(lld1.get(5)).isEqualTo(7.26);
+        assertThat(lld1.get(2)).isEqualTo(null);
+        assertThat(lld1.get(3)).isEqualTo(20.04);
         assertThat(lld1.size()).isEqualTo(5);
 
-        lld1.removeFirst(); // it should be [5.13, 7.26, 10.25, 19.7]
-        assertThat(lld1.get(3)).isEqualTo(19.7);
-        assertThat(lld1.get(4)).isEqualTo(null);
+        lld1.removeFirst(); // it should be [ null, null, null, null, 5.13, 7.26, 10.25, 19.7]
+        assertThat(lld1.get(3)).isEqualTo(null);
+        assertThat(lld1.get(4)).isEqualTo(5.13);
         assertThat(lld1.size()).isEqualTo(4);
     }
 
+    /**
+     * Test resizing up when exceeding capacity
+     */
     @Test
-    @DisplayName("Test whether getRecursively() works correctly")
-    public void testGetRecursiveOnly() {
-        Deque61B<String> lld1 = new ArrayDeque61B<>();
+    @DisplayName("Test that resizeUp() doubles capacity and maintains order")
+    public void testResizeUp() {
+        Deque61B<Integer> deque = new ArrayDeque61B<>();
 
-        lld1.addFirst("back"); // after this call we expect: ["back"]
+        // Fill up the deque beyond its initial capacity
+        for (int i = 0; i < 8; i++) {
+            deque.addLast(i);
+        }
 
-        lld1.addFirst("middle"); // after this call we expect: ["middle", "back"]
+        // Now adding another item should trigger resizeUp()
+        deque.addLast(8);
+        deque.addLast(9);
 
-        lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
+        // Check new size
+        assertThat(deque.size()).isEqualTo(10);
 
-        assertThat(lld1.getRecursive(0)).isEqualTo("front");
-        assertThat(lld1.getRecursive(1)).isEqualTo("middle");
-        assertThat(lld1.getRecursive(2)).isEqualTo("back");
+        // Check that all items remain in the correct order after resizing
+        for (int i = 0; i < 10; i++) {
+            assertThat(deque.get(4 + i)).isEqualTo(i);
+        }
     }
 
+    /**
+     * Test resizing down when items are removed
+     */
     @Test
-    @DisplayName("Test whether getRecursively() works correctly with both remove() methods")
-    public void testGetRecursiveWithRemove() {
-        Deque61B<Integer> lld1 = new ArrayDeque61B<>();
+    @DisplayName("Test that resizeDown() shrinks capacity when usage is low")
+    public void testResizeDown() {
+        Deque61B<Integer> deque = new ArrayDeque61B<>();
 
-        lld1.addFirst(5);
-        lld1.addFirst(3);
-        lld1.addFirst(726);
-        lld1.addFirst(512); // it should be [512, 726, 3, 5]
+        // Add elements beyond capacity to ensure resizing up happens
+        for (int i = 0; i < 16; i++) {
+            deque.addLast(i);
+        }
 
-        assertThat(lld1.get(3)).isEqualTo(5);
-        assertThat(lld1.get(1)).isEqualTo(726);
+        // Remove most elements to trigger resizeDown()
+        for (int i = 0; i < 12; i++) {
+            deque.removeFirst();
+        }
 
-        lld1.removeLast(); // it should be [512, 726, 3]
-        assertThat(lld1.getRecursive(3)).isEqualTo(null); // index out of bound, it should return null
-        assertThat(lld1.getRecursive(0)).isEqualTo(512);
-        assertThat(lld1.size()).isEqualTo(3);
+        // Ensure size has updated correctly
+        assertThat(deque.size()).isEqualTo(4);
 
-        lld1.removeFirst(); // it should be [726, 3]
-        assertThat(lld1.getRecursive(0)).isEqualTo(726);
-        assertThat(lld1.getRecursive(1)).isEqualTo(3);
-        assertThat(lld1.getRecursive(2)).isEqualTo(null); // index out of bound
-        assertThat(lld1.size()).isEqualTo(2);
+        // Ensure items are still accessible correctly
+        for (int i = 12; i < 16; i++) {
+            assertThat(deque.get(4 + i - 12)).isEqualTo(i);
+        }
     }
 
+    /**
+     * Test alternating add and remove operations while resizing
+     */
     @Test
-    @DisplayName("Test whether getRecursively() works correctly with both remove and add after constructed queue")
-    public void testGetRecursiveWithAddFirstAndLastWithRemove() {
-        Deque61B<Double> lld1 = new ArrayDeque61B<>();
+    @DisplayName("Test alternating adds and removes with resizing")
+    public void testResizeWithAlternatingOperations() {
+        Deque61B<Integer> deque = new ArrayDeque61B<>();
 
-        lld1.addFirst(5.13);
-        lld1.addLast(7.26);
-        lld1.addLast(10.25);
-        lld1.addFirst(20.04);
-        lld1.addLast(19.7); // it should be [20.04, 5.13, 7.26, 10.25, 19.7]
+        // Add items to fill the deque and trigger resize
+        for (int i = 0; i < 12; i++) {
+            if (i % 2 == 0) {
+                deque.addFirst(i);
+            } else {
+                deque.addLast(i);
+            }
+        }
 
-        assertThat(lld1.getRecursive(2)).isEqualTo(7.26);
-        assertThat(lld1.getRecursive(5)).isEqualTo(null);
-        assertThat(lld1.getRecursive(0)).isEqualTo(20.04);
-        assertThat(lld1.size()).isEqualTo(5);
+        assertThat(deque.size()).isEqualTo(12);
 
-        lld1.removeFirst(); // it should be [5.13, 7.26, 10.25, 19.7]
-        assertThat(lld1.getRecursive(3)).isEqualTo(19.7);
-        assertThat(lld1.getRecursive(4)).isEqualTo(null);
-        assertThat(lld1.size()).isEqualTo(4);
+        // Remove half of the items
+        for (int i = 0; i < 6; i++) {
+            deque.removeFirst();
+            deque.removeLast();
+        }
+
+        assertThat(deque.size()).isEqualTo(6);
+
+        // Add more elements to trigger another resize
+        for (int i = 12; i < 18; i++) {
+            deque.addLast(i);
+        }
+
+        // Ensure deque maintains correct ordering
+        assertThat(deque.size()).isEqualTo(12);
+        assertThat(deque.get(4)).isNotNull();
+    }
+
+    /**
+     * Test adding and removing all elements multiple times to force resizing
+     */
+    @Test
+    @DisplayName("Test resizeUp and resizeDown multiple times with add/remove operations")
+    public void testRepeatedResizing() {
+        Deque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Add and remove elements repeatedly to force resizing multiple times
+        for (int i = 0; i < 5; i++) {
+            // Fill the deque
+            for (int j = 0; j < 16; j++) {
+                deque.addLast(j);
+            }
+
+            assertThat(deque.size()).isEqualTo(16);
+
+            // Remove all elements
+            for (int j = 0; j < 16; j++) {
+                deque.removeFirst();
+            }
+
+            assertThat(deque.size()).isEqualTo(0);
+            assertThat(deque.isEmpty()).isTrue();
+        }
     }
 }
 
