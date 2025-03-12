@@ -199,7 +199,6 @@ public class ArrayDeque61BTest {
     public void testResizeUp() {
         Deque61B<Integer> deque = new ArrayDeque61B<>();
 
-        // Fill up the deque beyond its initial capacity
         for (int i = 0; i < 8; i++) {
             deque.addLast(i);
         }
