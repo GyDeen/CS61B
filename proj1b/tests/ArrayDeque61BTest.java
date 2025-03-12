@@ -170,6 +170,29 @@ public class ArrayDeque61BTest {
     }
 
     @Test
+    @DisplayName("Test circular wrap-around behavior for removeFirst and removeLast")
+    public void testCircularWrapAroundRemovals() {
+        Deque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Fill deque to capacity to test wrap-around
+        for (int i = 0; i < 8; i++) {
+            deque.addLast(i);
+        }
+
+        // Remove first 4 elements, forcing back to wrap around
+        for (int i = 0; i < 4; i++) {
+            deque.removeFirst();
+        }
+
+        // Add new elements, should wrap-around the internal array
+        deque.addLast(100);
+        deque.addLast(101);
+
+        assertThat(deque.toList()).containsExactly(null, 4, 5, 6, 7, 100, 101, null).inOrder();
+    }
+
+
+    @Test
     @DisplayName("Test whether get() works correctly with both remove and add after constructed queue")
     public void testGetWithAddFirstAndLastWithRemove() {
         Deque61B<Double> lld1 = new ArrayDeque61B<>();
@@ -190,6 +213,25 @@ public class ArrayDeque61BTest {
         assertThat(lld1.get(4)).isEqualTo(5.13);
         assertThat(lld1.size()).isEqualTo(4);
     }
+
+    @Test
+    @DisplayName("Test resizeUp when back wraps to index 0")
+    public void testResizeUpWhenBackWraps() {
+        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Fill array to force `back` to wrap to 0
+        for (int i = 0; i < 8; i++) {
+            deque.addLast(i);
+        }
+
+        // Add new elements to wrap `back` around to 0
+        deque.addLast(100);
+        deque.addLast(101); // it should be [null, null, null, null, 0, 1, 2, 3, 4, 5, 6, 7, 100, 101, null, null]
+
+        assertThat(deque.arrayLength()).isEqualTo(16); // Ensuring resizeUp triggered
+        assertThat(deque.toList()).containsExactly(null, null, null, null, 0, 1, 2, 3, 4, 5, 6, 7, 100, 101, null, null).inOrder();
+    }
+
 
     /**
      * Test resizing up when exceeding capacity
@@ -263,7 +305,7 @@ public class ArrayDeque61BTest {
         assertThat(deque.size()).isEqualTo(12);
 
         // Remove half of the items
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             deque.removeFirst();
             deque.removeLast();
         }
@@ -277,35 +319,61 @@ public class ArrayDeque61BTest {
 
         // Ensure deque maintains correct ordering
         assertThat(deque.size()).isEqualTo(12);
-        assertThat(deque.get(4)).isNotNull();
+        assertThat(deque.get(15)).isEqualTo(16);
     }
 
-    /**
-     * Test adding and removing all elements multiple times to force resizing
-     */
     @Test
     @DisplayName("Test resizeUp and resizeDown multiple times with add/remove operations")
     public void testRepeatedResizing() {
-        Deque61B<Integer> deque = new ArrayDeque61B<>();
+        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
 
-        // Add and remove elements repeatedly to force resizing multiple times
-        for (int i = 0; i < 5; i++) {
-            // Fill the deque
-            for (int j = 0; j < 16; j++) {
-                deque.addLast(j);
+        int totalInserted = 0;
+
+        for (int i = 0; i < 5; i++) { // Repeat resizing test 5 times
+            int initialCapacity = deque.arrayLength(); // Get the current capacity before filling
+
+            // Step 1: Fill up deque to trigger resizeUp()
+            for (int j = 0; j < initialCapacity; j++) {
+                deque.addLast(totalInserted);
+                totalInserted++;
             }
 
-            assertThat(deque.size()).isEqualTo(16);
+            // Verify that size matches the capacity before resizing
+            assertThat(deque.size()).isEqualTo(initialCapacity);
 
-            // Remove all elements
-            for (int j = 0; j < 16; j++) {
+            // Step 2: Check ordering remains valid after resizeUp()
+            for (int j = 0; j < initialCapacity; j++) {
+                assertThat(deque.get(4 + j)).isEqualTo(totalInserted - initialCapacity + j);
+            }
+
+            // Step 3: Remove elements until size < 25% of capacity to trigger resizeDown()
+            int removeCount = deque.arrayLength() - (deque.arrayLength() / 4);
+            for (int j = 0; j < removeCount; j++) {
                 deque.removeFirst();
             }
 
+            // Ensure size is correctly updated
+            assertThat(deque.size()).isEqualTo(deque.arrayLength() / 4);
+
+            // Step 4: Ensure capacity has resized down to half
+            assertThat(deque.arrayLength()).isEqualTo(initialCapacity); // Should have shrunk back
+
+            // Step 5: Verify elements are still ordered correctly after resizing down
+            for (int j = 0; j < deque.size(); j++) {
+                assertThat(deque.get(4 + j)).isNotNull();
+            }
+
+            // Step 6: Remove all elements to ensure deque can be emptied properly
+            while (!deque.isEmpty()) {
+                deque.removeFirst();
+            }
+
+            // Ensure deque is empty
             assertThat(deque.size()).isEqualTo(0);
             assertThat(deque.isEmpty()).isTrue();
         }
     }
+
 }
 
 

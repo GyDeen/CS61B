@@ -78,7 +78,6 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
     }
 
 
-
     @Override
     public void addFirst(T x) {
         if (size == items.length) {
@@ -117,6 +116,10 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
         return size;
     }
 
+    public int arrayLength() {
+        return items.length;
+    }
+
 
     // need to handle cases such as addLast then removeFirst immediately
     @Override
@@ -128,14 +131,14 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
         if (size == items.length / 4 && items.length > 16) {
             resizeDown(items.length / 2);
         }
-        T removed = items[front + 1];
+        T removed = items[(Math.floorMod(front + 1, items.length))];
 
         while (removed == null && size != 0) {
             front = Math.floorMod(front + 1, items.length);
             removed = items[front + 1];
         }
 
-        items[front + 1] = null;
+        items[(Math.floorMod(front + 1, items.length))] = null;
         front = Math.floorMod(front + 1, items.length);
         size--;
 
@@ -152,13 +155,13 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
             resizeDown(items.length / 2);
         }
 
-        T removed = items[back - 1];
+        T removed = items[Math.floorMod(back - 1, items.length)];
 
         while (removed == null && size != 0) {
             back = Math.floorMod(back - 1, items.length);
             removed = items[back - 1];
         }
-        items[back - 1] = null;
+        items[Math.floorMod(back - 1, items.length)] = null;
         back = Math.floorMod(back - 1, items.length);
         size--;
         return removed;
