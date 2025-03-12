@@ -51,10 +51,10 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
     public void resizeUp(int newSize) {
         T[] newItems = (T[]) new Object[newSize];
 
-        int newStart = newSize / 4;
+        int newStart = (newSize - size) / 2;
 
         for (int i = 0; i < size; i++) {
-            newItems[newStart + i] = items[Math.floorMod(front + i, items.length)];
+            newItems[newStart + i] = items[Math.floorMod(front + i + 1, items.length)];
         }
 
         front = newStart - 1;
@@ -65,14 +65,14 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
 
     public void resizeDown(int newSize) {
         T[] newItems = (T[]) new Object[newSize];
-        int newStart = newSize / 4;
+        int newStart = (newSize - size) / 2;
 
-        for (int i = 0; i <= size; i++) {
-            newItems[newStart + i] = items[Math.floorMod(front + i, items.length)];
+        for (int i = 0; i < size; i++) {
+            newItems[newStart + i] = items[Math.floorMod(front + i + 1, items.length)];
         }
 
-        front = newSize - 1;
-        back = size;
+        front = newStart - 1;
+        back = newSize - newStart;
         items = newItems;
 
     }

@@ -225,21 +225,21 @@ public class ArrayDeque61BTest {
         Deque61B<Integer> deque = new ArrayDeque61B<>();
 
         // Add elements beyond capacity to ensure resizing up happens
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 32; i++) {
             deque.addLast(i);
         }
 
         // Remove most elements to trigger resizeDown()
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 25; i++) {
             deque.removeFirst();
         }
 
         // Ensure size has updated correctly
-        assertThat(deque.size()).isEqualTo(4);
+        assertThat(deque.size()).isEqualTo(7);
 
         // Ensure items are still accessible correctly
-        for (int i = 12; i < 16; i++) {
-            assertThat(deque.get(4 + i - 12)).isEqualTo(i);
+        for (int i = 25; i < 32; i++) {
+            assertThat(deque.get(5 + i - 25)).isEqualTo(i);
         }
     }
 
