@@ -343,6 +343,69 @@ public class ArrayDeque61BTest {
         assertThat(deque.get(15)).isEqualTo(16);
     }
 
+
+    @Test
+    @DisplayName("Ensure resizeDown does not occur when capacity is already at 16")
+    public void testNoResizeDownWhenAtMinimumCapacity() {
+        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Fill deque up to minimum threshold for resize behavior
+        for (int i = 0; i < 16; i++) {
+            deque.addLast(i);
+        }
+
+        // Remove elements to drop usage below 25%
+        for (int i = 0; i < 14; i++) {
+            deque.removeFirst();
+        }
+
+        // The array size should NOT shrink below 16
+        assertThat(deque.arrayLength()).isEqualTo(16);
+    }
+
+    @Test
+    @DisplayName("Test alternating addFirst and addLast with forced resizeUp")
+    public void testAddAndResizeUp() {
+        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Alternating between front and back to stress test indexing logic
+        for (int i = 0; i < 16; i++) {
+            if (i % 2 == 0) {
+                deque.addFirst(i);
+            } else {
+                deque.addLast(i);
+            }
+        }
+
+        // Add one more to force resizeUp
+        deque.addLast(100);
+
+        assertThat(deque.arrayLength()).isEqualTo(32); // Capacity should double
+        assertThat(deque.size()).isEqualTo(17);
+    }
+
+    @Test
+    @DisplayName("Test multiple shrinkage steps with resizeDown()")
+    public void testRepeatedResizeDown() {
+        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Fill deque and trigger multiple resize-ups
+        for (int i = 0; i < 64; i++) {
+            deque.addLast(i);
+        }
+
+        // Remove elements to force multiple rounds of resizeDown
+        for (int i = 0; i < 60; i++) {
+            deque.removeFirst();
+        }
+
+        // Ensure array shrinks to appropriate size
+        assertThat(deque.arrayLength()).isEqualTo(16); // Should not shrink below 16
+        assertThat(deque.size()).isEqualTo(4);
+    }
+
+
+
 }
 
 
