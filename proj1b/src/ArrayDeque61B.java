@@ -85,7 +85,7 @@ public class ArrayDeque61B<T> implements Deque61B<T>, Iterable<T> {
         }
 
         front = Math.floorMod(front - 1, items.length);
-        items[front + 1] = x;
+        items[Math.floorMod(front + 1, items.length)] = x;
         size++;
     }
 

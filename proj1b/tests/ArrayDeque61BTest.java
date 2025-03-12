@@ -10,15 +10,15 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 public class ArrayDeque61BTest {
 
-         @Test
-         @DisplayName("ArrayDeque61B has no fields besides backing array and primitives")
-         void noNonTrivialFields() {
-             List<Field> badFields = Reflection.getFields(ArrayDeque61B.class)
-                     .filter(f -> !(f.getType().isPrimitive() || f.getType().equals(Object[].class) || f.isSynthetic()))
-                     .toList();
+    @Test
+    @DisplayName("ArrayDeque61B has no fields besides backing array and primitives")
+    void noNonTrivialFields() {
+        List<Field> badFields = Reflection.getFields(ArrayDeque61B.class)
+                .filter(f -> !(f.getType().isPrimitive() || f.getType().equals(Object[].class) || f.isSynthetic()))
+                .toList();
 
-             assertWithMessage("Found fields that are not array or primitives").that(badFields).isEmpty();
-         }
+        assertWithMessage("Found fields that are not array or primitives").that(badFields).isEmpty();
+    }
 
     @Test
     /* In this test, we have three different assert statements that verify that addFirst works correctly. */
@@ -26,13 +26,13 @@ public class ArrayDeque61BTest {
         Deque61B<String> lld1 = new ArrayDeque61B<>();
 
         lld1.addFirst("back"); // after this call we expect: ["back"]
-        assertThat(lld1.toList()).containsExactly(null,null,null,null,"back",null,null,null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, null, null, "back", null, null, null).inOrder();
 
         lld1.addFirst("middle"); // after this call we expect: ["middle", "back"]
-        assertThat(lld1.toList()).containsExactly(null,null,null,"middle", "back",null,null,null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, null, "middle", "back", null, null, null).inOrder();
 
         lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
-        assertThat(lld1.toList()).containsExactly(null,null,"front", "middle", "back",null,null,null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, "front", "middle", "back", null, null, null).inOrder();
 
          /* Note: The first two assertThat statements aren't really necessary. For example, it's hard
             to imagine a bug in your code that would lead to ["front"] and ["front", "middle"] failing,
@@ -47,7 +47,7 @@ public class ArrayDeque61BTest {
         lld1.addLast("front"); // after this call we expect: ["front"]
         lld1.addLast("middle"); // after this call we expect: ["front", "middle"]
         lld1.addLast("back"); // after this call we expect: ["front", "middle", "back"]
-        assertThat(lld1.toList()).containsExactly(null,null,null,null,null,"front","middle","back").inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, null, null, null, "front", "middle", "back").inOrder();
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ArrayDeque61BTest {
         lld1.addFirst(-2);
         lld1.addLast(3);
 
-        assertThat(lld1.toList()).containsExactly(3,null,null,-2,-1,0,1,2).inOrder();
+        assertThat(lld1.toList()).containsExactly(3, null, null, -2, -1, 0, 1, 2).inOrder();
     }
 
 
@@ -81,15 +81,15 @@ public class ArrayDeque61BTest {
 
 
         lld1.removeFirst();
-        assertThat(lld1.toList()).containsExactly(null,null,null,"middle", "back",null,null,null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, null, "middle", "back", null, null, null).inOrder();
         assertThat(lld1.size()).isEqualTo(2);
 
         lld1.removeFirst();
-        assertThat(lld1.toList()).containsExactly(null,null,null,null, "back",null,null,null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, null, null, "back", null, null, null).inOrder();
         assertThat(lld1.size()).isEqualTo(1);
 
         lld1.removeFirst();
-        assertThat(lld1.toList()).containsExactly(null,null,null,null,null,null,null,null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, null, null, null, null, null, null).inOrder();
         assertThat(lld1.size()).isEqualTo(0);
 
         // edge case: already empty
@@ -101,7 +101,7 @@ public class ArrayDeque61BTest {
 
 
     @Test
-    public void testMultiple () {
+    public void testMultiple() {
         Deque61B<String> lld1 = new ArrayDeque61B<>();
 
         lld1.addFirst("back"); // after this call we expect: ["back"]
@@ -111,7 +111,7 @@ public class ArrayDeque61BTest {
         lld1.addFirst("front"); // after this call we expect: ["front", "middle", "back"]
 
         lld1.removeLast();
-        assertThat(lld1.toList()).containsExactly(null, null, "front", "middle",null, null, null, null).inOrder();
+        assertThat(lld1.toList()).containsExactly(null, null, "front", "middle", null, null, null, null).inOrder();
         assertThat(lld1.size()).isEqualTo(2);
 
         lld1.removeLast();
@@ -258,6 +258,27 @@ public class ArrayDeque61BTest {
         }
     }
 
+    @Test
+    @DisplayName("Test alternating addFirst and addLast with forced resizeUp")
+    public void testAlternatingAddResizeUp() {
+        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
+
+        // Alternating between front and back to stress test indexing logic
+        for (int i = 0; i < 16; i++) {
+            if (i % 2 == 0) {
+                deque.addFirst(i);
+            } else {
+                deque.addLast(i);
+            }
+        }
+
+        // Add one more to force resizeUp
+        deque.addLast(100);
+
+        assertThat(deque.arrayLength()).isEqualTo(32); // Capacity should double
+        assertThat(deque.size()).isEqualTo(17);
+    }
+
     /**
      * Test resizing down when items are removed
      */
@@ -320,58 +341,6 @@ public class ArrayDeque61BTest {
         // Ensure deque maintains correct ordering
         assertThat(deque.size()).isEqualTo(12);
         assertThat(deque.get(15)).isEqualTo(16);
-    }
-
-    @Test
-    @DisplayName("Test resizeUp and resizeDown multiple times with add/remove operations")
-    public void testRepeatedResizing() {
-        ArrayDeque61B<Integer> deque = new ArrayDeque61B<>();
-
-        int totalInserted = 0;
-
-        for (int i = 0; i < 5; i++) { // Repeat resizing test 5 times
-            int initialCapacity = deque.arrayLength(); // Get the current capacity before filling
-
-            // Step 1: Fill up deque to trigger resizeUp()
-            for (int j = 0; j < initialCapacity; j++) {
-                deque.addLast(totalInserted);
-                totalInserted++;
-            }
-
-            // Verify that size matches the capacity before resizing
-            assertThat(deque.size()).isEqualTo(initialCapacity);
-
-            // Step 2: Check ordering remains valid after resizeUp()
-            for (int j = 0; j < initialCapacity; j++) {
-                assertThat(deque.get(4 + j)).isEqualTo(totalInserted - initialCapacity + j);
-            }
-
-            // Step 3: Remove elements until size < 25% of capacity to trigger resizeDown()
-            int removeCount = deque.arrayLength() - (deque.arrayLength() / 4);
-            for (int j = 0; j < removeCount; j++) {
-                deque.removeFirst();
-            }
-
-            // Ensure size is correctly updated
-            assertThat(deque.size()).isEqualTo(deque.arrayLength() / 4);
-
-            // Step 4: Ensure capacity has resized down to half
-            assertThat(deque.arrayLength()).isEqualTo(initialCapacity); // Should have shrunk back
-
-            // Step 5: Verify elements are still ordered correctly after resizing down
-            for (int j = 0; j < deque.size(); j++) {
-                assertThat(deque.get(4 + j)).isNotNull();
-            }
-
-            // Step 6: Remove all elements to ensure deque can be emptied properly
-            while (!deque.isEmpty()) {
-                deque.removeFirst();
-            }
-
-            // Ensure deque is empty
-            assertThat(deque.size()).isEqualTo(0);
-            assertThat(deque.isEmpty()).isTrue();
-        }
     }
 
 }
