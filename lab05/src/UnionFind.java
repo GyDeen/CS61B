@@ -1,5 +1,10 @@
+import net.sf.saxon.z.IntArraySet;
+
+import java.util.ArrayList;
+
 public class UnionFind {
-    // TODO: Instance variables
+    private ArrayList<Integer> union = new ArrayList<Integer>();
+    private int size;
 
     /* Creates a UnionFind data structure holding N items. Initially, all
        items are in disjoint sets. */
