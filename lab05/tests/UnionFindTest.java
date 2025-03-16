@@ -80,11 +80,11 @@ public class UnionFindTest {
         }
     }
 
-    /**
-     * Write your own tests below here to verify for correctness. The given tests are not comprehensive.
-     * Specifically, you may want to write a test for path compression and to check for the correctness
-     * of all methods in your implementation.
-     */
+    @Test
+    public void testFind() {
+        UnionFind uf = new UnionFind(10);
+
+    }
 
 }
 
