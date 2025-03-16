@@ -90,6 +90,106 @@ public class UnionFindTest {
         assertThat(uf.find(4)).isEqualTo(8);
     }
 
+    /**
+     * Test that initially, each element is in its own set of size 1.
+     */
+    @Test
+    public void testInitialSetSizes() {
+        int n = 5;
+        UnionFind uf = new UnionFind(n);
+        for (int i = 0; i < n; i++) {
+            assertThat(uf.sizeOf(i)).isEqualTo(1);
+            // Each element should be its own representative initially.
+            assertThat(uf.find(i)).isEqualTo(i);
+        }
+    }
+
+    /**
+     * Test basic unions and verify that connectivity and size updates are correct.
+     */
+    @Test
+    public void testUnionAndSizeUpdates() {
+        UnionFind uf = new UnionFind(6);
+        // Union a couple of pairs and check sizes.
+        uf.union(0, 1);
+        assertThat(uf.connected(0, 1)).isTrue();
+        assertThat(uf.sizeOf(0)).isEqualTo(2);
+        uf.union(2, 3);
+        assertThat(uf.sizeOf(2)).isEqualTo(2);
+
+        // Union the two sets.
+        uf.union(1, 2);
+        // Now 0, 1, 2, 3 should all be connected.
+        assertThat(uf.connected(0, 3)).isTrue();
+        // The size should reflect the total elements.
+        assertThat(uf.sizeOf(0)).isEqualTo(4);
+
+        // Union remaining elements.
+        uf.union(4, 5);
+        assertThat(uf.sizeOf(4)).isEqualTo(2);
+    }
+
+    /**
+     * Test that unioning an element with itself does nothing.
+     */
+    @Test
+    public void testSelfUnion() {
+        UnionFind uf = new UnionFind(4);
+        uf.union(2, 2);
+        // The find of each element should remain unchanged.
+        for (int i = 0; i < 4; i++) {
+            assertThat(uf.find(i)).isEqualTo(i);
+        }
+    }
+
+    /**
+     * Test that invalid inputs throw IllegalArgumentException.
+     */
+    @Test
+    public void testIllegalInput() {
+        UnionFind uf = new UnionFind(3);
+        try {
+            uf.find(-1);
+            fail("Expected IllegalArgumentException for find(-1)");
+        } catch (IllegalArgumentException e) {
+            // Expected exception.
+        }
+        try {
+            uf.union(0, 3);
+            fail("Expected IllegalArgumentException for union(0, 3)");
+        } catch (IllegalArgumentException e) {
+            // Expected exception.
+        }
+    }
+
+    /**
+     * Test a more complex union structure.
+     */
+    @Test
+    public void testComplexUnionStructure() {
+        UnionFind uf = new UnionFind(10);
+        // Create several unions to form multiple groups.
+        uf.union(0, 1);
+        uf.union(1, 2);
+        uf.union(3, 4);
+        uf.union(5, 6);
+        uf.union(7, 8);
+        uf.union(8, 9);
+        // Merge groups.
+        uf.union(2, 3);
+        uf.union(6, 7);
+        // Now merge the two large groups.
+        uf.union(4, 5);
+
+        // Verify that all elements now share the same root.
+        int root = uf.find(0);
+        for (int i = 1; i < 10; i++) {
+            assertThat(uf.find(i)).isEqualTo(root);
+        }
+        // And the overall size should be 10.
+        assertThat(uf.sizeOf(0)).isEqualTo(10);
+    }
+
 }
 
 
