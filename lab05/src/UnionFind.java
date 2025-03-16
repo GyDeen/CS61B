@@ -1,5 +1,3 @@
-import net.sf.saxon.z.IntArraySet;
-
 import java.util.ArrayList;
 
 public class UnionFind {
@@ -30,10 +28,6 @@ public class UnionFind {
         return -union.get(root);
     }
 
-    public int size() {
-        return size;
-    }
-
     /* Returns true if nodes/vertices V1 and V2 are connected. */
     public boolean connected(int v1, int v2) {
         return find(v1) == find(v2);
@@ -47,7 +41,12 @@ public class UnionFind {
             throw new IllegalArgumentException("Input out of set index");
         }
 
-        ArrayList<Integer> path = new ArrayList<Integer>();
+        // It is root. Returns itself
+        if (union.get(v) < 0) {
+            return v;
+        }
+
+        ArrayList<Integer> path = new ArrayList<>();
         int current = v;
 
         while (union.get(parent(current)) > 0) {
@@ -55,12 +54,11 @@ public class UnionFind {
             current = parent(current);
         }
 
-        int sizeOfPath = path.size();
         for (int toAssignRoot : path) {
             union.set(toAssignRoot, current);
         }
 
-        return current;
+        return union.get(current);
     }
 
     /* Connects two items V1 and V2 together by connecting their respective
@@ -69,19 +67,28 @@ public class UnionFind {
        root to V2's root. Union-ing an item with itself or items that are
        already connected should not change the structure. */
     public void union(int v1, int v2) {
-        if (connected(v1, v2)) {
+        int root1 = find(v1);
+        int root2 = find(v2);
+
+        // If they're already in the same set, do nothing.
+        if (root1 == root2) {
             return;
         }
 
-        int root1 = find(v1), root2 = find(v2);
-        int size1 = sizeOf(v1), size2 = sizeOf(v2);
+        // Now, instead of calling sizeOf(v1) and sizeOf(v2),
+        // use the fact that the root stores the negative size.
+        int size1 = -union.get(root1);
+        int size2 = -union.get(root2);
 
+        // Tie breaking by size:
         if (size1 > size2) {
             union.set(root2, root1);
+            union.set(root1, -(size1 + size2));
         } else {
             union.set(root1, root2);
+            union.set(root2, -(size1 + size2));
         }
-
     }
+
 
 }

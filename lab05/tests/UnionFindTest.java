@@ -83,7 +83,11 @@ public class UnionFindTest {
     @Test
     public void testFind() {
         UnionFind uf = new UnionFind(10);
+        uf.union(3, 8);
+        uf.union(3, 0);
+        uf.union(3, 4);
 
+        assertThat(uf.find(4)).isEqualTo(8);
     }
 
 }
