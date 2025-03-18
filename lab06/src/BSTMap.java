@@ -49,12 +49,19 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             }
 
             K nextKey = nextNode.key;
-            nextNode = getNextNode();
+            nextNode = getNextNode(nextNode);
             return nextKey;
         }
 
-        private BSTnode<K, V> getNextNode() {
+        private BSTnode<K, V> getNextNode(BSTnode<K, V>node) {
+            if(node.right != null) {
+                BSTnode<K, V> smallestNode = node.right;
+                while (smallestNode.left != null) {
+                    smallestNode = smallestNode.left;
+                }
 
+                return smallestNode;
+            }
         }
     }
 
@@ -146,20 +153,25 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        root = removeHelper(root, key);
+        BSTnode<K, V> removedNode = new BSTnode<>(null, null);
+        root = removeHelper(root, key, removedNode);
+        return removedNode.value;
     }
 
-    private BSTnode<K, V> removeHelper(BSTnode<K, V> node, K key) {
+    private BSTnode<K, V> removeHelper(BSTnode<K, V> node, K key, BSTnode<K, V> removedNode) {
         if (node == null) {
             return null;
         }
 
         int cmp = key.compareTo(node.key);
         if (cmp < 0) {
-            node.left = removeHelper(node.left, key);
+            node.left = removeHelper(node.left, key, removedNode);
         } else if (cmp > 0) {
-            node.right = removeHelper(node.right, key);
-        } else { // find the target node
+            node.right = removeHelper(node.right, key, removedNode);
+        } else {// find the target node
+
+            removedNode.key = node.key;
+            removedNode.value = node.value;
             if (node.left == null ) {
                 size--;
                 return node.right;
@@ -172,7 +184,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             BSTnode<K, V> smallChild = findSmallest(node.right); // use right-tree the smallest node to replace node
             node.key = smallChild.key;
             node.value = smallChild.value;
-            node.right = removeHelper(node.right, smallChild.key); // remove the right-tree smallest node
+            node.right = removeHelper(node.right, smallChild.key,  new BSTnode<>(null, null)); // remove the right-tree smallest node
         }
 
         return node;
