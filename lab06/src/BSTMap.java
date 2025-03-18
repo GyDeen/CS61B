@@ -4,15 +4,15 @@ import java.util.Set;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
-    private BSTnode<K, V> root;
+    private BSTnode root;
     private int size;
 
 
-    private class BSTnode<K, V> {
+    private class BSTnode {
         private K key;
         private V value;
-        private BSTnode<K, V> left;
-        private BSTnode<K, V> right;
+        private BSTnode left;
+        private BSTnode right;
 
         public BSTnode(K key, V value) {
             this.key = key;
@@ -24,7 +24,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     private class BSTnodeIterator implements Iterator<K> {
 
-        private BSTnode<K, V> nextNode;
+        private BSTnode nextNode;
 
 
         public BSTnodeIterator() {
@@ -53,15 +53,45 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             return nextKey;
         }
 
-        private BSTnode<K, V> getNextNode(BSTnode<K, V>node) {
+        private BSTnode getNextNode(BSTnode node) {
+            if (node == null) {
+                return null;
+            }
+
+            // the next smallest is at right-tree left-most node
             if(node.right != null) {
-                BSTnode<K, V> smallestNode = node.right;
+                BSTnode smallestNode = node.right;
                 while (smallestNode.left != null) {
                     smallestNode = smallestNode.left;
                 }
 
                 return smallestNode;
             }
+
+            BSTnode successor = null;
+            BSTnode  ancestor = root;
+
+            while (ancestor != null) {
+                int cmp = node.key.compareTo(ancestor.key);
+
+                // currentNode is smaller than ancestor,
+                // which means it may have a smaller node not being returned yet
+                if (cmp < 0) {
+                    successor = ancestor;
+                    ancestor = ancestor.left;
+
+                    // currentNode is bigger than ancestor, which means ancestor has being passed.
+                    // we need to move to ancestor right
+                } else if (cmp > 0) {
+                    ancestor = ancestor.right;
+                } else {
+                    break;
+                }
+            }
+
+            return successor;
+
+
         }
     }
 
@@ -76,7 +106,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
     public BSTMap(K key, V value) {
-        this.root = new BSTnode<K, V>(key, value);
+        this.root = new BSTnode(key, value);
     }
 
     @Override
@@ -84,10 +114,10 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         root = putHelper(root, key, value);
     }
 
-    private BSTnode<K, V> putHelper(BSTnode<K, V>node, K key, V value) {
+    private BSTnode putHelper(BSTnode node, K key, V value) {
         if (node == null) {
             size++;
-            return new BSTnode<K, V>(key, value);
+            return new BSTnode(key, value);
         }
 
         int cmp = key.compareTo(node.key);
@@ -104,7 +134,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     @Override
     public V get(K key) {
 
-        BSTnode<K, V> crtNode = root;
+        BSTnode crtNode = root;
 
         while (crtNode != null && crtNode.key != key) {
             if (key.compareTo(crtNode.key) == 0){
@@ -121,7 +151,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public boolean containsKey(K key) {
-        BSTnode<K, V> crtNode = root;
+        BSTnode crtNode = root;
 
         while (crtNode != null) {
             if (key.compareTo(crtNode.key) == 0) {
@@ -153,12 +183,12 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        BSTnode<K, V> removedNode = new BSTnode<>(null, null);
+        BSTnode removedNode = new BSTnode(null, null);
         root = removeHelper(root, key, removedNode);
         return removedNode.value;
     }
 
-    private BSTnode<K, V> removeHelper(BSTnode<K, V> node, K key, BSTnode<K, V> removedNode) {
+    private BSTnode removeHelper(BSTnode node, K key, BSTnode removedNode) {
         if (node == null) {
             return null;
         }
@@ -181,17 +211,17 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             }
 
             // there are two children
-            BSTnode<K, V> smallChild = findSmallest(node.right); // use right-tree the smallest node to replace node
+            BSTnode smallChild = findSmallest(node.right); // use right-tree the smallest node to replace node
             node.key = smallChild.key;
             node.value = smallChild.value;
-            node.right = removeHelper(node.right, smallChild.key,  new BSTnode<>(null, null)); // remove the right-tree smallest node
+            node.right = removeHelper(node.right, smallChild.key,  new BSTnode(null, null)); // remove the right-tree smallest node
         }
 
         return node;
     }
 
     // Find the smallest node at given tree
-    private BSTnode<K, V> findSmallest(BSTnode<K, V> node) {
+    private BSTnode findSmallest(BSTnode node) {
         while (node.left != null) {
             node = node.left;
         }
