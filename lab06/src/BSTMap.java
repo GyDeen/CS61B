@@ -1,4 +1,5 @@
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
@@ -19,6 +20,47 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             this.left = null;
             this.right = null;
         }
+    }
+
+    private class BSTnodeIterator implements Iterator<K> {
+
+        private BSTnode<K, V> nextNode;
+
+
+        public BSTnodeIterator() {
+            this.nextNode = root;
+            if (nextNode != null) {
+                while (nextNode.left != null) {
+                    nextNode = nextNode.left;
+                }
+            }
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            return nextNode != null;
+        }
+
+        @Override
+        public K next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            K nextKey = nextNode.key;
+            nextNode = getNextNode();
+            return nextKey;
+        }
+
+        private BSTnode<K, V> getNextNode() {
+
+        }
+    }
+
+    @Override
+    public Iterator<K> iterator() {
+        return new BSTnodeIterator();
     }
 
     public BSTMap() {
@@ -145,8 +187,5 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
 
-        @Override
-    public Iterator<K> iterator() {
-        return null;
-    }
+
 }
