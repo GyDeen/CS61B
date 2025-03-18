@@ -126,9 +126,24 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
                 return node.left;
             }
 
-
+            // there are two children
+            BSTnode<K, V> smallChild = findSmallest(node.right); // use right-tree the smallest node to replace node
+            node.key = smallChild.key;
+            node.value = smallChild.value;
+            node.right = removeHelper(node.right, smallChild.key); // remove the right-tree smallest node
         }
+
+        return node;
     }
+
+    // Find the smallest node at given tree
+    private BSTnode<K, V> findSmallest(BSTnode<K, V> node) {
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node;
+    }
+
 
         @Override
     public Iterator<K> iterator() {
