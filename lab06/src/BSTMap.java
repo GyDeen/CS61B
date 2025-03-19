@@ -1,6 +1,7 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
@@ -136,7 +137,11 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
         BSTnode crtNode = root;
 
-        while (crtNode != null && crtNode.key != key) {
+        if (crtNode == null) {
+            return null;
+        }
+
+        while (crtNode != null) {
             if (key.compareTo(crtNode.key) == 0){
                 return crtNode.value;
             } else if (key.compareTo(crtNode.key) < 0) {
@@ -178,7 +183,19 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public Set<K> keySet() {
-        return Set.of();
+        Set<K> keys = new TreeSet<>();
+        collectKeys(root, keys);
+        return keys;
+    }
+
+    private void collectKeys(BSTnode node, Set<K> keys) {
+        if (node == null) {
+            return;
+        }
+
+        collectKeys(node.left, keys);
+        keys.add(node.key);
+        collectKeys(node.right, keys);
     }
 
     @Override
