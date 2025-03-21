@@ -2,9 +2,8 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Percolation {
-    private final int IS_FULL = 1;
-    private final int IS_EMPTY = -1;
-    private final int IS_BLOCK = 2;
+    private final int IS_FULL = 3;
+    private final int IS_EMPTY = 1;
     private final int NOT_OPEN = 0;
 
 
@@ -44,38 +43,35 @@ public class Percolation {
         grid[row][col] = getRandomStatement(row);
         openSite++;
 
-        // If it is not blocked
-        if (grid[row][col] != IS_BLOCK) {
-
-            // If it is row 0, make it connect with virtualTop
-            if (row == 0) {
-                boardUF.union(idxUF, virtualTop);
-            }
-
-            if (row == boardSize - 1) {
-                boardUF.union(idxUF, virtualBottom);
-            }
-
-            // If it is not the first row
-            if (row > 0 && grid[row - 1][col] != NOT_OPEN && grid[row - 1][col] != IS_BLOCK) {
-                boardUF.union(idxUF, getUFIdx(row - 1, col));
-            }
-
-            // If it is not the bottom row
-            if (row < boardSize - 1 && grid[row + 1][col] != NOT_OPEN && grid[row + 1][col] != IS_BLOCK) {
-                boardUF.union(idxUF, getUFIdx(row + 1, col));
-            }
-
-            // If it is not the right-most column
-            if (col > 0 && grid[row][col - 1] != NOT_OPEN && grid[row][col - 1] != IS_BLOCK) {
-                boardUF.union(idxUF, getUFIdx(row, col - 1));
-            }
-
-            // If it is not the left-most column
-            if (col < boardSize - 1 && grid[row][col + 1] != NOT_OPEN && grid[row][col + 1] != IS_BLOCK) {
-                boardUF.union(idxUF, getUFIdx(row, col + 1));
-            }
+        // If it is row 0, make it connect with virtualTop
+        if (row == 0) {
+            boardUF.union(idxUF, virtualTop);
         }
+
+        if (row == boardSize - 1) {
+            boardUF.union(idxUF, virtualBottom);
+        }
+
+        // If it is not the first row
+        if (row > 0 && grid[row - 1][col] != NOT_OPEN) {
+            boardUF.union(idxUF, getUFIdx(row - 1, col));
+        }
+
+        // If it is not the bottom row
+        if (row < boardSize - 1 && grid[row + 1][col] != NOT_OPEN) {
+            boardUF.union(idxUF, getUFIdx(row + 1, col));
+        }
+
+        // If it is not the right-most column
+        if (col > 0 && grid[row][col - 1] != NOT_OPEN) {
+            boardUF.union(idxUF, getUFIdx(row, col - 1));
+        }
+
+        // If it is not the left-most column
+        if (col < boardSize - 1 && grid[row][col + 1] != NOT_OPEN) {
+            boardUF.union(idxUF, getUFIdx(row, col + 1));
+        }
+
 
 
     }
@@ -87,7 +83,6 @@ public class Percolation {
 
     // If this site is connecting with virtualTop, it is full
     public boolean isFull(int row, int col) {
-        if (grid[row][col] == IS_BLOCK) return false;
         return boardUF.find(getUFIdx(row, col)) == boardUF.find(virtualTop);
     }
 
@@ -101,11 +96,11 @@ public class Percolation {
 
     public int getRandomStatement(int row) {
         if (row == 0) {
-            int[] validTopRow = {IS_BLOCK, IS_FULL};
+            int[] validTopRow = {IS_FULL};
             return validTopRow[ThreadLocalRandom.current().nextInt(validTopRow.length)];
         } else {
             // For other rows, only BLOCKED or EMPTY
-            int[] validOtherRows = {IS_BLOCK, IS_EMPTY};
+            int[] validOtherRows = {IS_EMPTY};
             return validOtherRows[ThreadLocalRandom.current().nextInt(validOtherRows.length)];
         }
     }
