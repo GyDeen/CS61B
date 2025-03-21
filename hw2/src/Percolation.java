@@ -2,10 +2,32 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 
 public class Percolation {
-    // TODO: Add any necessary instance variables.
+    private int boardSize;
+    private boolean isPercolation;
+    private WeightedQuickUnionUF board;
 
+
+    private class Node {
+        private final int IS_FULL = 1;
+        private final int IS_BLOCK = -1;
+        private final int IS_EMPTY = 0;
+        private final int IS_OPEN = 2;
+        private final int NOT_OPEN = -2;
+
+        private boolean isTop = false;
+        private int statement = NOT_OPEN; // Statement for whether is full, block or empty
+        private int x;
+        private int y;
+
+
+        public Node(int x, int y) {
+
+        }
+    }
     public Percolation(int N) {
-        // TODO: Fill in this constructor.
+        isPercolation = false;
+        boardSize = N;
+        board = new WeightedQuickUnionUF(N);
     }
 
     public void open(int row, int col) {
