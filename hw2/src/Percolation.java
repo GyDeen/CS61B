@@ -3,39 +3,21 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     private final int IS_FULL = 1;
-    private final int IS_BLOCK = -1;
-    private final int IS_EMPTY = 0;
-    private final int IS_OPEN = 2;
-    private final int NOT_OPEN = -2;
+    private final int IS_EMPTY = -1;
+    private final int IS_BLOCK = 2;
+    private final int NOT_OPEN = 0;
 
 
-    private final int boardSize;
+    private int boardSize;
     private boolean isPercolation;
-    private WeightedQuickUnionUF board;
-
-    private boolean isTop = false;
-    private int statement = NOT_OPEN; // Statement for whether is full, block or empty
-    private int x;
-    private int y;
+    private WeightedQuickUnionUF boardUF;
+    private int[][] grid;
 
 
-
-        public void setStatement(int i) {
-            statement = i;
-        }
-
-        public int getStatement() {
-            return statement;
-        }
-
-        public int getBoardIdx() {
-
-        }
-    }
     public Percolation(int N) {
-        isPercolation = false;
         boardSize = N;
-        board = new WeightedQuickUnionUF(N);
+        boardUF = new WeightedQuickUnionUF(N);
+        grid = new int[N][N];
     }
 
     public void open(int row, int col) {
