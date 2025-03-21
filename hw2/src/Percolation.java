@@ -8,12 +8,11 @@ public class Percolation {
     private final int NOT_OPEN = 0;
 
 
-    private int boardSize;
-    private boolean isPercolation;
-    private WeightedQuickUnionUF boardUF;
-    private int virtualTop; // Any site connects to this means they are full
-    private int virtualBottom; // Any site connects with virtualTop and virtualBottom means this module is percolation
-    private int[][] grid;
+    private final int boardSize;
+    private final WeightedQuickUnionUF boardUF;
+    private final int virtualTop; // Any site connects to this means they are full
+    private final int virtualBottom; // Any site connects with virtualTop and virtualBottom means this module is percolation
+    private final int[][] grid;
     private int openSite = 0;
 
 
