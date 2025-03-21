@@ -21,7 +21,20 @@ public class Percolation {
 
 
         public Node(int x, int y) {
+            this.x = x;
+            this.y = y;
 
+            if (x == 0) {
+                isTop = true;
+            }
+        }
+
+        public void setStatement(int i) {
+            statement = i;
+        }
+
+        public int getStatement() {
+            return statement;
         }
     }
     public Percolation(int N) {
