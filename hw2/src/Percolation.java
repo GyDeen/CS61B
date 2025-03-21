@@ -1,9 +1,6 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import java.util.concurrent.ThreadLocalRandom;
 
-import java.util.Random;
-
-
 public class Percolation {
     private final int IS_FULL = 1;
     private final int IS_EMPTY = -1;
@@ -14,30 +11,25 @@ public class Percolation {
     private int boardSize;
     private boolean isPercolation;
     private WeightedQuickUnionUF boardUF;
+    private int virtualTop; // Any site connects to this means they are full
+    private int virtualBottom; // Any site connects with virtualTop and virtualBottom means this module is percolation
     private int[][] grid;
+    private int openSite = 0;
+
 
 
     public Percolation(int N) {
         boardSize = N;
-        boardUF = new WeightedQuickUnionUF(N);
+        /* Using two extra sites to represents connected to top and connected to bottom.
+        *  This can avoid looping through the whole top row or bottom row */
+        boardUF = new WeightedQuickUnionUF(N * N + 2);
+
+        virtualTop = boardSize * boardSize;
+        virtualBottom = boardSize * boardSize + 1;
         grid = new int[N][N];
     }
 
-    public int getRandomStatement(int row) {
-        if (row == 0) {
-            int[] validTopRow = {IS_BLOCK, IS_EMPTY, IS_FULL};
-            return validTopRow[ThreadLocalRandom.current().nextInt(validTopRow.length)];
-        } else {
-            // For other rows, only BLOCKED or EMPTY
-            int[] validOtherRows = {IS_BLOCK, IS_EMPTY};
-            return validOtherRows[ThreadLocalRandom.current().nextInt(validOtherRows.length)];
-        }
-    }
 
-
-    private int getUFIdx(int row, int col) {
-        return row * boardSize + col;
-    }
 
     public void open(int row, int col) {
 
@@ -51,48 +43,77 @@ public class Percolation {
 
         int idxUF = getUFIdx(row, col);
         grid[row][col] = getRandomStatement(row);
+        openSite++;
 
-        // If it is not the first row
-        if (row > 0 && grid[row - 1][col] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row - 1, col));
+        // If it is not blocked
+        if (grid[row][col] != IS_BLOCK) {
+
+            // If it is row 0, make it connect with virtualTop
+            if (row == 0) {
+                boardUF.union(idxUF, virtualTop);
+            }
+
+            if (row == boardSize - 1) {
+                boardUF.union(idxUF, virtualBottom);
+            }
+
+            // If it is not the first row
+            if (row > 0 && grid[row - 1][col] != NOT_OPEN && grid[row - 1][col] != IS_BLOCK) {
+                boardUF.union(idxUF, getUFIdx(row - 1, col));
+            }
+
+            // If it is not the bottom row
+            if (row < boardSize - 1 && grid[row + 1][col] != NOT_OPEN && grid[row + 1][col] != IS_BLOCK) {
+                boardUF.union(idxUF, getUFIdx(row + 1, col));
+            }
+
+            // If it is not the right-most column
+            if (col > 0 && grid[row][col - 1] != NOT_OPEN && grid[row][col - 1] != IS_BLOCK) {
+                boardUF.union(idxUF, getUFIdx(row, col - 1));
+            }
+
+            // If it is not the left-most column
+            if (col < boardSize - 1 && grid[row][col + 1] != NOT_OPEN && grid[row][col + 1] != IS_BLOCK) {
+                boardUF.union(idxUF, getUFIdx(row, col + 1));
+            }
         }
-
-        if (row < boardSize - 1 && grid[row + 1][col] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row + 1, col));
-        }
-
-        if (col > 0 && grid[row][col - 1] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row, col - 1));
-        }
-        if (col < boardSize - 1 && grid[row][col + 1] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row, col + 1));
-        }
-
-
 
 
     }
+
 
     public boolean isOpen(int row, int col) {
         return grid[row][col] != NOT_OPEN;
     }
 
+    // If this site is connecting with virtualTop, it is full
     public boolean isFull(int row, int col) {
-        // TODO: Fill in this method.
-        return false;
+        if (grid[row][col] == IS_BLOCK) return false;
+        return boardUF.find(getUFIdx(row, col)) == boardUF.find(virtualTop);
     }
 
     public int numberOfOpenSites() {
-        // TODO: Fill in this method.
-        return 0;
+        return openSite;
     }
 
     public boolean percolates() {
-        // TODO: Fill in this method.
-        return false;
+        return boardUF.connected(virtualTop, virtualBottom);
     }
 
-    // TODO: Add any useful helper methods (we highly recommend this!).
-    // TODO: Remove all TODO comments before submitting.
+    public int getRandomStatement(int row) {
+        if (row == 0) {
+            int[] validTopRow = {IS_BLOCK, IS_FULL};
+            return validTopRow[ThreadLocalRandom.current().nextInt(validTopRow.length)];
+        } else {
+            // For other rows, only BLOCKED or EMPTY
+            int[] validOtherRows = {IS_BLOCK, IS_EMPTY};
+            return validOtherRows[ThreadLocalRandom.current().nextInt(validOtherRows.length)];
+        }
+    }
+
+
+    private int getUFIdx(int row, int col) {
+        return row * boardSize + col;
+    }
 
 }
