@@ -1,9 +1,6 @@
 package ngrams;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * An object for mapping a year number (e.g. 1996) to numerical data. Provides
@@ -55,8 +52,12 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      *  order of years().
      */
     public List<Double> data() {
-        // TODO: Fill in this method.
-        return null;
+        List<Double> data = new ArrayList<>(size());
+        for (Integer year : years()) {
+            data.add(get(year));
+        }
+
+        return data;
     }
 
     /**
@@ -69,8 +70,18 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      * should store the value from the TimeSeries that contains that year.
      */
     public TimeSeries plus(TimeSeries ts) {
-        // TODO: Fill in this method.
-        return null;
+        TimeSeries newTs = new TimeSeries();
+
+        Set<Integer> allYears = new HashSet<>(this.keySet());
+        allYears.addAll(ts.keySet());
+
+        for (Integer year : allYears) {
+            double valThis = this.getOrDefault(year, 0.0);
+            double valTs   = ts.getOrDefault(year, 0.0);
+            newTs.put(year, valThis + valTs);
+        }
+
+        return newTs;
     }
 
     /**
@@ -83,10 +94,16 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      * If TS has a year that is not in this TimeSeries, ignore it.
      */
     public TimeSeries dividedBy(TimeSeries ts) {
-        // TODO: Fill in this method.
-        return null;
-    }
+        TimeSeries newTs = new TimeSeries();
+        for (Integer year : this.keySet()) {
+            if (!ts.containsKey(year)) {
+                throw new IllegalArgumentException("Missing year in parameter TimeSeries: " + year);
+            }
 
-    // TODO: Add any private helper methods.
-    // TODO: Remove all TODO comments before submitting.
+            double quotient = this.get(year) / ts.get(year);
+            newTs.put(year, quotient);
+        }
+
+        return newTs;
+    }
 }
