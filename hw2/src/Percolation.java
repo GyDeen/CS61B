@@ -11,6 +11,7 @@ public class Percolation {
     private final WeightedQuickUnionUF boardUF;
     private final int virtualTop; // Any site connects to this means they are full
     private final int virtualBottom; // Any site connects with virtualTop and virtualBottom means this module is percolation
+    private final int virtualTopOnly;
     private final int[][] grid;
     private int openSite = 0;
 
@@ -18,12 +19,14 @@ public class Percolation {
 
     public Percolation(int N) {
         boardSize = N;
-        /* Using two extra sites to represents connected to top and connected to bottom.
-        *  This can avoid looping through the whole top row or bottom row */
-        boardUF = new WeightedQuickUnionUF(N * N + 2);
+        /* Using three extra sites to represents connected to top and connected to bottom.
+        *  This can avoid looping through the whole top row or bottom row
+        *  Using one more only connected to the top, which can prevent the backflow*/
+        boardUF = new WeightedQuickUnionUF(N * N + 3);
 
         virtualTop = boardSize * boardSize;
         virtualBottom = boardSize * boardSize + 1;
+        virtualTopOnly = boardSize * boardSize + 2;
         grid = new int[N][N];
     }
 
@@ -46,6 +49,7 @@ public class Percolation {
         // If it is row 0, make it connect with virtualTop
         if (row == 0) {
             boardUF.union(idxUF, virtualTop);
+            boardUF.union(idxUF, virtualTopOnly);
         }
 
         if (row == boardSize - 1) {
@@ -83,7 +87,7 @@ public class Percolation {
 
     // If this site is connecting with virtualTop, it is full
     public boolean isFull(int row, int col) {
-        return boardUF.find(getUFIdx(row, col)) == boardUF.find(virtualTop);
+        return boardUF.find(getUFIdx(row, col)) == boardUF.find(virtualTopOnly);
     }
 
     public int numberOfOpenSites() {
@@ -91,17 +95,14 @@ public class Percolation {
     }
 
     public boolean percolates() {
-        return boardUF.connected(virtualTop, virtualBottom);
+        return boardUF.connected(virtualTopOnly, virtualBottom);
     }
 
     public int getRandomStatement(int row) {
         if (row == 0) {
-            int[] validTopRow = {IS_FULL};
-            return validTopRow[ThreadLocalRandom.current().nextInt(validTopRow.length)];
+            return IS_FULL;
         } else {
-            // For other rows, only BLOCKED or EMPTY
-            int[] validOtherRows = {IS_EMPTY};
-            return validOtherRows[ThreadLocalRandom.current().nextInt(validOtherRows.length)];
+            return IS_EMPTY;
         }
     }
 
