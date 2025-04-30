@@ -1,6 +1,11 @@
 package ngrams;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 
 import static ngrams.TimeSeries.MAX_YEAR;
 import static ngrams.TimeSeries.MIN_YEAR;
@@ -18,12 +23,46 @@ import static ngrams.TimeSeries.MIN_YEAR;
 public class NGramMap {
 
     // TODO: Add any necessary static/instance variables.
+    private static final int WORD = 0;
+    private static final int YEAR = 1;
+    private static final int WORD_COUNT = 2;
+
+    HashMap<String, TimeSeries> theMap;
+    HashMap<Integer, Integer> wordsForYear;
+
 
     /**
      * Constructs an NGramMap from WORDSFILENAME and COUNTSFILENAME.
      */
     public NGramMap(String wordsFilename, String countsFilename) {
-        // TODO: Fill in this constructor. See the "NGramMap Tips" section of the spec for help.
+        try {
+            BufferedReader brWords = new BufferedReader(new FileReader("wordsFilename.txt"));
+            BufferedReader brCounts = new BufferedReader(new FileReader("countsFilename.txt"));
+
+            theMap = new HashMap<>();
+            String text;
+            while ((text = brWords.readLine()) != null) {
+                String[] parts = text.split("\t");
+
+                /* If the words is not in the current NGramMap, using the words as the key to the TimeSeries
+                *  that stores the frequency of each year. If it is in the current NGramMap, add the words frequency
+                *  to current records of that year frequency */
+                if (!theMap.containsKey(parts[WORD])) {
+                    TimeSeries newTs = new TimeSeries();
+                    newTs.put(Integer.parseInt(parts[YEAR]), Double.parseDouble(parts[WORD_COUNT]));
+                    theMap.put(parts[WORD], newTs);
+                } else {
+                    TimeSeries newTs = new TimeSeries();
+                    newTs.put(Integer.parseInt(parts[YEAR]), Double.parseDouble(parts[WORD_COUNT]));
+                    theMap.get(parts[YEAR]).plus(newTs);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }
     }
 
     /**
