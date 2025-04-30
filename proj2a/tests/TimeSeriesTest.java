@@ -55,4 +55,31 @@ public class TimeSeriesTest {
         assertThat(totalPopulation.years()).isEmpty();
         assertThat(totalPopulation.data()).isEmpty();
     }
+
+    @Test
+    public void testPlus() {
+        TimeSeries catPopulation = new TimeSeries();
+        catPopulation.put(1991, 0.0);
+        catPopulation.put(1992, 100.0);
+        catPopulation.put(1994, 200.0);
+        catPopulation.put(1995, 400.0);
+        catPopulation.put(1996, 500.0);
+
+
+        TimeSeries catPopulation2 = new TimeSeries();
+        catPopulation2.put(1990, 30.0);
+        catPopulation2.put(1994, 400.0);
+        catPopulation2.put(1995, 500.0);
+        catPopulation2.put(1996, 600.0);
+        catPopulation2.put(1997, 700.0);
+
+        TimeSeries totalCatPopulation = catPopulation.plus(catPopulation2);
+        List<Integer> expectedYears = new ArrayList<>
+                (Arrays.asList(1990, 1991, 1992, 1994, 1995, 1996, 1997));
+        assertThat(totalCatPopulation.years()).isEqualTo(expectedYears);
+
+        List<Double> expectedPopulation = new ArrayList<>
+                (Arrays.asList(30.0, 0.0, 100.0, 600.0, 900.0, 1100.0, 700.0));
+        assertThat(totalCatPopulation.data()).isEqualTo(expectedPopulation);
+    }
 } 
