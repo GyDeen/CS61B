@@ -97,14 +97,16 @@ public class NGramMap {
      * is not in the data files, returns an empty TimeSeries.
      */
     public TimeSeries countHistory(String word) {
-        return theMap.get(word);
+        TimeSeries ts = theMap.get(word);
+        if (ts == null) { return new TimeSeries();}
+        return new TimeSeries().plus(theMap.get(word));
     }
 
     /**
      * Returns a defensive copy of the total number of words recorded per year in all volumes.
      */
     public TimeSeries totalCountHistory() {
-        return wordsForYear;
+        return new TimeSeries().plus(wordsForYear);
     }
 
     /**

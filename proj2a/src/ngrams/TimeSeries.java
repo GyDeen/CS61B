@@ -30,7 +30,8 @@ public class TimeSeries extends TreeMap<Integer, Double> {
     public TimeSeries(TimeSeries ts, int startYear, int endYear) {
         super();
 
-        for (Integer year : ts.keySet()) {
+        Set<Integer> keys = ts.keySet();
+        for (Integer year : keys) {
             if (year < startYear) {
                 continue;
             } else if (year > endYear) {
@@ -55,7 +56,9 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      */
     public List<Double> data() {
         List<Double> data = new ArrayList<>(size());
-        for (Integer year : years()) {
+
+        List<Integer> years = years();
+        for (Integer year : years) {
             data.add(get(year));
         }
 
@@ -97,7 +100,8 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      */
     public TimeSeries dividedBy(TimeSeries ts) {
         TimeSeries newTs = new TimeSeries();
-        for (Integer year : this.keySet()) {
+        Set<Integer> allYears = new HashSet<>(this.keySet());
+        for (Integer year : allYears) {
             if (!ts.containsKey(year)) {
                 throw new IllegalArgumentException("Missing year in parameter TimeSeries: " + year);
             }
@@ -107,5 +111,19 @@ public class TimeSeries extends TreeMap<Integer, Double> {
         }
 
         return newTs;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Integer year : keySet()) {
+            if (!first) {
+                sb.append(", ");
+            }
+            sb.append(year).append("=").append(this.get(year));
+            first = false;
+        }
+        return sb.toString();
     }
 }
