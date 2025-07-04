@@ -24,16 +24,15 @@ public class HistoryTextHandler extends NgordnetQueryHandler {
 
         HashMap<String, TimeSeries> map = new HashMap<>();
 
-        String response = "";
         for (String word : words) {
             map.put(word, nGrammap.weightHistory(word, startYear, endYear));
         }
 
-        StringBuilder wordResponse = new StringBuilder();
+        String respond = "";
         for (String word: words) {
-            wordResponse.append(word).append(": {").append(map.get(word).toString()).append("}\n");
+            respond += word + ": " + map.get(word).toString() + "\n";
         }
 
-        return response;
+        return respond;
     }
 }

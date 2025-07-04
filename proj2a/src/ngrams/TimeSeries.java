@@ -112,18 +112,4 @@ public class TimeSeries extends TreeMap<Integer, Double> {
 
         return newTs;
     }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (Integer year : keySet()) {
-            if (!first) {
-                sb.append(", ");
-            }
-            sb.append(year).append("=").append(this.get(year));
-            first = false;
-        }
-        return sb.toString();
-    }
 }
