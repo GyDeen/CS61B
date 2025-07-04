@@ -48,13 +48,11 @@ public class Percolation {
             }
         }
 
-        // top row ↔ virtual top
         if (row == 0) {
             uf.union(idx, virtualTop);
             fullUf.union(idx, virtualTop);
         }
 
-        // bottom row ↔ virtual bottom (only in uf)
         if (row == n - 1) {
             uf.union(idx, virtualBottom);
         }
@@ -67,7 +65,5 @@ public class Percolation {
 
     private int index(int row, int col)      { return row * n + col; }
     private boolean inBounds(int r,int c)    { return r >= 0 && r < n && c >= 0 && c < n; }
-    private void validate(int r,int c) {
-        if (!inBounds(r,c)) throw new IllegalArgumentException("row="+r+", col="+c);
-    }
+    private void validate(int r,int c) {if (!inBounds(r,c)) throw new IllegalArgumentException("row="+r+", col="+c);}
 }
