@@ -2,113 +2,72 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Percolation {
-    private final int IS_FULL = 3;
-    private final int IS_EMPTY = 1;
-    private final int NOT_OPEN = 0;
 
+    private final int n;
+    private final int virtualTop;
+    private final int virtualBottom;
 
-    private final int boardSize;
-    private final WeightedQuickUnionUF boardUF;
-    private final int virtualTop; // Any site connects to this means they are full
-    private final int virtualBottom; // Any site connects with virtualTop and virtualBottom means this module is percolation
-    private final int virtualTopOnly;
-    private final int[][] grid;
-    private int openSite = 0;
+    // one UF for percolates()
+    private final WeightedQuickUnionUF uf;
+    // one UF for fullness
+    private final WeightedQuickUnionUF fullUf;
 
+    private final boolean[][] open;
+    private int openCount = 0;
 
+    public Percolation(int n) {
+        if (n <= 0) throw new IllegalArgumentException();
+        this.n = n;
 
-    public Percolation(int N) {
-        boardSize = N;
-        /* Using three extra sites to represents connected to top and connected to bottom.
-        *  This can avoid looping through the whole top row or bottom row
-        *  Using one more only connected to the top, which can prevent the backflow*/
-        boardUF = new WeightedQuickUnionUF(N * N + 3);
+        // +2 for top and bottom in the first UF
+        uf = new WeightedQuickUnionUF(n * n + 2);
+        // +1 for top only in the second UF
+        fullUf = new WeightedQuickUnionUF(n * n + 1);
 
-        virtualTop = boardSize * boardSize;
-        virtualBottom = boardSize * boardSize + 1;
-        virtualTopOnly = boardSize * boardSize + 2;
-        grid = new int[N][N];
+        virtualTop = n * n;
+        virtualBottom = n * n + 1;
+
+        open = new boolean[n][n];
     }
-
-
 
     public void open(int row, int col) {
+        validate(row, col);
+        if (open[row][col]) return;
 
-        if (row < 0 || row >= boardSize || col < 0 || col >= boardSize) throw new IllegalArgumentException("Index out of bounds: (" + row + ", " + col + ")");
+        open[row][col] = true;
+        openCount++;
 
+        int idx = index(row, col);
 
-        // If it is already opened, do nothing
-        if (isOpen(row, col)) {
-            return;
+        // connect to neighbours that are already open
+        for (int[] d : new int[][]{{-1,0},{1,0},{0,-1},{0,1}}) {
+            int r = row + d[0], c = col + d[1];
+            if (inBounds(r, c) && open[r][c]) {
+                uf.union(idx, index(r, c));
+                fullUf.union(idx, index(r, c));
+            }
         }
 
-        int idxUF = getUFIdx(row, col);
-        grid[row][col] = getRandomStatement(row);
-        openSite++;
-
-        // If it is row 0, make it connect with virtualTop
+        // top row ↔ virtual top
         if (row == 0) {
-            boardUF.union(idxUF, virtualTop);
-            boardUF.union(idxUF, virtualTopOnly);
+            uf.union(idx, virtualTop);
+            fullUf.union(idx, virtualTop);
         }
 
-        if (row == boardSize - 1) {
-            boardUF.union(idxUF, virtualBottom);
-        }
-
-        // If it is not the first row
-        if (row > 0 && grid[row - 1][col] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row - 1, col));
-        }
-
-        // If it is not the bottom row
-        if (row < boardSize - 1 && grid[row + 1][col] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row + 1, col));
-        }
-
-        // If it is not the right-most column
-        if (col > 0 && grid[row][col - 1] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row, col - 1));
-        }
-
-        // If it is not the left-most column
-        if (col < boardSize - 1 && grid[row][col + 1] != NOT_OPEN) {
-            boardUF.union(idxUF, getUFIdx(row, col + 1));
-        }
-
-
-
-    }
-
-
-    public boolean isOpen(int row, int col) {
-        return grid[row][col] != NOT_OPEN;
-    }
-
-    // If this site is connecting with virtualTop, it is full
-    public boolean isFull(int row, int col) {
-        return boardUF.find(getUFIdx(row, col)) == boardUF.find(virtualTopOnly);
-    }
-
-    public int numberOfOpenSites() {
-        return openSite;
-    }
-
-    public boolean percolates() {
-        return boardUF.connected(virtualTopOnly, virtualBottom);
-    }
-
-    public int getRandomStatement(int row) {
-        if (row == 0) {
-            return IS_FULL;
-        } else {
-            return IS_EMPTY;
+        // bottom row ↔ virtual bottom (only in uf)
+        if (row == n - 1) {
+            uf.union(idx, virtualBottom);
         }
     }
 
+    public boolean isOpen(int row, int col)  { validate(row, col); return open[row][col]; }
+    public boolean isFull(int row, int col)  { validate(row, col); return fullUf.connected(index(row,col), virtualTop); }
+    public int     numberOfOpenSites()       { return openCount; }
+    public boolean percolates()              { return uf.connected(virtualTop, virtualBottom); }
 
-    private int getUFIdx(int row, int col) {
-        return row * boardSize + col;
+    private int index(int row, int col)      { return row * n + col; }
+    private boolean inBounds(int r,int c)    { return r >= 0 && r < n && c >= 0 && c < n; }
+    private void validate(int r,int c) {
+        if (!inBounds(r,c)) throw new IllegalArgumentException("row="+r+", col="+c);
     }
-
 }
