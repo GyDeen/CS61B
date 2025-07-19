@@ -69,7 +69,6 @@ public class Task4 {
             SquareInfo sq = squareInfos.removeLast();
             if (!sq.removed) {
                 sq.removed = true;
-                inputChars.add('d');
                 for (int x = sq.startingX; x < sq.startingX + sq.size; x++) {
                     for (int y = sq.startingY; y > sq.startingY - sq.size; y--) {
                         try {
@@ -82,6 +81,7 @@ public class Task4 {
                 break;
             }
         }
+        inputChars.add('d');
     }
 
 
@@ -98,24 +98,45 @@ public class Task4 {
         }
     }
 
-    public void load(TETile[][] world) {
-        int currentIdx = 0;
+    public int load(TETile[][] world) {
+
+        // Clear the world first to make the exact same world as save
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < 15; y++) {
+                world[x][y] = Tileset.NOTHING;
+            }
+        }
+        fillWithTrees(world);
+
+        // Clear the current input list to avoid duplicates inputs
+        inputChars.clear();
+
+        int activateSquares = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader("src/save.txt"))) {
             long seed = Long.parseLong(reader.readLine());
             rand = new Random(seed);
 
             String[] commands = reader.readLine().split("\t");
             for (String ch : commands) {
+                inputChars.add(ch.charAt(0));
 
                 switch (ch) {
-                    case "n" -> addRandomSquare(world, rand);
-                    case "d" -> deleteLastSquare(world);
+                    case "n" :
+                        addRandomSquare(world, rand);
+                        activateSquares++;
+                        break;
+                    case "d" :
+                        deleteLastSquare(world);
+                        activateSquares++;
+                        break;
                 }
             }
 
         } catch (IOException e) {
             System.out.println("Error loading from file: " + e.getMessage());
         }
+
+        return activateSquares;
     }
 
 
@@ -181,8 +202,7 @@ public class Task4 {
 
                         break;
                     case 'l', 'L':
-                        task.load(world);
-                        squareNum = savedIndex;
+                        squareNum = task.load(world);
                     default:
                         break;
                 }
