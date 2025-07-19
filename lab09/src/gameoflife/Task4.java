@@ -6,7 +6,6 @@ import tileengine.TETile;
 import tileengine.Tileset;
 
 import java.awt.*;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -101,7 +100,7 @@ public class Task4 {
 
     public void load(TETile[][] world) {
         int currentIdx = 0;
-        try (BufferedReader reader = new BufferedReader(new FileReader("save.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/save.txt"))) {
             long seed = Long.parseLong(reader.readLine());
             rand = new Random(seed);
 
@@ -161,10 +160,14 @@ public class Task4 {
                         task.deleteLastSquare(world);
                         if (squareNum > 0) squareNum--;
                         break;
-                    case's', 'S': // Save the rand seed and input for loading
+                    case's', 'S':   // Save the rand seed and input for loading
+
+                        for (char ch : task.inputChars) {
+                            System.out.print(ch);
+                        }
                         try {
                             savedIndex = task.inputChars.size();
-                            FileWriter fw = new FileWriter("save.txt");
+                            FileWriter fw = new FileWriter("src/save.txt");
                             fw.write(seed + "\n");
                             for (char ch : task.inputChars) {
                                 fw.write(ch + "\t");
@@ -179,6 +182,7 @@ public class Task4 {
                         break;
                     case 'l', 'L':
                         task.load(world);
+                        squareNum = savedIndex;
                     default:
                         break;
                 }
