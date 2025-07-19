@@ -6,13 +6,25 @@ import tileengine.TETile;
 import tileengine.Tileset;
 
 import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.io.BufferedReader;
+
 
 public class Task4 {
     private static final int WIDTH = 30;
     private static final int HEIGHT = 20;
+
+    private static long seed = 726;
+    private Random rand = new Random(seed);
+
+    private static int savedIndex = 0;
+
     private LinkedList<SquareInfo> squareInfos = new LinkedList<>();
     private LinkedList<Character> inputChars = new LinkedList<>();
 
@@ -87,6 +99,27 @@ public class Task4 {
         }
     }
 
+    public void load(TETile[][] world) {
+        int currentIdx = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader("save.txt"))) {
+            long seed = Long.parseLong(reader.readLine());
+            rand = new Random(seed);
+
+            String[] commands = reader.readLine().split("\t");
+            for (String ch : commands) {
+
+                switch (ch) {
+                    case "n" -> addRandomSquare(world, rand);
+                    case "d" -> deleteLastSquare(world);
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error loading from file: " + e.getMessage());
+        }
+    }
+
+
     public static void main(String[] args) {
         Task4 task = new Task4();
 
@@ -101,7 +134,6 @@ public class Task4 {
         }
 
         fillWithTrees(world);
-        Random rand = new Random(20040726);
 
         ter.renderFrame(world);
 
@@ -119,7 +151,7 @@ public class Task4 {
 
                 switch (c) {
                     case 'n', 'N':
-                        task.addRandomSquare(world, rand);
+                        task.addRandomSquare(world, task.rand);
                         squareNum++;
                         break;
                     case 'q', 'Q':
@@ -127,8 +159,26 @@ public class Task4 {
                         break;
                     case 'd', 'D':
                         task.deleteLastSquare(world);
-                        squareNum--;
+                        if (squareNum > 0) squareNum--;
                         break;
+                    case's', 'S': // Save the rand seed and input for loading
+                        try {
+                            savedIndex = task.inputChars.size();
+                            FileWriter fw = new FileWriter("save.txt");
+                            fw.write(seed + "\n");
+                            for (char ch : task.inputChars) {
+                                fw.write(ch + "\t");
+                            }
+
+                            fw.close();
+                        } catch (IOException e) {
+                            System.out.println("No such file");
+                            throw new RuntimeException(e);
+                        }
+
+                        break;
+                    case 'l', 'L':
+                        task.load(world);
                     default:
                         break;
                 }
