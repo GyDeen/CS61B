@@ -98,7 +98,29 @@ public class Task4 {
         }
     }
 
-    public int load(TETile[][] world) {
+    // Save current picture to a file for reproducing
+    private void save() {
+        for (char ch : inputChars) {
+            System.out.print(ch);
+        }
+
+        try {
+            savedIndex = inputChars.size();
+            FileWriter fw = new FileWriter("src/save.txt");
+            fw.write(seed + "\n");
+            for (char ch : inputChars) {
+                fw.write(ch + "\t");
+            }
+
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("No such file");
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private int load(TETile[][] world) {
 
         // Clear the world first to make the exact same world as save
         for (int x = 0; x < WIDTH; x++) {
@@ -118,7 +140,7 @@ public class Task4 {
 
             String[] commands = reader.readLine().split("\t");
             for (String ch : commands) {
-                inputChars.add(ch.charAt(0));
+                System.out.println(ch + "\t");
 
                 switch (ch) {
                     case "n" :
@@ -127,7 +149,7 @@ public class Task4 {
                         break;
                     case "d" :
                         deleteLastSquare(world);
-                        activateSquares++;
+                        activateSquares--;
                         break;
                 }
             }
@@ -182,24 +204,7 @@ public class Task4 {
                         if (squareNum > 0) squareNum--;
                         break;
                     case's', 'S':   // Save the rand seed and input for loading
-
-                        for (char ch : task.inputChars) {
-                            System.out.print(ch);
-                        }
-                        try {
-                            savedIndex = task.inputChars.size();
-                            FileWriter fw = new FileWriter("src/save.txt");
-                            fw.write(seed + "\n");
-                            for (char ch : task.inputChars) {
-                                fw.write(ch + "\t");
-                            }
-
-                            fw.close();
-                        } catch (IOException e) {
-                            System.out.println("No such file");
-                            throw new RuntimeException(e);
-                        }
-
+                        task.save();
                         break;
                     case 'l', 'L':
                         squareNum = task.load(world);
