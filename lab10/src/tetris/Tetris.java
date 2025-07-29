@@ -136,6 +136,24 @@ public class Tetris {
         }
     }
 
+
+    /**
+     * Finding the top most row has block
+     * @param board
+     */
+    public int getTopmostOccupiedRow(TETile[][] board) {
+        // Find the first occupied row from top
+        for (int y = board[0].length - 1; y >= 0; y--) {
+            for (TETile[] teTiles : board) {
+                if (teTiles[y] != Tileset.NOTHING) {
+                    return y;
+                }
+            }
+        }
+        return -1;  // Board is completely empty
+    }
+
+
     /**
      * Clears lines/rows on the provided tiles/board that are horizontally filled.
      * Repeats this process for cascading effects and updates score accordingly.
@@ -146,12 +164,14 @@ public class Tetris {
         int linesCleared = 0;
         int rowHasChecked = 0;
         int[] rowToClear = new int[4];
+        Arrays.fill(rowToClear, -1);
 
-        for (int x = tiles.length - 1; x >= 0; x--) {
+        // Counting which rows need to be cleared and store it in descending order
+        for (int y = tiles[0].length - 1; y >= 0; y--) {
             if (rowHasChecked == 4) break;
 
             boolean currentRowIsFilled = true;
-            for (int y = tiles[0].length - 1; y >= 0; y--) {
+            for (int x = tiles.length - 1; x >= 0; x--) {
                 if (tiles[x][y] == Tileset.NOTHING) {
                     currentRowIsFilled = false;
                     break;
@@ -161,15 +181,40 @@ public class Tetris {
             // We find a filled row
             if (currentRowIsFilled) {
                 // Store the row that we need to clear
-                rowToClear[linesCleared] = x;
+                rowToClear[linesCleared] = y;
                 linesCleared++;
             }
 
             rowHasChecked++;
         }
 
+        // Now clear those rows
+        for (int i = 0; i < 4; i++) {
+            int row = rowToClear[i];
+            if (row == -1) break;
 
-        // TODO: Increment the score based on the number of lines cleared.
+            // Make sure we are shifting the correct row downwards
+            int adjustedRow = row - i;
+
+            for (int y = adjustedRow; y < HEIGHT - 1; y++) {
+                for (int x = 0; x < WIDTH; x++) {
+                    board[x][y] = board[x][y + 1];
+                }
+            }
+
+            // Clear the top row
+            for (int x = 0; x < WIDTH; x++) {
+                board[x][HEIGHT - 1] = Tileset.NOTHING;
+            }
+        }
+
+        // Clear the top most occupied row
+        int topmostOccupiedRow = getTopmostOccupiedRow(board);
+        for (int x = 0; x < WIDTH; x++) {
+            board[x][topmostOccupiedRow] = Tileset.NOTHING;
+        }
+
+        incrementScore(linesCleared);
 
         fillAux();
     }
