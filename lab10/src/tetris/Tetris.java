@@ -144,8 +144,30 @@ public class Tetris {
     public void clearLines(TETile[][] tiles) {
         // Keeps track of the current number lines cleared
         int linesCleared = 0;
+        int rowHasChecked = 0;
+        int[] rowToClear = new int[4];
 
-        // TODO: Check how many lines have been completed and clear it the rows if completed.
+        for (int x = tiles.length - 1; x >= 0; x--) {
+            if (rowHasChecked == 4) break;
+
+            boolean currentRowIsFilled = true;
+            for (int y = tiles[0].length - 1; y >= 0; y--) {
+                if (tiles[x][y] == Tileset.NOTHING) {
+                    currentRowIsFilled = false;
+                    break;
+                }
+            }
+
+            // We find a filled row
+            if (currentRowIsFilled) {
+                // Store the row that we need to clear
+                rowToClear[linesCleared] = x;
+                linesCleared++;
+            }
+
+            rowHasChecked++;
+        }
+
 
         // TODO: Increment the score based on the number of lines cleared.
 
@@ -159,7 +181,7 @@ public class Tetris {
     public void runGame() {
         resetActionTimer();
 
-        // TODO: Set up your game loop. The game should keep running until the game is over.
+
         // Use helper methods inside your game loop, according to the spec description.
 
 
