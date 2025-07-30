@@ -15,12 +15,26 @@ import java.util.Queue;
 import java.util.Random;
 
 public class World {
-    private static final int HEIGHT = 200;
-    private static final int WIDTH = 200;
-    private static final long seed = 726;
+    private static int WINDOW_HEIGHT = 1000;
+    private static int WINDOW_WIDTH = 1000;
+    private static long seed = 726;
     private static final Random RANDOM = new Random(seed);
 
-    private static void reedemWorld() {
+    public World() {}
+
+
+    /** Generate a world that based on input seed
+     * @param seed seed for random generator
+     */
+    public World(long seed) {
+        this.seed = seed;
+    }
+
+
+    /** Generate random room for the world
+     * @param world The world that the room will be in
+     */
+    public void generateRoom(TETile[][] world) {
 
     }
 }
