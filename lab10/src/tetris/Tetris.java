@@ -5,6 +5,7 @@ import tileengine.TETile;
 import tileengine.TERenderer;
 import tileengine.Tileset;
 
+import java.awt.*;
 import java.util.*;
 
 /**
@@ -90,22 +91,24 @@ public class Tetris {
             return;
         }
 
-        char input = StdDraw.nextKeyTyped();
-        switch (input) {
-            case 'a', 'A':
-                movement.tryMove(-1, 0);
-                break;
-            case 'd', 'D':
-                movement.tryMove(1, 0);
-                break;
-            case 's', 'S':
-                movement.tryMove(0, -1);
-                break;
-            case 'q', 'Q':
-                movement.rotate(Movement.Rotation.LEFT);
-                break;
-            case 'w', 'W':
-                movement.rotate(Movement.Rotation.RIGHT);
+        if (StdDraw.hasNextKeyTyped()) {
+            char input = StdDraw.nextKeyTyped();
+            switch (input) {
+                case 'a', 'A':
+                    movement.tryMove(-1, 0);
+                    break;
+                case 'd', 'D':
+                    movement.tryMove(1, 0);
+                    break;
+                case 's', 'S':
+                    movement.tryMove(0, -1);
+                    break;
+                case 'q', 'Q':
+                    movement.rotateLeft();
+                    break;
+                case 'w', 'W':
+                    movement.rotateRight();
+            }
         }
 
 
@@ -160,42 +163,33 @@ public class Tetris {
      * @param tiles
      */
     public void clearLines(TETile[][] tiles) {
-        // Keeps track of the current number lines cleared
         int linesCleared = 0;
-        int rowHasChecked = 0;
-        int[] rowToClear = new int[4];
+        int[] rowToClear = new int[HEIGHT];
         Arrays.fill(rowToClear, -1);
 
-        // Counting which rows need to be cleared and store it in descending order
-        for (int y = tiles[0].length - 1; y >= 0; y--) {
-            if (rowHasChecked == 4) break;
-
-            boolean currentRowIsFilled = true;
-            for (int x = tiles.length - 1; x >= 0; x--) {
-                if (tiles[x][y] == Tileset.NOTHING) {
-                    currentRowIsFilled = false;
+        // Find all the row that need to clear
+        for (int y = HEIGHT - 1; y >= 0; y--) {
+            boolean rowFilled = true;
+            for (int x = 0; x < WIDTH; x++) {
+                if (board[x][y] == Tileset.NOTHING) {
+                    rowFilled = false;
                     break;
                 }
             }
 
-            // We find a filled row
-            if (currentRowIsFilled) {
-                // Store the row that we need to clear
+            if (rowFilled) {
                 rowToClear[linesCleared] = y;
                 linesCleared++;
             }
-
-            rowHasChecked++;
         }
 
-        // Now clear those rows
-        for (int i = 0; i < 4; i++) {
-            int row = rowToClear[i];
-            if (row == -1) break;
+        Arrays.sort(rowToClear, 0, linesCleared);
 
-            // Make sure we are shifting the correct row downwards
+        for (int i = 0; i < linesCleared; i++) {
+            int row = rowToClear[i];
             int adjustedRow = row - i;
 
+            // Shift all rows above down by one
             for (int y = adjustedRow; y < HEIGHT - 1; y++) {
                 for (int x = 0; x < WIDTH; x++) {
                     board[x][y] = board[x][y + 1];
@@ -208,16 +202,20 @@ public class Tetris {
             }
         }
 
-        // Clear the top most occupied row
-        int topmostOccupiedRow = getTopmostOccupiedRow(board);
-        for (int x = 0; x < WIDTH; x++) {
-            board[x][topmostOccupiedRow] = Tileset.NOTHING;
+        if (linesCleared > 0) {
+            int topmostOccupiedRow = getTopmostOccupiedRow(board);
+            if (topmostOccupiedRow != -1) {
+                for (int x = 0; x < WIDTH; x++) {
+                    board[x][topmostOccupiedRow] = Tileset.NOTHING;
+                }
+            }
         }
 
-        incrementScore(linesCleared);
 
+        incrementScore(linesCleared);
         fillAux();
     }
+
 
     /**
      * Where the game logic takes place. The game should continue as long as the game isn't
@@ -225,10 +223,22 @@ public class Tetris {
      */
     public void runGame() {
         resetActionTimer();
+        renderBoard();
 
+        spawnPiece();
+        while (!isGameOver) {
+            // If current piece cannot fall down anymore, spawn new piece
+            if (currentTetromino == null) {
+                clearLines(board);
+                spawnPiece();
+                renderBoard();
+            }
 
-        // Use helper methods inside your game loop, according to the spec description.
-
+            // If we spawn a new piece and game is over, exit
+            if (isGameOver) System.exit(0);
+            updateBoard();
+            renderBoard();
+        }
 
     }
 
@@ -236,8 +246,9 @@ public class Tetris {
      * Renders the score using the StdDraw library.
      */
     private void renderScore() {
-        // TODO: Use the StdDraw library to draw out the score.
-
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.textLeft(1, 17, "Score: " + score);
+        StdDraw.show();
     }
 
     /**
