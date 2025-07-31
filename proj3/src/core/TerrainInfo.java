@@ -3,8 +3,8 @@ package core;
 import java.awt.*;
 
 public abstract class TerrainInfo {
-    private int height;
-    private int width;
+    private final int height;
+    private final int width;
     private Point location;
 
 
@@ -21,5 +21,21 @@ public abstract class TerrainInfo {
         this.location = location;
     }
 
+    /** Return the height of the Terrain */
+    public int getHeight() {
+        return height;
+    }
+
+
+    /** Return the width of the Terrain */
+    public int getWidth() {
+        return width;
+    }
+
+
+    /** Return a copy of the location. The location represent the central point */
+    public Point getLocation() {
+        return new Point(location);
+    }
 
 }

@@ -5,20 +5,19 @@ import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
 
+
+
 public class World {
-    private static int WINDOW_HEIGHT = 1000;
-    private static int WINDOW_WIDTH = 1000;
+    private static final int WINDOW_HEIGHT = 1000;
+    private static final int WINDOW_WIDTH = 1000;
+    private static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
+
     private static long seed = 726;
     private static final Random RANDOM = new Random(seed);
+    public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
+
 
     public World() {}
 
@@ -35,6 +34,20 @@ public class World {
      * @param world The world that the room will be in
      */
     public void generateRoom(TETile[][] world) {
+
+    }
+
+
+    /** */
+    public void renderWorld() {
+        TERenderer ter = new TERenderer();
+        ter.initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        for (int x = 0; x < WINDOW_WIDTH; x++) {
+            for (int y = 0; y < WORLD_HEIGHT; y++) {
+                world[x][y] = Tileset.NOTHING;
+            }
+        }
 
     }
 }
