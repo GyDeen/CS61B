@@ -14,8 +14,18 @@ public class World {
     public static final int WINDOW_HEIGHT = 60;
     public static final int WINDOW_WIDTH = 40;
     public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
+
     private static final int BLOCK_WIDTH1 = 1;
     private static final int BLOCK_WIDTH2 = 2;
+    // Could self define the ratio of thickness of wall
+    private static final double WALL_THICKNESS_1_PROBABILITY = 0.75;
+
+    private static final int MIN_ROOM_WIDTH = 4;
+
+    // Could self define teh ratio of Floor type of room
+    private static final double ROOM_FLOOR_POSS = 0.5;
+
+
     private static final int MIN_ROOM_NUM = 6;
 
     private static long seed = 726;
@@ -43,20 +53,17 @@ public class World {
 
 
     /** Generate a random room for the world. Randomly generate information such as size, location,
-     * the thickness of the "wall" of the room, whether it has corner.
+     * the thickness of the "wall" of the room, whether it has corner. It will stop generate when it has more than
+     * minimum number of room and fails to many times to generate new rooms
      */
     public void generateRooms() {
         int failAttempt = 0, failLimit = 400;
-        while (rooms.size() < roomNum && failAttempt < failLimit) {
-            int width = RandomUtils.uniform(random, 4, 10);
-            int height = RandomUtils.uniform(random, 4, 8);
+        while (rooms.size() < roomNum && (failAttempt < failLimit && rooms.size() < MIN_ROOM_NUM)) {
+            int width = RandomUtils.uniform(random, MIN_ROOM_WIDTH, 10);
+            int height = RandomUtils.uniform(random, MIN_ROOM_WIDTH, 8);
             int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
             int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
-
-
-            // If the width of the wall is less or equal to 3, it can't have wall thickness of 2
-            int wallThickness = (width <= 3) ? BLOCK_WIDTH1 :
-                    (random.nextInt(2) == 0 ? BLOCK_WIDTH1 : BLOCK_WIDTH2);
+            int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
 
             // Check validation of the room
             if (!Room.validRoom(x, y, width, height, wallThickness, rooms)) {
@@ -72,26 +79,44 @@ public class World {
             }
 
             // Generate the floor type and wall type
-            TileType floorType = getRandomPassable(), wallType = getRandomImpassable();
+            TileType floorType = getRandomPassable(), wallType = getRandomImpassable(floorType);
 
         }
     }
 
-    /* Helper function that return random picked tile type for room floor */
+    /* Helper function that return random picked tile type for room floor. FLOOR type is more likely to present */
     private static TileType getRandomPassable() {
-        TileType[] values = TileType.values();
-        while (true) {
-            TileType t = values[random.nextInt(values.length)];
-            if (t.passable) return t;
+        if (random.nextDouble() < ROOM_FLOOR_POSS) {
+            return TileType.FLOOR;
         }
+
+        // Else choose from other passable types (excluding FLOOR)
+        TileType[] values = TileType.values();
+        ArrayList<TileType> others = new ArrayList<>();
+        for (TileType t : values) {
+            if (t.passable && t != TileType.FLOOR) {
+                others.add(t);
+            }
+        }
+
+        return others.get(random.nextInt(others.size()));
     }
 
-    /* Helper function that return random picked tile type for room wall */
-    private static TileType getRandomImpassable() {
-        TileType[] values = TileType.values();
-        while (true) {
-            TileType t = values[random.nextInt(values.length)];
-            if (!t.passable) return t;
+    /* Helper function that return random picked tile type for room wall. WALL type has higher probability. If the
+    * Floor type is natural, mountain has higher chance */
+    private static TileType getRandomImpassable(TileType floorType) {
+        // Natural floors boost MOUNTAIN chance
+        boolean isNatural = floorType == TileType.FLOWER
+                || floorType == TileType.TREE
+                || floorType == TileType.GRASS;
+
+        double mountainChance = isNatural ? 0.6 : 0.3;
+        double roll = random.nextDouble();
+
+        if (roll < mountainChance) {
+            return TileType.MOUNTAIN;
+        } else {
+            return TileType.WALL;
         }
     }
 
