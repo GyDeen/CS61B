@@ -2,6 +2,7 @@ package core;
 
 import java.awt.*;
 
+
 public abstract class TerrainInfo {
     private final int height;
     private final int width;
@@ -37,5 +38,11 @@ public abstract class TerrainInfo {
     public Point getLocation() {
         return new Point(location);
     }
+
+
+    public static boolean withinBounds(int x, int y, int width, int height) {
+        return x > 0 && y > 0 && x + width < World.WINDOW_WIDTH && y + height < World.WORLD_HEIGHT;
+    }
+
 
 }
