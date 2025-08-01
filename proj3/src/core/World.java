@@ -1,44 +1,91 @@
 package core;
 
-import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
+import utils.RandomUtils;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 
 
 public class World {
-    private static final int WINDOW_HEIGHT = 1000;
-    private static final int WINDOW_WIDTH = 1000;
+    private static final int WINDOW_HEIGHT = 60;
+    private static final int WINDOW_WIDTH = 40;
     private static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
+    private int BLOCK_WIDTH1 = 1;
+    private int BLOCK_WIDTH2 = 2;
 
     private static long seed = 726;
-    private static final Random RANDOM = new Random(seed);
+    private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
+    private int roomNum;
+    private ArrayList<Room> rooms = new ArrayList<>();
 
-    public World() {}
+
+    /** Using the default seed to generate the world */
+    public World() {
+        roomNum = RandomUtils.uniform(random, 8, 17);
+    }
 
 
     /** Generate a world that based on input seed
      * @param seed seed for random generator
      */
     public World(long seed) {
-        this.seed = seed;
+        World.seed = seed;
+        random = new Random(seed);
+        roomNum = RandomUtils.uniform(random, 8, 17);
     }
 
 
-    /** Generate random room for the world
-     * @param world The world that the room will be in
+    /** Generate a random room for the world. Randomly generate information such as size, location,
+     * the thickness of the "wall" of the room, whether it has corner.
      */
-    public void generateRoom(TETile[][] world) {
+    public void generateRooms() {
+        while (rooms.size() < roomNum) {
+            int width = RandomUtils.uniform(random, 4, 10);
+            int height = RandomUtils.uniform(random, 4, 8);
+            int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
+            int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
 
+
+            // If the width of the wall is less or equal to 3, it can't have wall thickness of 2
+            int wallThickness = (width <= 3) ? 1 :
+                    (random.nextInt(2) == 0 ? 1 : 2);
+
+            // room without corner is rare
+            boolean isCornered = true;
+            int cornerRoll = random.nextInt(100);
+            if (cornerRoll % 7 == 0 || cornerRoll % 13 == 0 || cornerRoll % 4 == 0) {
+                isCornered = false;
+            }
+
+        }
+    }
+
+    /* Helper function that return random picked tile type for room floor */
+    private static TileType getRandomPassable() {
+        TileType[] values = TileType.values();
+        while (true) {
+            TileType t = values[random.nextInt(values.length)];
+            if (t.passable) return t;
+        }
+    }
+
+    /* Helper function that return random picked tile type for room wall */
+    private static TileType getRandomImpassable() {
+        TileType[] values = TileType.values();
+        while (true) {
+            TileType t = values[random.nextInt(values.length)];
+            if (!t.passable) return t;
+        }
     }
 
 
-    /** */
+    /** Draw the world and generate the whole picture of the world */
     public void renderWorld() {
         TERenderer ter = new TERenderer();
         ter.initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -48,6 +95,8 @@ public class World {
                 world[x][y] = Tileset.NOTHING;
             }
         }
+
+
 
     }
 }
