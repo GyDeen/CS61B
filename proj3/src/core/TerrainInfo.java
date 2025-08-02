@@ -40,8 +40,9 @@ public abstract class TerrainInfo {
     }
 
 
+    /** Check whether generated terrain will not exceed the window */
     public static boolean withinBounds(int x, int y, int width, int height) {
-        return x > 0 && y > 0 && x + width < World.WINDOW_WIDTH && y + height < World.WORLD_HEIGHT;
+        return x - width / 2 > 0 && y - width / 2 > 0 && x + width / 2 < World.WINDOW_WIDTH && y + height / 2 < World.WORLD_HEIGHT;
     }
 
 
