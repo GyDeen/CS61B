@@ -24,18 +24,18 @@ public enum TileType {
     }
 
     public TETile toTETile() {
-        switch (this) {
-            case FLOOR: return Tileset.FLOOR;
-            case UNLOCKED_DOOR: return Tileset.UNLOCKED_DOOR;
-            case GRASS: return Tileset.GRASS;
-            case FLOWER: return Tileset.FLOWER;
-            case SAND: return Tileset.SAND;
-            case TREE: return Tileset.TREE;
-            case WATER: return Tileset.WATER;
-            case MOUNTAIN: return Tileset.MOUNTAIN;
-            case LOCKED_DOOR: return Tileset.LOCKED_DOOR;
-            case WALL: return Tileset.WALL;
-            default: throw new IllegalArgumentException("Unrecognized tile type: " + this);
-        }
+        return switch (this) {
+            case FLOOR -> Tileset.FLOOR;
+            case UNLOCKED_DOOR -> Tileset.UNLOCKED_DOOR;
+            case GRASS -> Tileset.GRASS;
+            case FLOWER -> Tileset.FLOWER;
+            case SAND -> Tileset.SAND;
+            case TREE -> Tileset.TREE;
+            case WATER -> Tileset.WATER;
+            case MOUNTAIN -> Tileset.MOUNTAIN;
+            case LOCKED_DOOR -> Tileset.LOCKED_DOOR;
+            case WALL -> Tileset.WALL;
+            default -> throw new IllegalArgumentException("Unrecognized tile type: " + this);
+        };
     }
 }

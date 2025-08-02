@@ -11,24 +11,24 @@ import java.util.Random;
 
 
 public class World {
-    public static final int WINDOW_HEIGHT = 120;
-    public static final int WINDOW_WIDTH = 100;
+    public static final int WINDOW_HEIGHT = 50;
+    public static final int WINDOW_WIDTH = 70;
     public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
 
     private static final int BLOCK_WIDTH1 = 1;
     private static final int BLOCK_WIDTH2 = 2;
     // Could self define the ratio of thickness of wall
-    private static final double WALL_THICKNESS_1_PROBABILITY = 0.75;
+    private static final double WALL_THICKNESS_1_PROBABILITY = 0.9;
 
-    private static final int MIN_ROOM_WIDTH = 4;
+    private static final int MIN_ROOM_WIDTH = 13;
 
     // Could self define teh ratio of Floor type of room
     private static final double ROOM_FLOOR_POSS = 0.5;
 
 
-    private static final int MIN_ROOM_NUM = 10;
+    private static final int MIN_ROOM_NUM = 4;
 
-    private static long seed = 726;
+    private static long seed = 2024726;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -38,7 +38,7 @@ public class World {
 
     /** Using the default seed to generate the world */
     public World() {
-        roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM + 2, 20);
+        roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM + 2, 9);
     }
 
 
@@ -48,7 +48,7 @@ public class World {
     public World(long seed) {
         World.seed = seed;
         random = new Random(seed);
-        roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM + 2, 17);
+        roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM + 2, 9);
     }
 
 
@@ -73,8 +73,8 @@ public class World {
 
     /* Generate random room, return true if generate a valid room, false otherwise */
     private boolean generateRoom() {
-        int width = RandomUtils.uniform(random, MIN_ROOM_WIDTH, 10);
-        int height = RandomUtils.uniform(random, MIN_ROOM_WIDTH, 8);
+        int width = RandomUtils.uniform(random, MIN_ROOM_WIDTH, 20);
+        int height = RandomUtils.uniform(random, MIN_ROOM_WIDTH, 19);
         int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
         int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
         int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
@@ -146,6 +146,11 @@ public class World {
         }
 
         generateRooms();
+        for (Room room : rooms) {
+            room.allocateRoom(world);
+        }
+
+        ter.renderFrame(world);
 
     }
 }
