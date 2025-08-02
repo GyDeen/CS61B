@@ -5,7 +5,9 @@ import tileengine.TETile;
 import tileengine.Tileset;
 import utils.RandomUtils;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 
@@ -26,7 +28,7 @@ public class World {
     private static final double ROOM_FLOOR_POSS = 0.5;
 
 
-    private static final int MIN_ROOM_NUM = 4;
+    private static final int MIN_ROOM_NUM = 5;
 
     private static long seed = 2024726;
     private static Random random = new Random(seed);
@@ -57,15 +59,40 @@ public class World {
      * minimum number of room and fails to many times to generate new rooms
      */
     public void generateRooms() {
-        int failAttempt = 0, failLimit = 400;
-        while (failAttempt < failLimit && rooms.size() < roomNum) {
-            if (!generateRoom()) {
-                failAttempt++;
+        int rows = 3;
+        int cols = 3;
+        int cellWidth = WINDOW_WIDTH / cols;
+        int cellHeight = WORLD_HEIGHT / rows;
+
+        // Make a list of all cells
+        ArrayList<Point> cells = new ArrayList<>();
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < rows; j++) {
+                cells.add(new Point(i * cellWidth, j * cellHeight));
             }
         }
-        while (rooms.size() < MIN_ROOM_NUM) {
-            if (!generateRoom()) {
-                failAttempt++;
+
+        // Shuffle to ensure random order of selection
+        Collections.shuffle(cells, random);
+
+        int roomsToPlace = RandomUtils.uniform(random, MIN_ROOM_NUM, cells.size() + 1);
+        int placed = 0;
+
+        for (Point cell : cells) {
+            if (placed >= roomsToPlace) break;
+            if (generateRoomInCell(cell.x, cell.y, cellWidth, cellHeight)) {
+                placed++;
+            }
+        }
+
+        // Retry with new random cells if under MIN_ROOM_NUM
+        int retryLimit = 50;
+        int retries = 0;
+        while (rooms.size() < MIN_ROOM_NUM && retries++ < retryLimit) {
+            Collections.shuffle(cells, random);
+            for (Point cell : cells) {
+                if (rooms.size() >= MIN_ROOM_NUM) break;
+                generateRoomInCell(cell.x, cell.y, cellWidth, cellHeight);
             }
         }
     }
@@ -95,6 +122,44 @@ public class World {
         rooms.add(new Room(height, width, x, y, wallThickness, isCornered, floorType, wallType));
         return true;
     }
+
+
+
+    /* Generate location of cell(bucket) to make the distribution of room more uniform */
+    private boolean generateRoomInCell(int cellX, int cellY, int cellWidth, int cellHeight) {
+        int maxAttempts = 10;
+
+        for (int i = 0; i < maxAttempts; i++) {
+
+            // Make the room be able to be square or not square rectangle
+            int width, height;
+            do {
+                width = RandomUtils.uniform(random, 14, 24);
+                height = RandomUtils.uniform(random, 14, 24);
+            } while (random.nextDouble(0,1) < 0.7 && Math.abs(width - height) < 3);
+
+            // Make the room not exactly the central of the cell
+            int maxX = cellX + cellWidth - width - 1;
+            int maxY = cellY + cellHeight - height - 1;
+
+            int x = RandomUtils.uniform(random, cellX + 1, maxX);
+            int y = RandomUtils.uniform(random, cellY + 1, maxY);
+
+            if (!Room.validRoom(x, y, width, height, rooms)) continue;
+
+            // Randomize the room's floor type, wall type and wall thickness
+            TileType floorType = getRandomPassable(), wallType = getRandomImpassable(floorType);
+            boolean isCornered = random.nextInt(100) % 4 != 0;
+            int wallThickness = (random.nextDouble(0,1) < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
+
+            rooms.add(new Room(height, width, x, y, wallThickness, isCornered, floorType, wallType));
+            return true;
+        }
+
+        // Cannot generate a valid room
+        return false;
+    }
+
 
     /* Helper function that return random picked tile type for room floor. FLOOR type is more likely to present */
     private static TileType getRandomPassable() {
