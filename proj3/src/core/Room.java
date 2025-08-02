@@ -1,5 +1,7 @@
 package core;
 
+import tileengine.TETile;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -7,12 +9,15 @@ public class Room extends TerrainInfo{
     private TileType floorType;
     private TileType wallType;
     private boolean isCornered;
+    private int thicknessOfWall;
+
     private static int BUFFER = 2;
 
 
-    public Room(int height, int width, Point location, boolean isCornered, TileType floorType, TileType wallType) {
+    public Room(int height, int width, Point location, int thicknessOfWall, boolean isCornered, TileType floorType, TileType wallType) {
         super(height, width, location);
 
+        this.thicknessOfWall = thicknessOfWall;
         this.floorType = floorType;
         this.wallType = wallType;
         this.isCornered = isCornered;
@@ -20,9 +25,10 @@ public class Room extends TerrainInfo{
 
 
 
-    public Room(int height, int width, int x, int y, boolean isCornered, TileType floorType, TileType wallType) {
+    public Room(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, TileType floorType, TileType wallType) {
         super(height, width, x, y);
 
+        this.thicknessOfWall = thicknessOfWall;
         this.floorType = floorType;
         this.wallType = wallType;
         this.isCornered = isCornered;
@@ -31,8 +37,39 @@ public class Room extends TerrainInfo{
 
 
     /** Render the room */
-    public void renderRoom() {
+    public void renderRoom(TETile[][] world) {
+        int startX = getLocation().x - getWidth() / 2;
+        int startY = getLocation().y - getHeight() / 2;
+        int endX = startX + getWidth();
+        int endY = startY + getHeight();
 
+        for (int i = startX; i < endX; i++) {
+            for (int j = startY; j < endY; j++) {
+                if (thicknessOfWall == 2) {
+                    if (!isCornered && isCornerArea(i, j, startX, startY, endX, endY, 2)) {
+                        continue;
+                    }
+
+                    boolean isWall =
+                            i < startX + thicknessOfWall || i >= endX - thicknessOfWall ||
+                                    j < startY + thicknessOfWall || j >= endY - thicknessOfWall;
+                }
+            }
+        }
+    }
+
+
+    /* Return true if the given position is a corner */
+    private boolean isCornerArea(int x, int y, int startX, int startY, int endX, int endY, int t) {
+        boolean inLeft = x < startX + t;
+        boolean inRight = x >= endX - t;
+        boolean inBottom = y < startY + t;
+        boolean inTop = y >= endY - t;
+
+        return (inLeft && inBottom)  ||
+                (inRight && inBottom) ||
+                (inLeft && inTop)     ||
+                (inRight && inTop);
     }
 
 

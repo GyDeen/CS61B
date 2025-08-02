@@ -92,7 +92,7 @@ public class World {
         TileType floorType = getRandomPassable();
         TileType wallType = getRandomImpassable(floorType);
 
-        rooms.add(new Room(height, width, x, y, isCornered, floorType, wallType));
+        rooms.add(new Room(height, width, x, y, wallThickness, isCornered, floorType, wallType));
         return true;
     }
 
