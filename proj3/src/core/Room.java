@@ -36,7 +36,9 @@ public class Room extends TerrainInfo{
 
 
 
-    /** Render the room */
+    /** Render the room based on the information stored. The out-most floor will always be FLOOR type, while the other
+     * floor will be the floor type it stored
+     * @param world the world that the room will be presented */
     public void renderRoom(TETile[][] world) {
         int startX = getLocation().x - getWidth() / 2;
         int startY = getLocation().y - getHeight() / 2;
@@ -45,18 +47,26 @@ public class Room extends TerrainInfo{
 
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
-                if (thicknessOfWall == 2) {
-                    if (!isCornered && isCornerArea(i, j, startX, startY, endX, endY, 2)) {
-                        continue;
-                    }
+                // If it don't have corner, skip the corner tiles
+                if (!isCornered && isCornerArea(i, j, startX, startY, endX, endY, thicknessOfWall)) continue;
 
-                    boolean isWall =
-                            i < startX + thicknessOfWall || i >= endX - thicknessOfWall ||
-                                    j < startY + thicknessOfWall || j >= endY - thicknessOfWall;
+                // Wall zone
+                if (i < startX + thicknessOfWall || i >= endX - thicknessOfWall || j < startY + thicknessOfWall || j >= endY - thicknessOfWall) {
+                    world[i][j] = wallType.toTETile();
                 }
+                // Outermost floor layer inside the wall
+                else if (i < startX + thicknessOfWall + 1 || i >= endX - thicknessOfWall - 1 || j < startY + thicknessOfWall + 1 || j >= endY - thicknessOfWall - 1) {
+                    world[i][j] = TileType.FLOOR.toTETile();
+                }
+                // Inner floor
+                else {
+                    world[i][j] = floorType.toTETile();
+                }
+
             }
         }
     }
+
 
 
     /* Return true if the given position is a corner */
