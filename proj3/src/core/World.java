@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class World {
     public static final int WINDOW_HEIGHT = 50;
-    public static final int WINDOW_WIDTH = 70;
+    public static final int WINDOW_WIDTH = 90;
     public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
 
     private static final int BLOCK_WIDTH1 = 1;
@@ -125,25 +125,27 @@ public class World {
 
 
 
-    /* Generate location of cell(bucket) to make the distribution of room more uniform */
+    /* Generate location of cell(bucket) to make the distribution of room more uniform. Return true if successfully
+    *  generate a room else false */
     private boolean generateRoomInCell(int cellX, int cellY, int cellWidth, int cellHeight) {
         int maxAttempts = 10;
 
         for (int i = 0; i < maxAttempts; i++) {
+            int maxRoomHeight = cellHeight - 1;
+
+            if (maxRoomHeight < 10) return false;
+
 
             // Make the room be able to be square or not square rectangle
-            int width, height;
-            do {
-                width = RandomUtils.uniform(random, 14, 24);
-                height = RandomUtils.uniform(random, 14, 24);
-            } while (random.nextDouble(0,1) < 0.7 && Math.abs(width - height) < 3);
+            int width = RandomUtils.uniform(random, 25, 35);
+            int height = RandomUtils.uniform(random, 10, maxRoomHeight + 1);
 
             // Make the room not exactly the central of the cell
             int maxX = cellX + cellWidth - width - 1;
             int maxY = cellY + cellHeight - height - 1;
 
-            int x = RandomUtils.uniform(random, cellX + 1, maxX);
-            int y = RandomUtils.uniform(random, cellY + 1, maxY);
+            int x = RandomUtils.uniform(random, maxX, cellX + 1);
+            int y = RandomUtils.uniform(random, cellY + 1,  maxY);
 
             if (!Room.validRoom(x, y, width, height, rooms)) continue;
 
