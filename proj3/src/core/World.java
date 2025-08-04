@@ -105,32 +105,39 @@ public class World {
     /** Method that generate the room purely randomly, not using cells */
     public void generateWithoutCell() {
         int roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM, MAX_ROOM_NUM + 1);
-        int maxAttempt = 50, currentAttempt = 0;
+        int maxAttempt = 100, currentAttempt = 0;
         while (currentAttempt < maxAttempt && rooms.size() < roomNum) {
-            generateRoom(roomNum);
-            currentAttempt++;
-        }
+            if (generateRoom(roomNum)) {
+                continue;
+            } else {
+                currentAttempt++;
+                System.out.println("Fail to generate room " + currentAttempt + "th");
+            }
 
-        while (rooms.size() < MIN_ROOM_NUM) generateRoom(roomNum);
+
+            while (rooms.size() < MIN_ROOM_NUM) generateRoom(roomNum);
+        }
     }
 
 
-    /* Generate random room, return true if generate a valid room, false otherwise */
+    /* Generate random room, return true if generate a valid room, false otherwise. */
     private boolean generateRoom(int roomCount) {
         double targetArea = WINDOW_WIDTH * WORLD_HEIGHT * 0.5;
         int idealRoomArea = (int) (targetArea / roomCount);
 
         // Randomly favor rectangular rooms (not perfect square)
         int width, height;
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 50; i++) {
             // Randomize width/height ratio slightly
             double aspectRatio = random.nextDouble(0.8, 1.3);
             width = (int) Math.sqrt(idealRoomArea * aspectRatio);
             height = (int) (idealRoomArea / (double) width);
 
+            // Apply some randomness to make the shape of room has more diversity
             width += RandomUtils.uniform(random, -2, 3);
             height += RandomUtils.uniform(random, -2, 3);
 
+            // Make the width and height of the room fit in the requirement
             width = clamp(width, MIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
             height = clamp(height, MIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
 
@@ -242,7 +249,8 @@ public class World {
             }
         }
 
-        generateRoomsUsingCells();
+        generateWithoutCell();
+        System.out.println("Current room number is: " + rooms.size());
         for (Room room : rooms) {
             room.allocateRoom(world);
         }
