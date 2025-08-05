@@ -191,7 +191,7 @@ public class Room extends TerrainInfo{
 
     /** Return a room based on input ideal size.
      * @param idealSize The ideal size of the room */
-    public static Room generateRoom(int idealSize, Random random) {
+    public static Room generateRoom(int idealSize, Random random, Room baseRoom, int direction) {
         double aspectRatio = random.nextDouble(0.8, 1.3);
         int width = (int) Math.sqrt(idealSize * aspectRatio);
         int height = (int) (idealSize / (double) width);
@@ -200,22 +200,16 @@ public class Room extends TerrainInfo{
         width += RandomUtils.uniform(random, -2, 3);
         height += RandomUtils.uniform(random, -2, 3);
 
-        // Make the width and height of the room fit in the requirement
-        width = clamp(width, MIN_MAIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
-        height = clamp(height, MIN_MAIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
+        if (baseRoom == null) {
+            width = clamp(width, MIN_MAIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
+            height = clamp(height, MIN_MAIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
+        } else {
+            width = clamp(width, MIN_SUB_ROOM_WIDTH, MAX_SUB_ROOM_WIDTH);
+            height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
+        }
 
-        int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
-        int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
 
-        int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
 
-        boolean isCornered = random.nextInt(100) % 4 != 0;
-
-        Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
-        newRoom.getRandomPassable(random);
-        newRoom.getRandomImpassable(random);
-
-        return newRoom;
     }
 
 
