@@ -10,25 +10,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import static core.Config.*;
 import static java.lang.Math.clamp;
 
 
 public class World {
-    public static final int WINDOW_HEIGHT = 50;
-    public static final int WINDOW_WIDTH = 90;
-    public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
-
-    private static final int BLOCK_WIDTH1 = 1;
-    private static final int BLOCK_WIDTH2 = 2;
-    // Could self define the ratio of thickness of wall
-    private static final double WALL_THICKNESS_1_PROBABILITY = 0.9;
-
-    private static final int MIN_ROOM_WIDTH = 13;
-
-
-    private static final int MIN_ROOM_NUM = 3;
-    private static final int MAX_ROOM_NUM = 5;
-
     private static long seed = 2024726;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
@@ -39,7 +25,7 @@ public class World {
 
     /** Using the default seed to generate the world */
     public World() {
-        roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM + 2, 9);
+        roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM + 2, 9);
     }
 
 
@@ -49,7 +35,7 @@ public class World {
     public World(long seed) {
         World.seed = seed;
         random = new Random(seed);
-        roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM + 2, 9);
+        roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM + 2, 9);
     }
 
 
@@ -76,7 +62,7 @@ public class World {
         // Shuffle to ensure random order of selection
         Collections.shuffle(cells, random);
 
-        int roomsToPlace = RandomUtils.uniform(random, MIN_ROOM_NUM, cells.size() + 1);
+        int roomsToPlace = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, cells.size() + 1);
         int placed = 0;
 
         for (Point cell : cells) {
@@ -89,10 +75,10 @@ public class World {
         // Retry with new random cells if under MIN_ROOM_NUM
         int retryLimit = 50;
         int retries = 0;
-        while (rooms.size() < MIN_ROOM_NUM && retries++ < retryLimit) {
+        while (rooms.size() < MIN_MAIN_ROOM_NUM && retries++ < retryLimit) {
             Collections.shuffle(cells, random);
             for (Point cell : cells) {
-                if (rooms.size() >= MIN_ROOM_NUM) break;
+                if (rooms.size() >= MIN_MAIN_ROOM_NUM) break;
                 generateRoomInCell(cell.x, cell.y, cellWidth, cellHeight);
             }
         }
@@ -101,7 +87,7 @@ public class World {
 
     /** Method that generate the room purely randomly, not using cells */
     public void generateWithoutCell() {
-        int roomNum = RandomUtils.uniform(random, MIN_ROOM_NUM, MAX_ROOM_NUM + 1);
+        int roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, MAX_MAIN_ROOM_NUM + 1);
         int maxAttempt = 100, currentAttempt = 0;
         while (currentAttempt < maxAttempt && rooms.size() < roomNum) {
             if (generateRoom(roomNum)) {
@@ -112,7 +98,7 @@ public class World {
             }
 
 
-            while (rooms.size() < MIN_ROOM_NUM) generateRoom(roomNum);
+            while (rooms.size() < MIN_MAIN_ROOM_NUM) generateRoom(roomNum);
         }
     }
 
@@ -122,36 +108,9 @@ public class World {
         double targetArea = WINDOW_WIDTH * WORLD_HEIGHT * 0.5;
         int idealRoomArea = (int) (targetArea / roomCount);
 
-        // Randomly generate rectangular room
-        int width, height;
         for (int i = 0; i < 50; i++) {
-            // Randomize width/height ratio
-            double aspectRatio = random.nextDouble(0.8, 1.3);
-            width = (int) Math.sqrt(idealRoomArea * aspectRatio);
-            height = (int) (idealRoomArea / (double) width);
 
-            // Apply some randomness to make the shape of room has more diversity
-            width += RandomUtils.uniform(random, -2, 3);
-            height += RandomUtils.uniform(random, -2, 3);
 
-            // Make the width and height of the room fit in the requirement
-            width = clamp(width, MIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
-            height = clamp(height, MIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
-
-            int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
-            int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
-
-            int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
-
-            if (!Room.validRoom(x, y, width, height, rooms)) continue;
-
-            boolean isCornered = random.nextInt(100) % 4 != 0;
-
-            Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
-            newRoom.getRandomPassable(random);
-            newRoom.getRandomImpassable(random);
-
-            rooms.add(newRoom);
             return true;
         }
 
