@@ -4,17 +4,22 @@ import tileengine.TETile;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Room extends TerrainInfo{
+    // Could self define teh ratio of Floor type of room
+    private static final double ROOM_FLOOR_POSS = 0.5;
+
     private TileType floorType;
     private TileType wallType;
     private boolean isCornered;
     private int thicknessOfWall;
 
     private static int BUFFER = 2;
+    private ArrayList<Room> subRoom;
 
 
-    public Room(int height, int width, Point location, int thicknessOfWall, boolean isCornered, TileType floorType, TileType wallType) {
+    public Room(int height, int width, Point location, int thicknessOfWall, boolean isCornered) {
         super(height, width, location);
 
         this.thicknessOfWall = thicknessOfWall;
@@ -25,7 +30,7 @@ public class Room extends TerrainInfo{
 
 
 
-    public Room(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, TileType floorType, TileType wallType) {
+    public Room(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
         super(height, width, x, y);
 
         this.thicknessOfWall = thicknessOfWall;
@@ -164,5 +169,50 @@ public class Room extends TerrainInfo{
                 b.getHeight()
         );
         return boxA.intersects(boxB);
+    }
+
+
+    /** This method will generate subroom for a Main room. The size of the subroom will be around 5 * 5 to 8 * 8 */
+    public void generateSubroom(Random random) {
+        int subRoomNum = random.nextInt(3);
+    }
+
+
+
+    /** Return random picked tile type for room wall. WALL type has higher probability. If the
+     * Floor type is natural, mountain has higher chance */
+    public void getRandomImpassable(Random random, TileType floorType) {
+        // Natural floors boost MOUNTAIN chance
+        boolean isNatural = floorType == TileType.FLOWER
+                || floorType == TileType.TREE
+                || floorType == TileType.GRASS;
+
+        double mountainChance = isNatural ? 0.6 : 0.3;
+        double roll = random.nextDouble();
+
+        if (roll < mountainChance) {
+            wallType = TileType.MOUNTAIN;
+        } else {
+            wallType = TileType.WALL;
+        }
+    }
+
+
+    /** Return random picked tile type for room floor. FLOOR type is more likely to present */
+    public void getRandomPassable(Random random) {
+        if (random.nextDouble() < ROOM_FLOOR_POSS) {
+            floorType = TileType.FLOOR;
+        }
+
+        // Else choose from other passable types (excluding FLOOR)
+        TileType[] values = TileType.values();
+        ArrayList<TileType> others = new ArrayList<>();
+        for (TileType t : values) {
+            if (t.passable && t != TileType.FLOOR) {
+                others.add(t);
+            }
+        }
+
+        floorType = others.get(random.nextInt(others.size()));
     }
 }
