@@ -7,22 +7,16 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static core.Config.*;
 import static java.lang.Math.clamp;
 
 public class Room extends TerrainInfo{
-    // Could self define teh ratio of Floor type of room
-    private static final double ROOM_FLOOR_POSS = 0.5;
-    private static final int BLOCK_WIDTH1 = 1;
-    private static final int BLOCK_WIDTH2 = 2;
-    // Could self define the ratio of thickness of wall
-    private static final double WALL_THICKNESS_1_PROBABILITY = 0.9;
-
     private TileType floorType;
     private TileType wallType;
     private boolean isCornered;
     private int thicknessOfWall;
 
-    private static int BUFFER = 2;
+
     private ArrayList<Room> subRoom;
 
 
@@ -207,8 +201,8 @@ public class Room extends TerrainInfo{
         height += RandomUtils.uniform(random, -2, 3);
 
         // Make the width and height of the room fit in the requirement
-        width = clamp(width, MIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
-        height = clamp(height, MIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
+        width = clamp(width, MIN_MAIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
+        height = clamp(height, MIN_MAIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
 
         int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
         int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
