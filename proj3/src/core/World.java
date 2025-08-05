@@ -25,9 +25,6 @@ public class World {
 
     private static final int MIN_ROOM_WIDTH = 13;
 
-    // Could self define teh ratio of Floor type of room
-    private static final double ROOM_FLOOR_POSS = 0.5;
-
 
     private static final int MIN_ROOM_NUM = 3;
     private static final int MAX_ROOM_NUM = 5;
@@ -125,10 +122,10 @@ public class World {
         double targetArea = WINDOW_WIDTH * WORLD_HEIGHT * 0.5;
         int idealRoomArea = (int) (targetArea / roomCount);
 
-        // Randomly favor rectangular rooms (not perfect square)
+        // Randomly generate rectangular room
         int width, height;
         for (int i = 0; i < 50; i++) {
-            // Randomize width/height ratio slightly
+            // Randomize width/height ratio
             double aspectRatio = random.nextDouble(0.8, 1.3);
             width = (int) Math.sqrt(idealRoomArea * aspectRatio);
             height = (int) (idealRoomArea / (double) width);
@@ -149,10 +146,12 @@ public class World {
             if (!Room.validRoom(x, y, width, height, rooms)) continue;
 
             boolean isCornered = random.nextInt(100) % 4 != 0;
-            TileType floorType = getRandomPassable();
-            TileType wallType = getRandomImpassable(floorType);
 
-            rooms.add(new Room(height, width, x, y, wallThickness, isCornered, floorType, wallType));
+            Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+            newRoom.getRandomPassable(random);
+            newRoom.getRandomImpassable(random);
+
+            rooms.add(newRoom);
             return true;
         }
 
@@ -186,12 +185,14 @@ public class World {
 
             if (!Room.validRoom(x, y, width, height, rooms)) continue;
 
-            // Randomize the room's floor type, wall type and wall thickness
-            TileType floorType = getRandomPassable(), wallType = getRandomImpassable(floorType);
             boolean isCornered = random.nextInt(100) % 4 != 0;
             int wallThickness = (random.nextDouble(0,1) < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
 
-            rooms.add(new Room(height, width, x, y, wallThickness, isCornered, floorType, wallType));
+            Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+            newRoom.getRandomPassable(random);
+            newRoom.getRandomImpassable(random);
+
+            rooms.add(newRoom);
             return true;
         }
 
@@ -200,42 +201,6 @@ public class World {
     }
 
 
-    /* Helper function that return random picked tile type for room floor. FLOOR type is more likely to present */
-    private static TileType getRandomPassable() {
-        if (random.nextDouble() < ROOM_FLOOR_POSS) {
-            return TileType.FLOOR;
-        }
-
-        // Else choose from other passable types (excluding FLOOR)
-        TileType[] values = TileType.values();
-        ArrayList<TileType> others = new ArrayList<>();
-        for (TileType t : values) {
-            if (t.passable && t != TileType.FLOOR) {
-                others.add(t);
-            }
-        }
-
-        return others.get(random.nextInt(others.size()));
-    }
-
-
-    /* Helper function that return random picked tile type for room wall. WALL type has higher probability. If the
-    * Floor type is natural, mountain has higher chance */
-    private static TileType getRandomImpassable(TileType floorType) {
-        // Natural floors boost MOUNTAIN chance
-        boolean isNatural = floorType == TileType.FLOWER
-                || floorType == TileType.TREE
-                || floorType == TileType.GRASS;
-
-        double mountainChance = isNatural ? 0.6 : 0.3;
-        double roll = random.nextDouble();
-
-        if (roll < mountainChance) {
-            return TileType.MOUNTAIN;
-        } else {
-            return TileType.WALL;
-        }
-    }
 
 
     /** Draw the world and generate the whole picture of the world */
