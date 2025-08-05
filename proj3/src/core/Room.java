@@ -1,14 +1,21 @@
 package core;
 
 import tileengine.TETile;
+import utils.RandomUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static java.lang.Math.clamp;
+
 public class Room extends TerrainInfo{
     // Could self define teh ratio of Floor type of room
     private static final double ROOM_FLOOR_POSS = 0.5;
+    private static final int BLOCK_WIDTH1 = 1;
+    private static final int BLOCK_WIDTH2 = 2;
+    // Could self define the ratio of thickness of wall
+    private static final double WALL_THICKNESS_1_PROBABILITY = 0.9;
 
     private TileType floorType;
     private TileType wallType;
@@ -23,8 +30,6 @@ public class Room extends TerrainInfo{
         super(height, width, location);
 
         this.thicknessOfWall = thicknessOfWall;
-        this.floorType = floorType;
-        this.wallType = wallType;
         this.isCornered = isCornered;
     }
 
@@ -34,8 +39,6 @@ public class Room extends TerrainInfo{
         super(height, width, x, y);
 
         this.thicknessOfWall = thicknessOfWall;
-        this.floorType = floorType;
-        this.wallType = wallType;
         this.isCornered = isCornered;
     }
 
@@ -172,9 +175,53 @@ public class Room extends TerrainInfo{
     }
 
 
-    /** This method will generate subroom for a Main room. The size of the subroom will be around 5 * 5 to 8 * 8 */
+    /** This method will generate subroom for a Main room. The size of the subroom will be around totally be around 30%
+     * of the main room */
     public void generateSubroom(Random random) {
-        int subRoomNum = random.nextInt(3);
+        subRoom = new ArrayList<>();
+
+        int subRoomNum = random.nextInt(4);
+
+        int idealSize = (int) (getWidth() * getHeight() * 0.3 / 3);
+
+        int failAttempt = 0, maxAttempt = 100;
+        while (failAttempt < maxAttempt) {
+            if (subRoom.size() == subRoomNum) break;
+
+            int subWidth, subHeight;
+
+        }
+    }
+
+
+
+    /** Return a room based on input ideal size.
+     * @param idealSize The ideal size of the room */
+    public static Room generateRoom(int idealSize, Random random) {
+        double aspectRatio = random.nextDouble(0.8, 1.3);
+        int width = (int) Math.sqrt(idealSize * aspectRatio);
+        int height = (int) (idealSize / (double) width);
+
+        // Apply some randomness to make the shape of room has more diversity
+        width += RandomUtils.uniform(random, -2, 3);
+        height += RandomUtils.uniform(random, -2, 3);
+
+        // Make the width and height of the room fit in the requirement
+        width = clamp(width, MIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
+        height = clamp(height, MIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
+
+        int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
+        int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
+
+        int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
+
+        boolean isCornered = random.nextInt(100) % 4 != 0;
+
+        Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+        newRoom.getRandomPassable(random);
+        newRoom.getRandomImpassable(random);
+
+        return newRoom;
     }
 
 
@@ -204,7 +251,7 @@ public class Room extends TerrainInfo{
             floorType = TileType.FLOOR;
         }
 
-        // Else choose from other passable types (excluding FLOOR)
+        // Else choose from other passable types
         TileType[] values = TileType.values();
         ArrayList<TileType> others = new ArrayList<>();
         for (TileType t : values) {
