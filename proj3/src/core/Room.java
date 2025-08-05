@@ -181,7 +181,7 @@ public class Room extends TerrainInfo{
 
     /** Return random picked tile type for room wall. WALL type has higher probability. If the
      * Floor type is natural, mountain has higher chance */
-    public void getRandomImpassable(Random random, TileType floorType) {
+    public void getRandomImpassable(Random random) {
         // Natural floors boost MOUNTAIN chance
         boolean isNatural = floorType == TileType.FLOWER
                 || floorType == TileType.TREE
