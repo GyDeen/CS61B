@@ -261,6 +261,26 @@ public class Room extends TerrainInfo{
     }
 
 
+    /* Return the Left edge (the x value) of the room */
+    private int getLeft() {
+        return getLocation().x - getWidth() / 2;
+    }
+
+    /* Return the Right edge (the x value) of the room */
+    private int getRight() {
+        return getLocation().x + getWidth() / 2;
+    }
+
+    /* Return the Top edge (the y value) of the room */
+    private int getTop() {
+        return getLocation().y - getHeight() / 2;
+    }
+
+    /* Return the Bottom edge (the y value) of the room */
+    private int getBottom() {
+        return getLocation().y + getHeight() / 2;
+    }
+
 
     /** Return random picked tile type for room wall. WALL type has higher probability. If the
      * Floor type is natural, mountain has higher chance */
