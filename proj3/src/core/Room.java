@@ -98,7 +98,7 @@ public class Room extends TerrainInfo{
         }
 
         for (Room r : rooms) {
-            if (boundingBoxesOverlap(room, r, BUFFER)) {
+            if (boundingBoxesOverlap(room, r)) {
                 return false;
             }
         }
@@ -109,12 +109,12 @@ public class Room extends TerrainInfo{
 
 
     /* Check whether it will have potential interaction with a room */
-    private static boolean boundingBoxesOverlap(Room a, Room b, int buffer) {
+    private static boolean boundingBoxesOverlap(Room a, Room b) {
         Rectangle boxA = new Rectangle(
-                a.getLocation().x - buffer,
-                a.getLocation().y - buffer,
-                a.getWidth() + 2 * buffer,
-                a.getHeight() + 2 * buffer
+                a.getLocation().x - Config.BUFFER,
+                a.getLocation().y - Config.BUFFER,
+                a.getWidth() + 2 * Config.BUFFER,
+                a.getHeight() + 2 * Config.BUFFER
         );
 
         Rectangle boxB = new Rectangle(
@@ -126,7 +126,6 @@ public class Room extends TerrainInfo{
 
         return boxA.intersects(boxB);
     }
-
 
 
 
@@ -172,7 +171,6 @@ public class Room extends TerrainInfo{
 
 
 
-
     /** Return a room based on input ideal size. If it is attaching on a main room, return null.
      * @param idealSize The ideal size of the room
      * @param random The random that used to generate the room
@@ -188,8 +186,8 @@ public class Room extends TerrainInfo{
         height += RandomUtils.uniform(random, -2, 3);
 
         if (baseRoom == null) {
-            width = clamp(width, MIN_MAIN_ROOM_WIDTH, WINDOW_WIDTH - 4);
-            height = clamp(height, MIN_MAIN_ROOM_WIDTH, WORLD_HEIGHT - 4);
+            width = clamp(width, MIN_MAIN_ROOM_WIDTH, MAX_MAIN_ROOM_WIDTH);
+            height = clamp(height, MIN_MAIN_ROOM_HEIGHT, MAX_MAIN_ROOM_HEIGHT);
         } else {
             width = clamp(width, MIN_SUB_ROOM_WIDTH, MAX_SUB_ROOM_WIDTH);
             height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
@@ -197,7 +195,6 @@ public class Room extends TerrainInfo{
 
 
         int x, y;
-
         if (baseRoom == null) {
             // Main room: place anywhere
             x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
@@ -308,5 +305,11 @@ public class Room extends TerrainInfo{
         }
 
         floorType = others.get(random.nextInt(others.size()));
+    }
+
+
+    /** Return the size of the room */
+    public int getSize() {
+        return getWidth() * getHeight();
     }
 }
