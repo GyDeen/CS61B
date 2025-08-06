@@ -190,7 +190,10 @@ public class Room extends TerrainInfo{
 
 
     /** Return a room based on input ideal size.
-     * @param idealSize The ideal size of the room */
+     * @param idealSize The ideal size of the room
+     * @param random The random that used to generate the room
+     * @param baseRoom whether it is a subroom. If it is a subroom, information of its main room
+     * @param direction which direction the subroom will be generated */
     public static Room generateRoom(int idealSize, Random random, Room baseRoom, int direction) {
         double aspectRatio = random.nextDouble(0.8, 1.3);
         int width = (int) Math.sqrt(idealSize * aspectRatio);
@@ -209,7 +212,52 @@ public class Room extends TerrainInfo{
         }
 
 
+        int x, y;
 
+        if (baseRoom == null) {
+            // Main room: place anywhere
+            x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
+            y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
+        } else {
+            // It is generating a subroom
+            switch (direction) {
+                case 0: // left
+                    x = baseRoom.getLeft() - width - 1;
+                    y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
+                    break;
+                case 1: // right
+                    x = baseRoom.getRight() + 1;
+                    y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
+                    break;
+                case 2: // bottom
+                    y = baseRoom.getBottom() - height - 1;
+                    x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
+                    break;
+                case 3: // top
+                    y = baseRoom.getTop() + 1;
+                    x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
+                    break;
+                default:
+                    // fallback if invalid direction
+                    x = baseRoom.getRight() + 1;
+                    y = baseRoom.getBottom();
+                    break;
+            }
+        }
+
+        int wallThickness;
+        if (baseRoom == null) {
+            wallThickness = (random.nextDouble(1) < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
+        } else {
+            wallThickness = baseRoom.thicknessOfWall;
+        }
+
+        boolean isCornered = random.nextInt(100) % 4 != 0;
+
+        Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+        newRoom.getRandomPassable(random);
+        newRoom.getRandomImpassable(random);
+        return newRoom;
     }
 
 
