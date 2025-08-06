@@ -1,5 +1,6 @@
 package core;
 
+import org.knowm.xchart.internal.chartpart.Axis;
 import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
@@ -11,8 +12,6 @@ import java.util.Collections;
 import java.util.Random;
 
 import static core.Config.*;
-import static java.lang.Math.clamp;
-import static java.lang.Math.max;
 
 
 public class World {
@@ -157,7 +156,17 @@ public class World {
 
 
         generateRoom();
-        System.out.println("Current room number is: " + rooms.size());
+        // Generate subroom for each main room
+        for (Room room : rooms) {
+            int direction = RandomUtils.uniform(random, 0, 5);
+            Room subRoom = Room.generateRoom(room.getSize() / 4, random, room, direction);
+
+            // Check whether it will overlap with other main room
+            if (Room.validRoom(subRoom, rooms)) {
+                subRoom.attachRoom(room);
+            }
+        }
+
         for (Room room : rooms) {
             room.allocateRoom(world);
         }

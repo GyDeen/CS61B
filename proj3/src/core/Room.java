@@ -108,13 +108,13 @@ public class Room extends TerrainInfo{
 
 
 
-    /* Check whether it will have potential interaction with a room */
+    /* Check whether it will have overlap with a room */
     private static boolean boundingBoxesOverlap(Room a, Room b) {
         Rectangle boxA = new Rectangle(
-                a.getLocation().x - Config.BUFFER,
-                a.getLocation().y - Config.BUFFER,
-                a.getWidth() + 2 * Config.BUFFER,
-                a.getHeight() + 2 * Config.BUFFER
+                a.getLocation().x,
+                a.getLocation().y,
+                a.getWidth(),
+                a.getHeight()
         );
 
         Rectangle boxB = new Rectangle(
@@ -197,8 +197,8 @@ public class Room extends TerrainInfo{
         int x, y;
         if (baseRoom == null) {
             // Main room: place anywhere
-            x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width - 1);
-            y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height - 1);
+            x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width / 2 - 1);
+            y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height / 2 - 1);
         } else {
             // It is generating a subroom
             switch (direction) {
@@ -242,7 +242,6 @@ public class Room extends TerrainInfo{
             isCornered = baseRoom.isCornered;
             newRoom = new Room(height, width, x, y, wallThickness, isCornered);
             newRoom.isSubroom = true;
-            baseRoom.subRoom.add(newRoom);
         }
 
         return newRoom;
@@ -312,4 +311,12 @@ public class Room extends TerrainInfo{
     public int getSize() {
         return getWidth() * getHeight();
     }
+
+
+    /** Attach a room to the given main room
+     * @param mainRoom the room that being attached */
+    public void attachRoom(Room mainRoom) {
+        mainRoom.subRoom.add(this);
+    }
+
 }
