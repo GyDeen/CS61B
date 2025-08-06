@@ -12,6 +12,7 @@ import java.util.Random;
 
 import static core.Config.*;
 import static java.lang.Math.clamp;
+import static java.lang.Math.max;
 
 
 public class World {
@@ -86,35 +87,16 @@ public class World {
 
 
     /** Method that generate the room purely randomly, not using cells */
-    public void generateWithoutCell() {
+    public void generateRoom() {
         int roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, MAX_MAIN_ROOM_NUM + 1);
-        int maxAttempt = 100, currentAttempt = 0;
-        while (currentAttempt < maxAttempt && rooms.size() < roomNum) {
-            if (generateRoom(roomNum)) {
-                continue;
-            } else {
-                currentAttempt++;
-                System.out.println("Fail to generate room " + currentAttempt + "th");
-            }
+        int maxAttempt = 1000, currentAttempt = 0;
+        int idealSize = WORLD_HEIGHT * WINDOW_WIDTH / roomNum;
 
-
-            while (rooms.size() < MIN_MAIN_ROOM_NUM) generateRoom(roomNum);
+        while (rooms.size() < roomNum &&  currentAttempt++ < maxAttempt) {
+            // Generate a main room
+            Room newRoom = Room.generateRoom(idealSize, random, null, 0);
+            if (Room.validRoom(newRoom, rooms)) rooms.add(newRoom);
         }
-    }
-
-
-    /* Generate random room, return true if generate a valid room, false otherwise. */
-    private boolean generateRoom(int roomCount) {
-        double targetArea = WINDOW_WIDTH * WORLD_HEIGHT * 0.5;
-        int idealRoomArea = (int) (targetArea / roomCount);
-
-        for (int i = 0; i < 50; i++) {
-
-
-            return true;
-        }
-
-        return false;
     }
 
 
@@ -173,7 +155,8 @@ public class World {
             }
         }
 
-        generateWithoutCell();
+
+        generateRoom();
         System.out.println("Current room number is: " + rooms.size());
         for (Room room : rooms) {
             room.allocateRoom(world);
