@@ -14,10 +14,10 @@ public class Config {
     public static final int WINDOW_WIDTH = 90;
     public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
 
-    public static final int MIN_MAIN_ROOM_WIDTH = 15;
+    public static final int MIN_MAIN_ROOM_WIDTH = 17;
     public static final int MAX_MAIN_ROOM_WIDTH = 25;
-    public static final int MIN_MAIN_ROOM_HEIGHT = 10;
-    public static final int MAX_MAIN_ROOM_HEIGHT = 18;
+    public static final int MIN_MAIN_ROOM_HEIGHT = 14;
+    public static final int MAX_MAIN_ROOM_HEIGHT = 20;
     public static final int MIN_MAIN_ROOM_NUM = 3;
     public static final int MAX_MAIN_ROOM_NUM = 5;
 
