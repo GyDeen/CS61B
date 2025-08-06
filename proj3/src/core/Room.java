@@ -14,7 +14,9 @@ public class Room extends TerrainInfo{
     private TileType floorType;
     private TileType wallType;
     private boolean isCornered;
+    private boolean isSubroom;
     private int thicknessOfWall;
+
 
 
     private ArrayList<Room> subRoom;
@@ -169,27 +171,9 @@ public class Room extends TerrainInfo{
     }
 
 
-    /** This method will generate subroom for a Main room. The size of the subroom will be around totally be around 30%
-     * of the main room */
-    public void generateSubroom(Random random) {
-        subRoom = new ArrayList<>();
-
-        int subRoomNum = random.nextInt(4);
-
-        int idealSize = (int) (getWidth() * getHeight() * 0.3 / 3);
-
-        int failAttempt = 0, maxAttempt = 100;
-        while (failAttempt < maxAttempt) {
-            if (subRoom.size() == subRoomNum) break;
-
-            int subWidth, subHeight;
-
-        }
-    }
 
 
-
-    /** Return a room based on input ideal size.
+    /** Return a room based on input ideal size. If it is attaching on a main room, return null.
      * @param idealSize The ideal size of the room
      * @param random The random that used to generate the room
      * @param baseRoom whether it is a subroom. If it is a subroom, information of its main room
@@ -246,17 +230,24 @@ public class Room extends TerrainInfo{
         }
 
         int wallThickness;
+        boolean isCornered;
+        Room newRoom;
         if (baseRoom == null) {
             wallThickness = (random.nextDouble(1) < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
+            isCornered = random.nextInt(100) % 4 != 0;
+            newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+            newRoom.getRandomPassable(random);
+            newRoom.getRandomImpassable(random);
+            newRoom.isSubroom = false;
+
         } else {
             wallThickness = baseRoom.thicknessOfWall;
+            isCornered = baseRoom.isCornered;
+            newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+            newRoom.isSubroom = true;
+            baseRoom.subRoom.add(newRoom);
         }
 
-        boolean isCornered = random.nextInt(100) % 4 != 0;
-
-        Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
-        newRoom.getRandomPassable(random);
-        newRoom.getRandomImpassable(random);
         return newRoom;
     }
 
