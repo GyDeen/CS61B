@@ -100,6 +100,15 @@ public class Room extends TerrainInfo{
             if (boundingBoxesOverlap(room, r)) {
                 return false;
             }
+
+            // Checking whether it will have collision with any subroom
+            if (r.subRoom != null) {
+                for (Room subRoom : r.subRoom) {
+                    if (boundingBoxesOverlap(room, subRoom)) {
+                        return false;
+                    }
+                }
+            }
         }
 
         return true;
@@ -263,15 +272,18 @@ public class Room extends TerrainInfo{
         return getLocation().x - getWidth() / 2;
     }
 
+
     /* Return the Right edge (the x value) of the room */
     private int getRight() {
         return getLocation().x + getWidth() / 2;
     }
 
+
     /* Return the Top edge (the y value) of the room */
     private int getTop() {
         return getLocation().y - getHeight() / 2;
     }
+
 
     /* Return the Bottom edge (the y value) of the room */
     private int getBottom() {
@@ -282,7 +294,7 @@ public class Room extends TerrainInfo{
     /** Return random picked tile type for room wall. WALL type has higher probability. If the
      * Floor type is natural, mountain has higher chance */
     public void getRandomImpassable(Random random) {
-        // Natural floors boost MOUNTAIN chance
+        // Natural floors increase MOUNTAIN chance
         boolean isNatural = floorType == TileType.FLOWER
                 || floorType == TileType.TREE
                 || floorType == TileType.GRASS;
