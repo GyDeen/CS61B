@@ -168,7 +168,7 @@ public class World {
         }
 
         for (Room room : rooms) {
-            room.allocateRoom(world);
+            room.allocateRooms(world);
         }
 
         ter.renderFrame(world);

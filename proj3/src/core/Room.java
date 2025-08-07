@@ -38,11 +38,25 @@ public class Room extends TerrainInfo{
     }
 
 
-
     /** Allocate the room based on the information stored. The out-most floor will always be FLOOR type, while the other
      * floor will be the floor type it stored
      * @param world the world that the room will be presented */
-    public void allocateRoom(TETile[][] world) {
+    public void allocateRooms(TETile[][] world) {
+        // Allocate this room
+        allocateRoom(world);
+
+
+        // If it has any subroom, allocate them
+        if (subRoom != null) {
+            for (Room room : subRoom) {
+                room.allocateRooms(world);
+            }
+        }
+
+    }
+
+    /* The method that actually assign tiles to the input world */
+    private void allocateRoom(TETile[][] world) {
         int startX = getLocation().x - getWidth() / 2;
         int startY = getLocation().y - getHeight() / 2;
         int endX = startX + getWidth();
@@ -260,6 +274,8 @@ public class Room extends TerrainInfo{
             wallThickness = baseRoom.thicknessOfWall;
             isCornered = baseRoom.isCornered;
             newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+            newRoom.wallType = baseRoom.wallType;
+            newRoom.floorType = baseRoom.floorType;
             newRoom.isSubroom = true;
         }
 
