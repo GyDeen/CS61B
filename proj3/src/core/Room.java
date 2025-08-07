@@ -17,8 +17,7 @@ public class Room extends TerrainInfo{
     private boolean isSubroom;
     private int thicknessOfWall;
 
-
-
+    // Only initialise when there is a subroom attach to this room
     private ArrayList<Room> subRoom;
 
 
@@ -141,7 +140,7 @@ public class Room extends TerrainInfo{
             return false;
         }
 
-        // Checking whether it will ahve collision with any main room
+        // Checking whether it will have collision with any main room
         for (Room r : rooms) {
             if (boundingBoxesOverlap(x, y, width, height, r)) {
                 return false;
@@ -156,6 +155,7 @@ public class Room extends TerrainInfo{
                 }
             }
         }
+
         return true;
     }
 
@@ -246,7 +246,6 @@ public class Room extends TerrainInfo{
             newRoom.getRandomPassable(random);
             newRoom.getRandomImpassable(random);
             newRoom.isSubroom = false;
-            newRoom.subRoom = new ArrayList<>();
 
         } else {
             wallThickness = baseRoom.thicknessOfWall;
@@ -324,9 +323,10 @@ public class Room extends TerrainInfo{
     }
 
 
-    /** Attach a room to the given main room
+    /** Attach a room to the given main room. It will initialise the subroom for the main room.
      * @param mainRoom the room that being attached */
     public void attachRoom(Room mainRoom) {
+        if (mainRoom.subRoom == null) mainRoom.subRoom = new ArrayList<>();
         mainRoom.subRoom.add(this);
     }
 
