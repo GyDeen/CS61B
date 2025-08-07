@@ -90,8 +90,8 @@ public class Room extends TerrainInfo{
 
     /** Testing whether input room is a valid room. It couldn't have overlap with other rooms. It cannot make the floor
      * adjacent with the edge of the world, that is, the "floor" of the room need to be surrounded by "wall"
-     * @param room the room that need validation
-     * @param rooms the room that already exist */
+     * @param room the room that need validation (could be either main room or subroom)
+     * @param rooms the room that already exist (it could only be main room) */
     public static boolean validRoom(Room room, ArrayList<Room> rooms) {
         if (!TerrainInfo.withinBounds(room.getLocation().x, room.getLocation().y, room.getWidth(), room.getHeight())) {
             return false;
@@ -141,9 +141,19 @@ public class Room extends TerrainInfo{
             return false;
         }
 
+        // Checking whether it will ahve collision with any main room
         for (Room r : rooms) {
-            if (boundingBoxesOverlap(x, y, width, height, r, BUFFER)) {
+            if (boundingBoxesOverlap(x, y, width, height, r)) {
                 return false;
+            }
+
+            // Checking whether it will have collision with any subroom
+            if (r.subRoom != null) {
+                for (Room subRoom : r.subRoom) {
+                    if (boundingBoxesOverlap(x, y, width, height, subRoom)) {
+                        return false;
+                    }
+                }
             }
         }
         return true;
@@ -152,12 +162,12 @@ public class Room extends TerrainInfo{
 
 
     /* Check whether it will have potential interaction with a room */
-    private static boolean boundingBoxesOverlap(int x, int y, int width, int height, Room b, int buffer) {
+    private static boolean boundingBoxesOverlap(int x, int y, int width, int height, Room b) {
         Rectangle boxA = new Rectangle(
-                x - buffer,
-                y - buffer,
-                width + 2 * buffer,
-                height + 2 * buffer
+                x,
+                y,
+                width,
+                height
         );
 
         Rectangle boxB = new Rectangle(
@@ -196,7 +206,7 @@ public class Room extends TerrainInfo{
 
         int x, y;
         if (baseRoom == null) {
-            // Main room: place anywhere
+            // Placing main room
             x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width / 2 - 1);
             y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height / 2 - 1);
         } else {
@@ -236,6 +246,7 @@ public class Room extends TerrainInfo{
             newRoom.getRandomPassable(random);
             newRoom.getRandomImpassable(random);
             newRoom.isSubroom = false;
+            newRoom.subRoom = new ArrayList<>();
 
         } else {
             wallThickness = baseRoom.thicknessOfWall;
