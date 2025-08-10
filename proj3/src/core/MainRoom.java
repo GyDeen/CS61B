@@ -3,6 +3,7 @@ package core;
 import utils.RandomUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static core.Config.*;
@@ -50,4 +51,14 @@ public class MainRoom extends Room {
         if (subRooms == null) subRooms = new ArrayList<>();
         subRooms.add(this);
     }
+
+
+    /** Getter for subrooms, return a safe copy of it */
+    public List<Room> getSubRooms() {
+        if (subRooms == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(subRooms);
+    }
+
 }
