@@ -41,12 +41,24 @@ public abstract class Room {
     public int getHeight() { return height; }
     public int getWidth()  { return width; }
     public Point getLocation() { return new Point(location); }
+    public int getThicknessOfWall() { return thicknessOfWall; }
     public int getSize() {return getWidth() * getHeight();}
+    public boolean isCornered() { return isCornered; }
 
     public int getLeft()   { return getLocation().x - getWidth() / 2; }
     public int getRight()  { return getLocation().x + getWidth() / 2; }
     public int getTop()    { return getLocation().y - getHeight() / 2; }
     public int getBottom() { return getLocation().y + getHeight() / 2; }
+
+    public TileType getFloorType() { return floorType; }
+    public TileType getWallType() { return wallType; }
+
+
+    // Setter for often used property
+    public void setFloorType(TileType floorType) { this.floorType = floorType; }
+    public void setWallType(TileType wallType) { this.wallType = wallType; }
+
+
 
 
 
@@ -57,8 +69,6 @@ public abstract class Room {
                 && x + width / 2 < WINDOW_WIDTH
                 && y + height / 2 < WORLD_HEIGHT;
     }
-
-
 
 
     /** Assigning the world with current information stored */
@@ -109,15 +119,10 @@ public abstract class Room {
             return false;
         }
 
-
         for (Room r : rooms) {
             if (boundingBoxesOverlap(room, r)) return false;
-            if (r.subRoom != null) {
-                for (Room s : r.subRoom) {
-                    if (boundingBoxesOverlap(room, s)) return false;
-                }
-            }
         }
+
         return true;
     }
 
@@ -129,15 +134,10 @@ public abstract class Room {
 
         for (Room r : rooms) {
             if (boundingBoxesOverlap(x, y, width, height, r)) return false;
-
-            if (r.subRoom != null) {
-                for (Room s : r.subRoom) {
-                    if (boundingBoxesOverlap(x, y, width, height, s)) return false;
-                }
-            }
         }
         return true;
     }
+
 
 
     /* Checking whether given information will have collision with existing room */
