@@ -1,0 +1,53 @@
+package core;
+
+import utils.RandomUtils;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import static core.Config.*;
+import static java.lang.Math.clamp;
+
+public class MainRoom extends Room {
+    // Only initialise when there is a subroom attach to this room
+    private ArrayList<Room> subRooms;
+
+
+    public MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
+        super(height, width, x, y, thicknessOfWall, isCornered);
+    }
+
+
+    /** Factory: generate a main room */
+    public static MainRoom generate(int idealSize, Random random) {
+        double aspectRatio = random.nextDouble(0.8, 1.3);
+        int width  = (int) Math.sqrt(idealSize * aspectRatio);
+        int height = (int) (idealSize / (double) width);
+
+        width  += RandomUtils.uniform(random, -2, 3);
+        height += RandomUtils.uniform(random, -2, 3);
+
+        width  = clamp(width,  MIN_MAIN_ROOM_WIDTH,  MAX_MAIN_ROOM_WIDTH);
+        height = clamp(height, MIN_MAIN_ROOM_HEIGHT, MAX_MAIN_ROOM_HEIGHT);
+
+        int x = RandomUtils.uniform(random, 1, WINDOW_WIDTH - width / 2 - 1);
+        int y = RandomUtils.uniform(random, 1, WORLD_HEIGHT - height / 2 - 1);
+
+        int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
+        boolean isCornered = random.nextInt(100) % 4 != 0;
+
+        MainRoom room = new MainRoom(height, width, x, y, wallThickness, isCornered);
+        room.getRandomPassable(random);
+        room.getRandomImpassable(random);
+        return room;
+    }
+
+
+
+    /** Attach the input subRoom to current MainRoom
+     * @param subRoom the subRoom that attach to current MainRoom */
+    public void attachRoom(Room subRoom) {
+        if (subRooms == null) subRooms = new ArrayList<>();
+        subRooms.add(this);
+    }
+}
