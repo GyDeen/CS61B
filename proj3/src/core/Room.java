@@ -121,6 +121,14 @@ public abstract class Room {
 
         for (Room r : rooms) {
             if (boundingBoxesOverlap(room, r)) return false;
+
+            if (r instanceof MainRoom main) {
+                if (!main.getSubRooms().isEmpty()) {
+                    for (Room subRoom : main.getSubRooms()) {
+                        if (boundingBoxesOverlap(room, subRoom)) return false;
+                    }
+                }
+            }
         }
 
         return true;
@@ -134,6 +142,14 @@ public abstract class Room {
 
         for (Room r : rooms) {
             if (boundingBoxesOverlap(x, y, width, height, r)) return false;
+
+            if (r instanceof MainRoom main) {
+                if (!main.getSubRooms().isEmpty()) {
+                    for (Room subRoom : main.getSubRooms()) {
+                        if (boundingBoxesOverlap(x, y, width, height, subRoom)) return false;
+                    }
+                }
+            }
         }
         return true;
     }
