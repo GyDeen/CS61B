@@ -93,7 +93,7 @@ public class World {
 
         while (rooms.size() < roomNum &&  currentAttempt++ < maxAttempt) {
             // Generate a main room
-            Room newRoom = Room.generateRoom(idealSize, random, null, 0);
+            MainRoom newRoom = MainRoom.generate(idealSize, random);
             if (Room.validRoom(newRoom, rooms)) rooms.add(newRoom);
         }
     }
@@ -128,7 +128,7 @@ public class World {
             boolean isCornered = random.nextInt(100) % 4 != 0;
             int wallThickness = (random.nextDouble(0,1) < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
 
-            Room newRoom = new Room(height, width, x, y, wallThickness, isCornered);
+            MainRoom newRoom = new MainRoom(height, width, x, y, wallThickness, isCornered);
             newRoom.getRandomPassable(random);
             newRoom.getRandomImpassable(random);
 
@@ -158,17 +158,18 @@ public class World {
         generateRoom();
         // Generate subroom for each main room
         for (Room room : rooms) {
+            MainRoom main = (MainRoom) room;
             int direction = RandomUtils.uniform(random, 0, 5);
-            Room subRoom = Room.generateRoom(room.getSize() / 4, random, room, direction);
+            SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, main, direction);
 
             // Check whether it will overlap with other main room
             if (Room.validRoom(subRoom, rooms)) {
-                subRoom.attachRoom(room);
+                ((MainRoom) room).attachRoom(subRoom);
             }
         }
 
         for (Room room : rooms) {
-            room.allocateRooms(world);
+            room.allocateRoom(world);
         }
 
         ter.renderFrame(world);
