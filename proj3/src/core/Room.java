@@ -17,16 +17,13 @@ public abstract class Room {
     private final Point location;
 
     // Existing Room state
-    protected TileType floorType;
-    protected TileType wallType;
-    protected boolean isCornered;
-    protected int thicknessOfWall;
-
-    // Only initialise when there is a subroom attach to this room
-    protected ArrayList<Room> subRoom;
+    private TileType floorType;
+    private TileType wallType;
+    private boolean isCornered;
+    private int thicknessOfWall;
 
 
-    protected Room(int height, int width, Point location, int thicknessOfWall, boolean isCornered) {
+    public Room(int height, int width, Point location, int thicknessOfWall, boolean isCornered) {
         this.height = height;
         this.width = width;
         this.location = new Point(location);
@@ -34,7 +31,7 @@ public abstract class Room {
         this.isCornered = isCornered;
     }
 
-    protected Room(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
+    public Room(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
         this(height, width, new Point(x, y), thicknessOfWall, isCornered);
     }
 
@@ -62,20 +59,10 @@ public abstract class Room {
     }
 
 
-    /** Allocate this room and all subrooms into world */
-    public void allocateRooms(TETile[][] world) {
-        allocateRoom(world);
-        if (subRoom != null) {
-            for (Room room : subRoom) {
-                room.allocateRooms(world);
-            }
-        }
-    }
 
 
-
-    /* The method that actually assign tiles to the input world */
-    private void allocateRoom(TETile[][] world) {
+    /** Assigning the world with current information stored */
+    public void allocateRoom(TETile[][] world) {
         int startX = getLocation().x - getWidth() / 2;
         int startY = getLocation().y - getHeight() / 2;
         int endX = startX + getWidth();
@@ -115,14 +102,16 @@ public abstract class Room {
     }
 
 
+
     /** Testing whether input room is a valid room (no overlaps and within bounds) */
     public static boolean validRoom(Room room, ArrayList<Room> rooms) {
         if (!withinBounds(room.getLocation().x, room.getLocation().y, room.getWidth(), room.getHeight())) {
             return false;
         }
+
+
         for (Room r : rooms) {
             if (boundingBoxesOverlap(room, r)) return false;
-
             if (r.subRoom != null) {
                 for (Room s : r.subRoom) {
                     if (boundingBoxesOverlap(room, s)) return false;
@@ -131,6 +120,7 @@ public abstract class Room {
         }
         return true;
     }
+
 
 
     /** Validate by raw x/y/width/height */
@@ -149,12 +139,16 @@ public abstract class Room {
         return true;
     }
 
+
+    /* Checking whether given information will have collision with existing room */
     private static boolean boundingBoxesOverlap(Room a, Room b) {
         Rectangle boxA = new Rectangle(a.getLocation().x, a.getLocation().y, a.getWidth(), a.getHeight());
         Rectangle boxB = new Rectangle(b.getLocation().x, b.getLocation().y, b.getWidth(), b.getHeight());
         return boxA.intersects(boxB);
     }
 
+
+    /* Checking whether given information will have collision with existing room */
     private static boolean boundingBoxesOverlap(int x, int y, int width, int height, Room b) {
         Rectangle boxA = new Rectangle(x, y, width, height);
         Rectangle boxB = new Rectangle(b.getLocation().x, b.getLocation().y, b.getWidth(), b.getHeight());
@@ -163,14 +157,8 @@ public abstract class Room {
 
 
 
-    public void attachRoom(Room mainRoom) {
-        if (mainRoom.subRoom == null) mainRoom.subRoom = new ArrayList<>();
-        mainRoom.subRoom.add(this);
-    }
-
-
-
-    /** Random wall type biased by floor type */
+    /** Random wall type biased by floor type
+     * @param random the random object used for randomize */
     public void getRandomImpassable(Random random) {
         boolean isNatural = floorType == TileType.FLOWER
                 || floorType == TileType.TREE
@@ -181,11 +169,13 @@ public abstract class Room {
 
 
 
-    /** Random passable floor type */
+    /** Random passable floor type
+     * @param random the random object used for randomize */
     public void getRandomPassable(Random random) {
         if (random.nextDouble() < ROOM_FLOOR_POSS) {
             floorType = TileType.FLOOR;
         }
+
         ArrayList<TileType> others = new ArrayList<>();
         for (TileType t : TileType.values()) {
             if (t.passable && t != TileType.FLOOR) {
