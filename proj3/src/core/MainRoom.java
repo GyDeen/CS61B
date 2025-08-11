@@ -11,7 +11,7 @@ import static java.lang.Math.clamp;
 
 public class MainRoom extends Room {
     // Only initialise when there is a subroom attach to this room
-    private ArrayList<Room> subRooms;
+    private ArrayList<SubRoom> subRooms;
 
 
     public MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
@@ -47,14 +47,14 @@ public class MainRoom extends Room {
 
     /** Attach the input subRoom to current MainRoom
      * @param subRoom the subRoom that attach to current MainRoom */
-    public void attachRoom(Room subRoom) {
+    public void attachRoom(SubRoom subRoom) {
         if (subRooms == null) subRooms = new ArrayList<>();
-        subRooms.add(this);
+        subRooms.add(subRoom);
     }
 
 
     /** Getter for subrooms, return a safe copy of it */
-    public List<Room> getSubRooms() {
+    public List<SubRoom> getSubRooms() {
         if (subRooms == null) {
             return new ArrayList<>();
         }

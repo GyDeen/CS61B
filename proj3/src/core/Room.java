@@ -99,6 +99,12 @@ public abstract class Room {
                 }
             }
         }
+
+        if(this instanceof MainRoom mainRoom) {
+            for (SubRoom subRoom : mainRoom.getSubRooms()) {
+                subRoom.allocateRoom(world);
+             }
+        }
     }
 
 
