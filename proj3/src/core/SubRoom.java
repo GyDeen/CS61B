@@ -1,5 +1,6 @@
 package core;
 
+import tileengine.TERenderer;
 import tileengine.TETile;
 import utils.RandomUtils;
 
@@ -82,6 +83,7 @@ public class SubRoom extends Room {
                     if (i < startX + getThicknessOfWall() + 1 || i >= endX - getThicknessOfWall() - 1 ||
                             j < startY + getThicknessOfWall() + 1 || j >= endY - getThicknessOfWall() - 1) {
                         world[i][j] = TileType.FLOOR.toTETile();
+                        continue;
                     } else {world[i][j] = getFloorType().toTETile();
                         continue;
                     }
@@ -96,7 +98,11 @@ public class SubRoom extends Room {
                 // Outermost floor layer inside the wall
                 else if (i < startX + getThicknessOfWall() + 1 || i >= endX - getThicknessOfWall() - 1 ||
                         j < startY + getThicknessOfWall() + 1 || j >= endY - getThicknessOfWall() - 1) {
-                    world[i][j] = TileType.FLOOR.toTETile();
+                    world[i][j] = (belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight))
+                            ? getFloorType().toTETile()
+                            : TileType.FLOOR.toTETile();
+                    TERenderer render = new TERenderer();
+                    render.renderFrame(world);
                 }
                 // Inner floor
                 else {
