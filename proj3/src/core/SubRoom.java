@@ -67,6 +67,44 @@ public class SubRoom extends Room {
         int mainRoomWidth = mainRoom.getWidth();
         int mainRoomHeight = mainRoom.getHeight();
 
+        int startX = getLocation().x - getWidth() / 2;
+        int startY = getLocation().y - getHeight() / 2;
+        int endX = startX + getWidth();
+        int endY = startY + getHeight();
+
+        for (int i = startX; i < endX; i++) {
+            for (int j = startY; j < endY; j++) {
+                // If it don't have corner, skip the corner tiles
+                if (!isCornered() && isCornerArea(i, j, startX, startY, endX, endY, getThicknessOfWall())) continue;
+
+                // If it belongs to Main room, override it with floorType it should be
+                if (belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight)) {
+                    if (i < startX + getThicknessOfWall() + 1 || i >= endX - getThicknessOfWall() - 1 ||
+                            j < startY + getThicknessOfWall() + 1 || j >= endY - getThicknessOfWall() - 1) {
+                        world[i][j] = TileType.FLOOR.toTETile();
+                    } else {world[i][j] = getFloorType().toTETile();
+                        continue;
+                    }
+                }
+
+                // Wall zone
+                if (i < startX + getThicknessOfWall() || i >= endX - getThicknessOfWall() ||
+                        j < startY + getThicknessOfWall() || j >= endY - getThicknessOfWall()) {
+                    world[i][j] = getWallType().toTETile();
+                }
+
+                // Outermost floor layer inside the wall
+                else if (i < startX + getThicknessOfWall() + 1 || i >= endX - getThicknessOfWall() - 1 ||
+                        j < startY + getThicknessOfWall() + 1 || j >= endY - getThicknessOfWall() - 1) {
+                    world[i][j] = TileType.FLOOR.toTETile();
+                }
+                // Inner floor
+                else {
+                    world[i][j] = getFloorType().toTETile();
+                }
+            }
+        }
+
     }
 
 
