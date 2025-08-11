@@ -40,10 +40,10 @@ public abstract class Room {
     // Getter for often used property
     public int getHeight() { return height; }
     public int getWidth()  { return width; }
-    public Point getLocation() { return new Point(location); }
     public int getThicknessOfWall() { return thicknessOfWall; }
     public int getSize() {return getWidth() * getHeight();}
     public boolean isCornered() { return isCornered; }
+    public Point getLocation() { return new Point(location); }
 
     public int getLeft()   { return getLocation().x - getWidth() / 2; }
     public int getRight()  { return getLocation().x + getWidth() / 2; }
@@ -102,8 +102,8 @@ public abstract class Room {
     }
 
 
-    /* Return true if the given position is a corner */
-    private boolean isCornerArea(int x, int y, int startX, int startY, int endX, int endY, int t) {
+    /** Return true if the given position is a corner */
+    public boolean isCornerArea(int x, int y, int startX, int startY, int endX, int endY, int t) {
         boolean inLeft = x < startX + t;
         boolean inRight = x >= endX - t;
         boolean inBottom = y < startY + t;
