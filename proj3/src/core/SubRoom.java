@@ -1,17 +1,21 @@
 package core;
 
+import tileengine.TETile;
 import utils.RandomUtils;
 
+import java.awt.*;
 import java.util.Random;
 
 import static core.Config.*;
 import static java.lang.Math.clamp;
 
 public class SubRoom extends Room {
+    MainRoom mainRoom;
 
 
-    public SubRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
+    public SubRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, MainRoom baseRoom) {
         super(height, width, x, y, thicknessOfWall, isCornered);
+        mainRoom = baseRoom;
     }
 
     /** Generate a subroom attached to a base main room
@@ -49,9 +53,26 @@ public class SubRoom extends Room {
                 break;
         }
 
-        SubRoom sub = new SubRoom(height, width, x, y, baseRoom.getThicknessOfWall(), baseRoom.isCornered());
+        SubRoom sub = new SubRoom(height, width, x, y, baseRoom.getThicknessOfWall(), baseRoom.isCornered(), baseRoom);
         sub.setFloorType(baseRoom.getFloorType());
         sub.setWallType(baseRoom.getWallType());
         return sub;
+    }
+
+    /** Allocation of subroom needs to connect the subroom floor and override the wall and out most FLOOR with its
+     * floor type */
+    @Override
+    public void allocateRoom(TETile[][] world) {
+        Point mainRoomPosition = mainRoom.getLocation();
+        int mainRoomWidth = mainRoom.getWidth();
+        int mainRoomHeight = mainRoom.getHeight();
+
+    }
+
+
+    /* Return true if given position belongs to its main room */
+    private boolean belongMainRoom(int x, int y, Point mainRoomPosition, int mainRoomWidth, int mainRoomHeight) {
+        return (mainRoomPosition.x - mainRoomWidth / 2 <= x && x <= mainRoomPosition.x + mainRoomWidth / 2) &&
+                (mainRoomPosition.y - mainRoomHeight / 2 <= y && y <= mainRoomPosition.y + mainRoomHeight / 2);
     }
 }
