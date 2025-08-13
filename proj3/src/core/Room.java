@@ -159,9 +159,9 @@ public abstract class Room {
 
     /* Checking whether given information will have collision with existing room */
     private static boolean boundingBoxesOverlap(Room a, Room b) {
-        Rectangle boxA = new Rectangle(a.getLocation().x, a.getLocation().y, a.getWidth(), a.getHeight());
-        Rectangle boxB = new Rectangle(b.getLocation().x, b.getLocation().y, b.getWidth(), b.getHeight());
-        return boxA.intersects(boxB);
+        int aLeft = a.getLeft(), aBottom = a.getBottom(), aRight = a.getRight(),  aTop = a.getTop();
+        int bLeft = b.getLeft(), bBottom = b.getBottom(), bRight = b.getRight(),  bTop = b.getTop();
+        return aLeft < bRight && aRight > bLeft && aBottom < bTop && aTop > bBottom;
     }
 
 
