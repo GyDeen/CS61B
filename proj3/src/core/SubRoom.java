@@ -11,12 +11,15 @@ import static core.Config.*;
 import static java.lang.Math.clamp;
 
 public class SubRoom extends Room {
-    MainRoom mainRoom;
+    private MainRoom mainRoom;
+    // 0: LEFT   1: RIGHT   2: BOTTOM   3: TOP
+    private int direction;
 
 
-    public SubRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, MainRoom baseRoom) {
+    public SubRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, MainRoom baseRoom, int direction) {
         super(height, width, x, y, thicknessOfWall, isCornered);
         mainRoom = baseRoom;
+        this.direction = direction;
     }
 
     /** Generate a subroom attached to a base main room
@@ -33,28 +36,31 @@ public class SubRoom extends Room {
         width  = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
 
+        // At least wall tiles overlap with the main room. At most hal of the subroom overlap with main room
+        int overLap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width);
+
         int x, y;
         switch (direction) {
             case 0: // left
-                x = baseRoom.getLeft() - width - 1;
-                y = RandomUtils.uniform(random, baseRoom.getTop(), baseRoom.getBottom() - height + 1);
+                x = baseRoom.getLeft() + overLap - width / 2;
+                y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case 1: // right
-                x = baseRoom.getRight() + 1;
-                y = RandomUtils.uniform(random, baseRoom.getTop(), baseRoom.getBottom() - height + 1);
+                x = baseRoom.getRight() + overLap + width / 2;
+                y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case 2: // bottom
-                y = baseRoom.getBottom() - height - 1;
+                y = baseRoom.getBottom() + overLap - height / 2;
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
                 break;
             case 3: // top
             default:
-                y = baseRoom.getTop() + 1;
+                y = baseRoom.getTop() - overLap + height / 2;
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
                 break;
         }
 
-        SubRoom sub = new SubRoom(height, width, x, y, baseRoom.getThicknessOfWall(), baseRoom.isCornered(), baseRoom);
+        SubRoom sub = new SubRoom(height, width, x, y, baseRoom.getThicknessOfWall(), baseRoom.isCornered(), baseRoom, direction);
         sub.setFloorType(baseRoom.getFloorType());
         sub.setWallType(baseRoom.getWallType());
         return sub;
@@ -68,41 +74,26 @@ public class SubRoom extends Room {
         int mainRoomWidth = mainRoom.getWidth();
         int mainRoomHeight = mainRoom.getHeight();
 
-        int startX = getLocation().x - getWidth() / 2;
-        int startY = getLocation().y - getHeight() / 2;
-        int endX = startX + getWidth();
-        int endY = startY + getHeight();
+        int startX = getLeft();
+        int startY = getBottom();
+        int endX = getRight();
+        int endY = getTop();
 
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
                 // If it don't have corner, skip the corner tiles
-                if (!isCornered() && isCornerArea(i, j, startX, startY, endX, endY, getThicknessOfWall())) continue;
+                if (isCornered() && isCornerArea(i, j, startX, startY, endX, endY, getThicknessOfWall())) continue;
 
                 // If it belongs to Main room, override it with floorType it should be
                 if (belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight)) {
-                    if (i < startX + getThicknessOfWall() + 1 || i >= endX - getThicknessOfWall() - 1 ||
-                            j < startY + getThicknessOfWall() + 1 || j >= endY - getThicknessOfWall() - 1) {
-                        world[i][j] = TileType.FLOOR.toTETile();
-                        continue;
-                    } else {world[i][j] = getFloorType().toTETile();
-                        continue;
-                    }
+                    world[i][j] = getFloorType().toTETile();
+                    continue;
                 }
 
                 // Wall zone
                 if (i < startX + getThicknessOfWall() || i >= endX - getThicknessOfWall() ||
                         j < startY + getThicknessOfWall() || j >= endY - getThicknessOfWall()) {
                     world[i][j] = getWallType().toTETile();
-                }
-
-                // Outermost floor layer inside the wall
-                else if (i < startX + getThicknessOfWall() + 1 || i >= endX - getThicknessOfWall() - 1 ||
-                        j < startY + getThicknessOfWall() + 1 || j >= endY - getThicknessOfWall() - 1) {
-                    world[i][j] = (belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight))
-                            ? getFloorType().toTETile()
-                            : TileType.FLOOR.toTETile();
-                    TERenderer render = new TERenderer();
-                    render.renderFrame(world);
                 }
                 // Inner floor
                 else {
@@ -116,7 +107,9 @@ public class SubRoom extends Room {
 
     /* Return true if given position belongs to its main room */
     private boolean belongMainRoom(int x, int y, Point mainRoomPosition, int mainRoomWidth, int mainRoomHeight) {
-        return (mainRoomPosition.x - mainRoomWidth / 2 <= x && x <= mainRoomPosition.x + mainRoomWidth / 2) &&
-                (mainRoomPosition.y - mainRoomHeight / 2 <= y && y <= mainRoomPosition.y + mainRoomHeight / 2);
+        int left = mainRoomPosition.x - mainRoomWidth / 2;
+        int bottom  = mainRoomPosition.y - mainRoomHeight / 2;
+        return x >= left && x < left + mainRoomWidth
+                && y >= bottom  && y < bottom  + mainRoomHeight;
     }
 }
