@@ -115,12 +115,26 @@ public abstract class Room {
 
 
     /** Testing whether input room is a valid room (no overlaps and within bounds) */
-    public static boolean validRoom(Room room, ArrayList<Room> rooms) {
+    public static boolean validRoom(Room room, ArrayList<Room> rooms, MainRoom allowedOverlap) {
         if (!withinBounds(room.getLocation().x, room.getLocation().y, room.getWidth(), room.getHeight())) {
             return false;
         }
 
         for (Room r : rooms) {
+
+            // Skip the overlap checking against subroom's baseRoom
+            if (r == allowedOverlap) {
+                // allow overlap with the base main room itself,
+                // but forbid overlap with its existing subrooms
+                if (allowedOverlap.getSubRooms() != null) {
+                    for (Room s : allowedOverlap.getSubRooms()) {
+                        if (boundingBoxesOverlap(room, s)) return false;
+                    }
+                }
+                continue;
+            }
+
+
             if (boundingBoxesOverlap(room, r)) return false;
 
             if (r instanceof MainRoom main) {
