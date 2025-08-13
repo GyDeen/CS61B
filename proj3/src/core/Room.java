@@ -47,8 +47,8 @@ public abstract class Room {
 
     public int getLeft()   { return getLocation().x - getWidth() / 2; }
     public int getRight()  { return getLocation().x + getWidth() / 2; }
-    public int getTop()    { return getLocation().y - getHeight() / 2; }
-    public int getBottom() { return getLocation().y + getHeight() / 2; }
+    public int getTop()    { return getLocation().y + getHeight() / 2; }
+    public int getBottom() { return getLocation().y - getHeight() / 2; }
 
     public TileType getFloorType() { return floorType; }
     public TileType getWallType() { return wallType; }
@@ -87,11 +87,6 @@ public abstract class Room {
                 if (i < startX + thicknessOfWall || i >= endX - thicknessOfWall ||
                         j < startY + thicknessOfWall || j >= endY - thicknessOfWall) {
                     world[i][j] = wallType.toTETile();
-                }
-                // Outermost floor layer inside the wall
-                else if (i < startX + thicknessOfWall + 1 || i >= endX - thicknessOfWall - 1 ||
-                        j < startY + thicknessOfWall + 1 || j >= endY - thicknessOfWall - 1) {
-                    world[i][j] = TileType.FLOOR.toTETile();
                 }
                 // Inner floor
                 else {
