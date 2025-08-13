@@ -82,7 +82,7 @@ public class SubRoom extends Room {
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
                 // If it don't have corner, skip the corner tiles
-                if (isCornered() && isCornerArea(i, j, startX, startY, endX, endY, getThicknessOfWall())) continue;
+                if (!isCornered() && isCornerArea(i, j, startX, startY, endX, endY, getThicknessOfWall())) continue;
 
                 // If it belongs to Main room, override it with floorType it should be
                 if (belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight)) {
