@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 2024726;
+    private static long seed = 1024;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -87,7 +87,6 @@ public class World {
 
     /** Method that generate the room purely randomly, not using cells */
     public void generateRoom() {
-        int roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, MAX_MAIN_ROOM_NUM + 1);
         int maxAttempt = 1000, currentAttempt = 0;
         int idealSize = WORLD_HEIGHT * WINDOW_WIDTH / roomNum;
 
@@ -158,14 +157,21 @@ public class World {
         generateRoom();
         // Generate subroom for each main room
         for (Room room : rooms) {
-            MainRoom main = (MainRoom) room;
-            int direction = RandomUtils.uniform(random, 0, 5);
-            SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, main, direction);
+            int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
+            int allocateSubroomMaxAttempt = subRoomNum * 50;
 
-            // Check whether it will overlap with other main room
-            if (Room.validRoom(subRoom, rooms)) {
-                ((MainRoom) room).attachRoom(subRoom);
+
+            // Try to allocate desire subroom number
+            for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
+                if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
+
+                int direction = RandomUtils.uniform(random, 0, 5);
+                SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, (MainRoom) room, direction);
+                if (Room.validRoom(subRoom, rooms)) {
+                    ((MainRoom) room).attachRoom(subRoom);
+                }
             }
+
         }
 
         for (Room room : rooms) {
