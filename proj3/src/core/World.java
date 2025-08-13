@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 1024;
+    private static long seed = 0726;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -25,7 +25,7 @@ public class World {
 
     /** Using the default seed to generate the world */
     public World() {
-        roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM + 2, 9);
+        roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, MAX_MAIN_ROOM_NUM);
     }
 
 
@@ -35,7 +35,7 @@ public class World {
     public World(long seed) {
         World.seed = seed;
         random = new Random(seed);
-        roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM + 2, 9);
+        roomNum = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, MAX_MAIN_ROOM_NUM);
     }
 
 
@@ -93,7 +93,7 @@ public class World {
         while (rooms.size() < roomNum &&  currentAttempt++ < maxAttempt) {
             // Generate a main room
             MainRoom newRoom = MainRoom.generate(idealSize, random);
-            if (Room.validRoom(newRoom, rooms)) rooms.add(newRoom);
+            if (Room.validRoom(newRoom, rooms, null)) rooms.add(newRoom);
         }
     }
 
@@ -157,20 +157,20 @@ public class World {
         generateRoom();
         // Generate subroom for each main room
         for (Room room : rooms) {
-            int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
-            int allocateSubroomMaxAttempt = subRoomNum * 50;
+                    int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
+                    int allocateSubroomMaxAttempt = subRoomNum * 50;
 
 
-            // Try to allocate desire subroom number
-            for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
-                if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
+                    // Try to allocate desire subroom number
+                    for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
+                        if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
 
-                int direction = RandomUtils.uniform(random, 0, 5);
-                SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, (MainRoom) room, direction);
-                if (Room.validRoom(subRoom, rooms)) {
-                    ((MainRoom) room).attachRoom(subRoom);
-                }
-            }
+                        int direction = RandomUtils.uniform(random, 0, 5);
+                        SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, (MainRoom) room, direction);
+                        if (Room.validRoom(subRoom, rooms, (MainRoom) room)) {
+                            ((MainRoom) room).attachRoom(subRoom);
+                        }
+                    }
 
         }
 

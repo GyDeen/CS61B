@@ -37,25 +37,29 @@ public class SubRoom extends Room {
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
 
         // At least wall tiles overlap with the main room. At most hal of the subroom overlap with main room
-        int overLap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width);
+        int overlap;
 
         int x, y;
         switch (direction) {
             case 0: // left
-                x = baseRoom.getLeft() + overLap - width / 2;
+                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width / 2);
+                x = baseRoom.getLeft() + overlap - width / 2;
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case 1: // right
-                x = baseRoom.getRight() + overLap + width / 2;
+                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width / 2);
+                x = baseRoom.getRight() + overlap + width / 2;
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case 2: // bottom
-                y = baseRoom.getBottom() + overLap - height / 2;
+                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), height / 2);
+                y = baseRoom.getBottom() + overlap - height / 2;
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
                 break;
             case 3: // top
             default:
-                y = baseRoom.getTop() - overLap + height / 2;
+                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), height / 2);
+                y = baseRoom.getTop() - overlap + height / 2;
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
                 break;
         }
