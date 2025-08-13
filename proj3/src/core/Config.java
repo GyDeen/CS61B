@@ -21,11 +21,11 @@ public class Config {
     public static final int MIN_MAIN_ROOM_NUM = 3;
     public static final int MAX_MAIN_ROOM_NUM = 5;
 
-    public static final int MIN_SUB_ROOM_WIDTH = 4;
-    public static final int MAX_SUB_ROOM_WIDTH = 8;
-    public static final int MIN_SUB_ROOM_HEIGHT = 3;
-    public static final int MAX_SUB_ROOM_HEIGHT = 6;
-    public static final int MIN_SUB_ROOM_NUM = 0;
-    public static final int MAX_SUB_ROOM_NUM = 4;
+    public static final int MIN_SUB_ROOM_WIDTH = 8;
+    public static final int MAX_SUB_ROOM_WIDTH = 10;
+    public static final int MIN_SUB_ROOM_HEIGHT = 6;
+    public static final int MAX_SUB_ROOM_HEIGHT = 10;
+    public static final int MIN_SUB_ROOM_NUM = 2;
+    public static final int MAX_SUB_ROOM_NUM = 7;
 
 }

@@ -48,7 +48,7 @@ public class SubRoom extends Room {
                 break;
             case 1: // right
                 overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width / 2);
-                x = baseRoom.getRight() + overlap + width / 2;
+                x = baseRoom.getRight() - overlap + width / 2;
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case 2: // bottom
