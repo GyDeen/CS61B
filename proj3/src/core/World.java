@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 0726;
+    private static long seed = 6;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -165,7 +165,7 @@ public class World {
                     for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
                         if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
 
-                        int direction = RandomUtils.uniform(random, 0, 5);
+                        Direction direction = Direction.values()[RandomUtils.uniform(random, Direction.values().length)];
                         SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, (MainRoom) room, direction);
                         if (Room.validRoom(subRoom, rooms, (MainRoom) room)) {
                             ((MainRoom) room).attachRoom(subRoom);
