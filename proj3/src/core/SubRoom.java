@@ -35,29 +35,32 @@ public class SubRoom extends Room {
         width  = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
 
+        int minOverlapX = baseRoom.getThicknessOfWall() + 1;
+        int minOverlapY = baseRoom.getThicknessOfWall() + 1;
+
         // At least wall tiles overlap with the main room. At most hal of the subroom overlap with main room
         int overlap;
 
         int x, y;
         switch (direction) {
             case LEFT: // left
-                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width / 2);
+                overlap = RandomUtils.uniform(random, minOverlapX, width / 2);
                 x = baseRoom.getLeft() + overlap - width / 2;
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case RIGHT: // right
-                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), width / 2);
+                overlap = RandomUtils.uniform(random, minOverlapX, width / 2);
                 x = baseRoom.getRight() - overlap + width / 2;
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
                 break;
             case DOWN: // bottom
-                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), height / 2);
+                overlap = RandomUtils.uniform(random, minOverlapY, height / 2);
                 y = baseRoom.getBottom() + overlap - height / 2;
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
                 break;
             case UP: // top
             default:
-                overlap = RandomUtils.uniform(random, baseRoom.getThicknessOfWall(), height / 2);
+                overlap = RandomUtils.uniform(random, minOverlapY, height / 2);
                 y = baseRoom.getTop() - overlap + height / 2;
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
                 break;
@@ -79,9 +82,9 @@ public class SubRoom extends Room {
 
         int startX = getLeft();
         int startY = getBottom();
-        int endX   = getRight();    // exclusive
-        int endY   = getTop();      // exclusive
-        int t      = getThicknessOfWall();
+        int endX = getRight();
+        int endY = getTop();
+        int t = getThicknessOfWall();
 
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
@@ -91,20 +94,29 @@ public class SubRoom extends Room {
                         (i < startX + t) || (i >= endX - t) ||
                                 (j < startY + t) || (j >= endY - t);
 
+                boolean onSubroomFloor =
+                        (i >= startX + t) && (i < endX - t) &&
+                                (j >= startY + t) && (j < endY - t);
+
                 // Belong to main room
                 boolean inMainBounds = belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight);
 
                 boolean onMainFloor =
-                        (i >= mainRoom.getLeft()   + t && i < mainRoom.getRight()  - t) &&
-                                (j >= mainRoom.getBottom() + t && j < mainRoom.getTop()    - t);
+                        (i >= mainRoom.getLeft() + t && i < mainRoom.getRight() - t) &&
+                                (j >= mainRoom.getBottom() + t && j < mainRoom.getTop() - t);
 
                 boolean onMainWall = inMainBounds && !onMainFloor;
 
                 // Doorway only along the shared edge for this subroom's direction
-                boolean onDoorway = onMainWall && !subRoomWall;
+                boolean onDoorway = (onMainWall && onSubroomFloor) || (onMainWall && subRoomWall) || (subRoomWall && onMainFloor);
 
-                // Only skip rounded *interior* corners; keep wall corners solid ---
+                // Only skip rounded *interior* corners; keep wall corners solid
                 if (!isCornered() && isCornerArea(i, j, startX, startY, endX, endY, t) && !subRoomWall) {
+                    continue;
+                }
+
+                if (onDoorway) {
+                    world[i][j] = getFloorType().toTETile();
                     continue;
                 }
 
@@ -112,14 +124,8 @@ public class SubRoom extends Room {
                     continue;
                 }
 
-                // Preserve the main wall band, except at the doorway
-                if (onMainWall && !onDoorway) {
+                if (onMainWall) {
                     world[i][j] = getWallType().toTETile();
-                    continue;
-                }
-
-                if (onDoorway) {
-                    world[i][j] = getFloorType().toTETile();
                     continue;
                 }
 
