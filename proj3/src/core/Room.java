@@ -209,7 +209,7 @@ public abstract class Room {
 
         ArrayList<TileType> others = new ArrayList<>();
         for (TileType t : TileType.values()) {
-            if (t.passable && t != TileType.FLOOR) {
+            if (t.isPassable() && t != TileType.FLOOR) {
                 others.add(t);
             }
         }
