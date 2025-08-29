@@ -11,14 +11,13 @@ public enum TileType {
     SAND(true, 2),
     TREE(true, 2),
     WATER(true, 1),
-    HALLWAYFLOOR(true, 5),
     MOUNTAIN(false, Integer.MAX_VALUE),
     LOCKED_DOOR(false, Integer.MAX_VALUE),
     WALL(false, Integer.MAX_VALUE);
 
 
-    public final boolean passable;
-    public final int movementCost;
+    private final boolean passable;
+    private final int movementCost;
 
     TileType(boolean passable, int movementCost) {
         this.passable = passable;
@@ -27,7 +26,7 @@ public enum TileType {
 
     public TETile toTETile() {
         return switch (this) {
-            case FLOOR, HALLWAYFLOOR -> Tileset.FLOOR;
+            case FLOOR -> Tileset.FLOOR;
             case UNLOCKED_DOOR -> Tileset.UNLOCKED_DOOR;
             case GRASS -> Tileset.GRASS;
             case FLOWER -> Tileset.FLOWER;
@@ -39,5 +38,27 @@ public enum TileType {
             case WALL -> Tileset.WALL;
             default -> throw new IllegalArgumentException("Unrecognized tile type: " + this);
         };
+    }
+
+
+    /** Convert input tile into TileType */
+    public static TileType toType(TETile tile) {
+        return switch (tile) {
+            case FLOOR -> TileType.FLOOR;
+            case UNLOCKED_DOOR -> TileType.UNLOCKED_DOOR;
+            case GRASS -> TileType.GRASS;
+            case FLOWER -> TileType.FLOWER;
+            case SAND -> TileType.SAND;
+            case TREE -> TileType.TREE;
+            case WATER -> TileType.WATER;
+            case MOUNTAIN -> TileType.MOUNTAIN;
+            case LOCKED_DOOR -> TileType.LOCKED_DOOR;
+            case WALL -> TileType.WALL;
+            default -> throw new IllegalArgumentException("Unrecognized tile type: " + tile);
+        };
+    }
+
+    public Boolean isPassable(){
+        return passable;
     }
 }
