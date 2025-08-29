@@ -21,7 +21,6 @@ public class World {
 
     private int roomNum;
     private ArrayList<Room> rooms = new ArrayList<>();
-    private ArrayList<Hallway> hallways = new ArrayList<>();
 
 
     /** Using the default seed to generate the world */
