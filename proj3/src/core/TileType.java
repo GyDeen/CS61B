@@ -13,7 +13,8 @@ public enum TileType {
     WATER(true, 1),
     MOUNTAIN(false, Integer.MAX_VALUE),
     LOCKED_DOOR(false, Integer.MAX_VALUE),
-    WALL(false, Integer.MAX_VALUE);
+    WALL(false, Integer.MAX_VALUE),
+    NOTHING(false, Integer.MAX_VALUE);
 
 
     private final boolean passable;
@@ -54,6 +55,7 @@ public enum TileType {
             case MOUNTAIN -> TileType.MOUNTAIN;
             case LOCKED_DOOR -> TileType.LOCKED_DOOR;
             case WALL -> TileType.WALL;
+            case NOTHING -> TileType.NOTHING;
             default -> throw new IllegalArgumentException("Unrecognized tile type: " + tile);
         };
     }

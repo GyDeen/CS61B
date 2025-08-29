@@ -23,7 +23,15 @@ public class HallwayCarver {
 
         for (int x = 0; x < world.length; x++) {
             for (int y = 0; y < world[0].length; y++) {
-                if (world[x][y].isPassable())
+                TileType worldTile= TileType.toType(world[x][y]);
+                if (worldTile.isPassable()) {
+                    floor[x][y] = true;
+                } else if (worldTile == TileType.NOTHING) {
+                    floor[x][y] = false;
+                    wall[x][y] = false;
+                } else {
+                    wall[x][y] = true;
+                }
             }
         }
     }
