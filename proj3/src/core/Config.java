@@ -28,4 +28,6 @@ public class Config {
     public static final int MIN_SUB_ROOM_NUM = 2;
     public static final int MAX_SUB_ROOM_NUM = 7;
 
+    public static final int DOOR_BUFF = 1;
+
 }

@@ -44,7 +44,7 @@ public class HallwayCarver {
     }
 
     private void setFloor(int x, int y) {
-        world[x][y] = Tileset.FLOOR;
+        world[x][y] = FLOOR;
         floor[x][y] = true;
         wall[x][y]  = false;
     }
@@ -70,7 +70,45 @@ public class HallwayCarver {
     /** Connect two room with given Door */
     public boolean connect(Room a, Point doorA, Room b, Point doorB, boolean placeDoors) {
         Point drA = (doorA != null) ? doorA : pickDoorOnPerimeter(a, b);
-        Point drb = (doorB != null) ? doorB : pickDoorOnPerimeter(b, a);
+        Point drB = (doorB != null) ? doorB : pickDoorOnPerimeter(b, a);
+        Direction direc = null;
+
+        // Door on the horizontal
+        if (drA.x == a.getLeft()) {
+            direc = Direction.LEFT;
+        } else if (drA.x == a.getRight()) {
+            direc = Direction.RIGHT;
+        }
+
+        // Door on vertical
+        if (drA.y == a.getTop()) {
+            direc = Direction.UP;
+        } else  if (drA.y == a.getBottom()) {
+            direc = Direction.DOWN;
+        }
+
+        // Find how many pivot we need. If it has no alignment for both doors, it needs 2. If it has either x or y align,
+        // it needs 1. If both align, it needs 0
+        int pivotCount = 0;
+        if (drA.x == drB.x && drA.y == drB.y) {
+            pivotCount = 2;
+        } else if (drA.x == drB.x || drA.y == drB.y) {
+            pivotCount = 1;
+        }
+
+        // Generate pivot position
+        Point[] pivots = new Point[pivotCount + 2];
+        if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) {
+            pivotCount += 2;
+        }
+
+        while (pivotCount > 0) {
+
+        }
+
+
+
+        return true;
     }
 
 
@@ -84,28 +122,28 @@ public class HallwayCarver {
         if (fromOnLeft && fromOnBottom) { // From on Bottom Left
             boolean onFromTop = random.nextBoolean();
             if (onFromTop) {
-                doorX = random.nextInt(from.getLeft(), from.getRight());
+                doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
                 doorY = from.getTop();
             } else {
-                doorY = random.nextInt(from.getBottom(), from.getBottom());
+                doorY = random.nextInt(from.getBottom() + 1, from.getBottom() - 1);
                 doorX = from.getRight();
             }
         } else if (!fromOnLeft && fromOnBottom) { // From on Bottom Right
             boolean onFromTop = random.nextBoolean();
             if (onFromTop) {
-                doorX = random.nextInt(from.getLeft(), from.getRight());
+                doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
                 doorY = from.getTop();
             } else {
-                doorY = random.nextInt(from.getBottom(), from.getBottom());
+                doorY = random.nextInt(from.getBottom() + 1, from.getBottom() - 1);
                 doorX = from.getLeft();
             }
         } else if (!fromOnLeft && !fromOnBottom) { // From on Top Right
             boolean onFromBottom = random.nextBoolean();
             if (onFromBottom) {
-                doorX = random.nextInt(from.getLeft(), from.getRight());
+                doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
                 doorY = from.getBottom();
             } else {
-                doorY = random.nextInt(from.getBottom(), from.getTop());
+                doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
                 doorX = from.getLeft();
             }
         } else { // From on Top Left
@@ -122,5 +160,30 @@ public class HallwayCarver {
         return new Point(doorX, doorY);
     }
 
+    /* Return the distance between given two point */
+    private static double distancePoint(int x1, int y1, int x2, int y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+
+    /* It will generate a pivot based on current position, direction, and destination position */
+    private Point generatePivot(Point current, Direction direction, Point destination, int pivotCount) {
+        if (pivotCount == 0) throw new RuntimeException("Invalid pivot count");
+
+        final int minX = 1, maxX = world.length - 2;
+        final int minY = 1, maxY = world[0].length - 2;
+
+        switch (direction) {
+            case UP:
+                int yStart = clamp(current.y + Config.DOOR_BUFF, minY, maxY);
+        }
+
+    }
+
+
+    private static int clamp(int v, int lo, int hi) {
+        if (lo > hi) { int t = lo; lo = hi; hi = t; }
+        return (v < lo) ? lo : Math.min(v, hi);
+    }
 
 }

@@ -44,23 +44,21 @@ public enum TileType {
 
     /** Convert input tile into TileType */
     public static TileType toType(TETile tile) {
-        return switch (tile) {
-            case FLOOR -> TileType.FLOOR;
-            case UNLOCKED_DOOR -> TileType.UNLOCKED_DOOR;
-            case GRASS -> TileType.GRASS;
-            case FLOWER -> TileType.FLOWER;
-            case SAND -> TileType.SAND;
-            case TREE -> TileType.TREE;
-            case WATER -> TileType.WATER;
-            case MOUNTAIN -> TileType.MOUNTAIN;
-            case LOCKED_DOOR -> TileType.LOCKED_DOOR;
-            case WALL -> TileType.WALL;
-            case NOTHING -> TileType.NOTHING;
-            default -> throw new IllegalArgumentException("Unrecognized tile type: " + tile);
-        };
+        if (tile == Tileset.FLOOR) return FLOOR;
+        if (tile == Tileset.UNLOCKED_DOOR) return UNLOCKED_DOOR;
+        if (tile == Tileset.GRASS) return GRASS;
+        if (tile == Tileset.FLOWER) return FLOWER;
+        if (tile == Tileset.SAND) return SAND;
+        if (tile == Tileset.TREE) return TREE;
+        if (tile == Tileset.WATER) return WATER;
+        if (tile == Tileset.MOUNTAIN) return MOUNTAIN;
+        if (tile == Tileset.LOCKED_DOOR) return LOCKED_DOOR;
+        if (tile == Tileset.WALL) return WALL;
+        if (tile == Tileset.NOTHING) return NOTHING;
+        throw new IllegalArgumentException("Unrecognized tile: " + tile);
     }
 
-    public Boolean isPassable(){
+    public boolean isPassable(){
         return passable;
     }
 }
