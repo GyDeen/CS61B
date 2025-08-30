@@ -215,4 +215,10 @@ public abstract class Room {
         }
         floorType = others.get(random.nextInt(others.size()));
     }
+
+
+    /** Return the distance between two rooms */
+    public static double distanceBetween(Room a, Room b) {
+        return Math.sqrt(Math.pow(Math.abs(a.location.x - b.location.x), 2) + Math.pow(Math.abs(a.location.y - b.location.y), 2));
+    }
 }
