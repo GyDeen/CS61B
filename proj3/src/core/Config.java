@@ -29,5 +29,8 @@ public class Config {
     public static final int MAX_SUB_ROOM_NUM = 7;
 
     public static final int DOOR_BUFF = 1;
+    public static final int MAX_OVERSHOOT = 5;
+    public static final int FUTURE_BUFFER = 1;
+    public static final int SMALL_ADVANCE = 1;
 
 }

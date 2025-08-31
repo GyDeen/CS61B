@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import static core.Config.*;
 import static tileengine.Tileset.FLOOR;
 
 public class HallwayCarver {
@@ -165,20 +166,116 @@ public class HallwayCarver {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-
-    /* It will generate a pivot based on current position, direction, and destination position */
     private Point generatePivot(Point current, Direction direction, Point destination, int pivotCount) {
-        if (pivotCount == 0) throw new RuntimeException("Invalid pivot count");
+        if (pivotCount <= 0) throw new IllegalArgumentException("Invalid pivot count");
 
         final int minX = 1, maxX = world.length - 2;
         final int minY = 1, maxY = world[0].length - 2;
 
         switch (direction) {
-            case UP:
-                int yStart = clamp(current.y + Config.DOOR_BUFF, minY, maxY);
-        }
+            case UP: {
+                // Pivot will be (current.x, py) with py > current.y
+                int yStart = Math.min(current.y + DOOR_BUFF, maxY);
 
+                if (pivotCount == 1) {
+                    if (destination.y <= current.y)
+                        throw new IllegalStateException("Final UP pivot impossible: dest.y is not ahead");
+                    int py = Math.min(destination.y, maxY);
+                    return new Point(current.x, py);
+                } else {
+                    int yEnd;
+                    if (destination.y > current.y) {
+                        // head toward dest, but don't go past
+                        int target = destination.y - FUTURE_BUFFER + MAX_OVERSHOOT;
+                        yEnd = Math.min(target, maxY);
+                    } else {
+                        // dest is behind or equal in y
+                        yEnd = Math.min(current.y + SMALL_ADVANCE, maxY);
+                    }
+                    if (yStart > yEnd) return new Point(current.x, Math.min(current.y + 1, maxY));
+                    int py = (yStart == yEnd) ? yStart : random.nextInt(yStart, yEnd + 1);
+                    return new Point(current.x, py);
+                }
+            }
+
+            case DOWN: {
+                // Pivot will be (current.x, py) with py < current.y
+                int yStart = Math.max(current.y - DOOR_BUFF, minY);
+
+                if (pivotCount == 1) {
+                    if (destination.y >= current.y)
+                        throw new IllegalStateException("Final DOWN pivot impossible: dest.y is not reachable");
+                    int py = Math.max(destination.y, minY);
+                    return new Point(current.x, py);
+                } else {
+                    int yEnd;
+                    if (destination.y < current.y) {
+                        int target = destination.y + FUTURE_BUFFER - MAX_OVERSHOOT;
+                        yEnd = Math.max(target, minY);
+                    } else {
+                        yEnd = Math.max(current.y - SMALL_ADVANCE, minY);
+                    }
+                    // yEnd <= yStart for DOWN
+                    if (yEnd > yStart) return new Point(current.x, Math.max(current.y - 1, minY));
+                    int py = (yEnd == yStart) ? yStart : random.nextInt(yEnd, yStart + 1);
+                    if (py >= current.y) py = current.y - 1;    // ensure we actually move down
+                    return new Point(current.x, Math.max(py, minY));
+                }
+            }
+
+            case RIGHT: {
+                // Pivot will be (px, current.y) with px > current.x
+                int xStart = Math.min(current.x + DOOR_BUFF, maxX);
+
+                if (pivotCount == 1) {
+                    if (destination.x <= current.x)
+                        throw new IllegalStateException("Final RIGHT pivot impossible: dest.x is not reachable");
+                    int px = Math.min(destination.x, maxX);
+                    return new Point(px, current.y);
+                } else {
+                    int xEnd;
+                    if (destination.x > current.x) {
+                        int target = destination.x - FUTURE_BUFFER + MAX_OVERSHOOT;
+                        xEnd = Math.min(target, maxX);
+                    } else {
+                        xEnd = Math.min(current.x + SMALL_ADVANCE, maxX);
+                    }
+                    if (xStart > xEnd) return new Point(Math.min(current.x + 1, maxX), current.y);
+                    int px = (xStart == xEnd) ? xStart : random.nextInt(xStart, xEnd + 1);
+                    return new Point(px, current.y);
+                }
+            }
+
+            case LEFT: {
+                // Pivot will be (px, current.y) with px < current.x
+                int xStart = Math.max(current.x - DOOR_BUFF, minX);
+
+                if (pivotCount == 1) {
+                    if (destination.x >= current.x)
+                        throw new IllegalStateException("Final LEFT pivot impossible: dest.x is not reachable");
+                    int px = Math.max(destination.x, minX);
+                    return new Point(px, current.y);
+                } else {
+                    int xEnd;
+                    if (destination.x < current.x) {
+                        int target = destination.x + FUTURE_BUFFER - MAX_OVERSHOOT;
+                        xEnd = Math.max(target, minX);
+                    } else {
+                        xEnd = Math.max(current.x - SMALL_ADVANCE, minX);
+                    }
+                    // xEnd <= xStart for LEFT;
+                    if (xEnd > xStart) return new Point(Math.max(current.x - 1, minX), current.y);
+                    int px = (xEnd == xStart) ? xStart : random.nextInt(xEnd, xStart + 1);
+                    if (px >= current.x) px = current.x - 1;
+                    return new Point(Math.max(px, minX), current.y);
+                }
+            }
+
+            default:
+                throw new IllegalStateException("Unknown direction: " + direction);
+        }
     }
+
 
 
     private static int clamp(int v, int lo, int hi) {
