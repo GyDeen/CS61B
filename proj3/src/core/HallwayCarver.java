@@ -56,6 +56,11 @@ public class HallwayCarver {
         floor[x][y] = false;
     }
 
+    private void setDoor(int x, int y) {
+        world[x][y] = tileengine.Tileset.UNLOCKED_DOOR;
+        floor[x][y] = true; wall[x][y] = false;
+    }
+
     private boolean inBounds(int x, int y) {
         return 0 <= x && x < world.length && 0 <= y && y < world[0].length;
     }
@@ -98,14 +103,14 @@ public class HallwayCarver {
         }
 
         // Generate pivot position
-        Point[] pivots = new Point[pivotCount + 2];
         if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) {
             pivotCount += 2;
         }
 
+        Point currentPos = new Point(drA.x, drA.y);
         int i = 0;
         while (pivotCount > 0) {
-            pivots[i] = pickDoorOnPerimeter(a, b);
+            Point pivot = pickDoorOnPerimeter(a, b);
             pivotCount--;
         }
 
@@ -168,6 +173,8 @@ public class HallwayCarver {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
+
+    /* It will generate a pivot based on given direction, current position, and destination */
     private Point generatePivot(Point current, Direction direction, Point destination, int pivotCount) {
         if (pivotCount <= 0) throw new IllegalArgumentException("Invalid pivot count");
 
@@ -324,5 +331,17 @@ public class HallwayCarver {
             }
         }
     }
+
+
+    /* It will allocate hallway. If it hit a wall at the same direction, it will return false then roll back.
+    * Or it out of bound will also return false and roll back. Otherwise it will allocate hallway and mark the WALL AND
+    * FLOOR AND WORLD */
+    private boolean allocateHallway(Point currentPos, Point nextPivot) {
+
+    }
+
+
+    /* Get the type of Tile at given position */
+    private TileType typeAt(int x, int y) { return TileType.toType(world[x][y]); }
 
 }
