@@ -103,8 +103,10 @@ public class HallwayCarver {
             pivotCount += 2;
         }
 
+        int i = 0;
         while (pivotCount > 0) {
-
+            pivots[i] = pickDoorOnPerimeter(a, b);
+            pivotCount--;
         }
 
 
@@ -277,10 +279,50 @@ public class HallwayCarver {
     }
 
 
-
+    /* Fit v into range of lo and hi */
     private static int clamp(int v, int lo, int hi) {
         if (lo > hi) { int t = lo; lo = hi; hi = t; }
         return (v < lo) ? lo : Math.min(v, hi);
+    }
+
+    /* Return true if given direction on Horizontal */
+    private boolean isHorizontal(Direction d) {
+        return d == Direction.LEFT || d == Direction.RIGHT;
+    }
+
+
+    /* Find next Direction for current carver */
+    private Direction nextDirection(Direction currentDir, Point atPivot, Point dest, int remainingPivots) {
+        if (!isHorizontal(currentDir)) { // was UP/DOWN, go horizontal now
+            if (dest.x > atPivot.x) return Direction.RIGHT;
+            if (dest.x < atPivot.x) return Direction.LEFT;
+            // dest.x == pivot.x: perfectly aligned on x
+            if (remainingPivots > 0) {
+                // pick the side with more space
+                int rightSpace = (world.length - 2) - atPivot.x;
+                int leftSpace  = atPivot.x - 1;
+                if (rightSpace == leftSpace) {
+                    return random.nextBoolean() ? Direction.RIGHT : Direction.LEFT;
+                }
+                return (rightSpace > leftSpace) ? Direction.RIGHT : Direction.LEFT;
+            } else {
+                // final leg will be vertical anyway
+                return Direction.RIGHT;
+            }
+        } else { // was LEFT/RIGHT, go vertical now
+            if (dest.y > atPivot.y) return Direction.UP;
+            if (dest.y < atPivot.y) return Direction.DOWN;
+            if (remainingPivots > 0) {
+                int upSpace   = (world[0].length - 2) - atPivot.y;
+                int downSpace = atPivot.y - 1;
+                if (upSpace == downSpace) {
+                    return random.nextBoolean() ? Direction.UP : Direction.DOWN;
+                }
+                return (upSpace > downSpace) ? Direction.UP : Direction.DOWN;
+            } else {
+                return Direction.UP;
+            }
+        }
     }
 
 }
