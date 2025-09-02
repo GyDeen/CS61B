@@ -1,6 +1,7 @@
 package core;
 
 import tileengine.TETile;
+import tileengine.TileType;
 
 import java.awt.*;
 import java.util.ArrayList;

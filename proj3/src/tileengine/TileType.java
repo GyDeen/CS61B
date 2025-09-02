@@ -1,7 +1,4 @@
-package core;
-
-import tileengine.TETile;
-import tileengine.Tileset;
+package tileengine;
 
 public enum TileType {
     FLOOR(true, 5),

@@ -1,7 +1,7 @@
 package core;
 
 import tileengine.TETile;
-import utils.RandomUtils;
+import tileengine.TileType;
 
 import java.awt.*;
 import java.util.ArrayList;
