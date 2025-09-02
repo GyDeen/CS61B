@@ -88,7 +88,7 @@ public class HallwayCarver {
         // Door on vertical
         if (drA.y == a.getTop()) {
             direc = Direction.UP;
-        } else  if (drA.y == a.getBottom()) {
+        } else if (drA.y == a.getBottom()) {
             direc = Direction.DOWN;
         }
 
@@ -101,7 +101,7 @@ public class HallwayCarver {
             pivotCount = 1;
         }
 
-        // Generate pivot position
+        // Randomly add more pivot for long distance hallway
         if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) {
             pivotCount += 2;
         }
@@ -109,7 +109,7 @@ public class HallwayCarver {
         Point currentPos = new Point(drA.x, drA.y);
         int i = 0;
         while (pivotCount > 0) {
-            Point pivot = pickDoorOnPerimeter(a, b);
+            Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
             pivotCount--;
         }
 
@@ -302,7 +302,7 @@ public class HallwayCarver {
         if (!isHorizontal(currentDir)) { // was UP/DOWN, go horizontal now
             if (dest.x > atPivot.x) return Direction.RIGHT;
             if (dest.x < atPivot.x) return Direction.LEFT;
-            // dest.x == pivot.x: perfectly aligned on x
+            // perfectly aligned on x
             if (remainingPivots > 0) {
                 // pick the side with more space
                 int rightSpace = (world.length - 2) - atPivot.x;
@@ -394,13 +394,11 @@ public class HallwayCarver {
         // SUCCESS — commit staged changes to world and  masks
         for (Point p : floors) {
             world[p.x][p.y] = tileengine.Tileset.FLOOR;
-            floor[p.x][p.y] = true;
-            wall[p.x][p.y]  = false;
+            setFloor(p.x, p.y);
         }
         for (Point p : doors) {
             world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
-            floor[p.x][p.y] = true;
-            wall[p.x][p.y]  = false;
+            setDoor(p.x, p.y);
         }
         return true;
     }
