@@ -1,7 +1,6 @@
 package core;
 
 import tileengine.TETile;
-import tileengine.Tileset;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static core.Config.*;
-import static tileengine.Tileset.FLOOR;
 
 public class HallwayCarver {
     private static TETile[][] world;
@@ -44,21 +42,22 @@ public class HallwayCarver {
         }
     }
 
+
     private void setFloor(int x, int y) {
-        world[x][y] = FLOOR;
         floor[x][y] = true;
         wall[x][y]  = false;
     }
 
+
     private void setWall(int x, int y) {
-        world[x][y] = Tileset.WALL;
         wall[x][y]  = true;
         floor[x][y] = false;
     }
 
     private void setDoor(int x, int y) {
-        world[x][y] = tileengine.Tileset.UNLOCKED_DOOR;
-        floor[x][y] = true; wall[x][y] = false;
+        floor[x][y] = true;
+        wall[x][y]  = false;
+        door.add(new Point(x, y));
     }
 
     private boolean inBounds(int x, int y) {
@@ -333,12 +332,79 @@ public class HallwayCarver {
     }
 
 
-    /* It will allocate hallway. If it hit a wall at the same direction, it will return false then roll back.
-    * Or it out of bound will also return false and roll back. Otherwise it will allocate hallway and mark the WALL AND
-    * FLOOR AND WORLD */
-    private boolean allocateHallway(Point currentPos, Point nextPivot) {
-
+    private static boolean contains(ArrayList<Point> pts, int x, int y) {
+        for (Point p : pts) if (p.x == x && p.y == y) return true;
+        return false;
     }
+
+    /* Allocate a straight segment currentPos -> nextPivot.
+     * - If OOB, or > MAX_WALL_IN_A_ROW walls in a row: return false (no changes).
+     * - NOTHING: stage floor.
+     * - PASSABLE: walk over (don’t modify).
+     * - WALL: stage door, keep counting; if run exceeds limit -> fail.
+     * On success, write staged floors/doors to world[][] and update floor[][]/wall[][]. */
+    private boolean allocateHallway(Point currentPos, Point nextPivot) {
+        if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
+            throw new IllegalArgumentException("Invalid pivot (must be axis-aligned)");
+        }
+
+        int dx = Integer.compare(nextPivot.x, currentPos.x); // <<< destination - source
+        int dy = Integer.compare(nextPivot.y, currentPos.y);
+        if (dx == 0 && dy == 0) return true;
+
+        // Stage change not commit to the world
+        ArrayList<Point> floors = new ArrayList<>();
+        ArrayList<Point> doors  = new ArrayList<>();
+
+        int x = currentPos.x, y = currentPos.y;
+        int wallRun = 0;
+
+        while (x != nextPivot.x || y != nextPivot.y) {
+            int nx = x + dx, ny = y + dy;
+            if (!inBounds(nx, ny)) return false;
+
+            // Treat already-staged cells as passable while planning
+            boolean stagedPassable = contains(floors, nx, ny) || contains(doors, nx, ny);
+            TileType nextType = stagedPassable ? TileType.FLOOR : TileType.toType(world[nx][ny]);
+
+            if (nextType == TileType.NOTHING) {
+                floors.add(new Point(nx, ny));
+                wallRun = 0;
+                x = nx; y = ny;
+                continue;
+            }
+
+            if (nextType.isPassable()) {
+                // walk across floors/doors; do not modify
+                wallRun = 0;
+                x = nx; y = ny;
+                continue;
+            }
+
+            // WALL-like: stage a door and keep counting
+            doors.add(new Point(nx, ny));
+            wallRun++;
+            // too many walls in a row -> invalid attempt; nothing committed
+            if (wallRun > MAX_WALL_IN_A_ROW) {
+                return false;
+            }
+            x = nx; y = ny;
+        }
+
+        // SUCCESS — commit staged changes to world and  masks
+        for (Point p : floors) {
+            world[p.x][p.y] = tileengine.Tileset.FLOOR;
+            floor[p.x][p.y] = true;
+            wall[p.x][p.y]  = false;
+        }
+        for (Point p : doors) {
+            world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
+            floor[p.x][p.y] = true;
+            wall[p.x][p.y]  = false;
+        }
+        return true;
+    }
+
 
 
     /* Get the type of Tile at given position */

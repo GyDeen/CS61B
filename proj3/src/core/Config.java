@@ -32,5 +32,6 @@ public class Config {
     public static final int MAX_OVERSHOOT = 5;
     public static final int FUTURE_BUFFER = 1;
     public static final int SMALL_ADVANCE = 1;
+    public static final int MAX_WALL_IN_A_ROW = 2;
 
 }
