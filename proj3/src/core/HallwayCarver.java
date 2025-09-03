@@ -15,7 +15,7 @@ public class HallwayCarver {
     private static TETile[][] world;
     private static boolean[][] floor;
     private static boolean[][] wall;
-    ArrayList<Point> door;
+    ArrayList<Point> door = new ArrayList<>();
     Random random;
 
     public HallwayCarver(TETile[][] world, Random rand) {
@@ -96,28 +96,30 @@ public class HallwayCarver {
 
         // Find how many pivot we need. If it has no alignment for both doors, it needs 2. If it has either x or y align,
         // it needs 1. If both align, it needs 0
-        int pivotCount = 0;
-        if (drA.x == drB.x && drA.y == drB.y) {
-            pivotCount = 2;
-        } else if (drA.x == drB.x || drA.y == drB.y) {
-            pivotCount = 1;
-        }
+        int pivotCount;
+        if (drA.x == drB.x && drA.y == drB.y) pivotCount = 0;
+        else if (drA.x == drB.x || drA.y == drB.y) pivotCount = 1;
+        else pivotCount = 2;
 
         // Randomly add more pivot for long distance hallway
-        if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) {
-            pivotCount += 2;
-        }
+        if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) pivotCount += 2;
+
 
         Point currentPos = new Point(drA.x, drA.y);
-        int i = 0;
+        int attempts = 0;
         while (pivotCount > 0) {
             Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
+            // Try to allocate a pivot more than 50 times, this connection failed
+            if (!allocateHallway(currentPos, pivot)) {
+                if (++attempts > MAX_ATTEMPT_PIVOT) return false;
+            }
+
             pivotCount--;
+            currentPos = pivot;
+            direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-
-
-        return true;
+        return allocateHallway(currentPos, drB);
     }
 
 
@@ -136,7 +138,7 @@ public class HallwayCarver {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
                 doorY = from.getEdgeOn(doorX, Direction.UP);
             } else {
-                doorY = random.nextInt(from.getBottom() + 1, from.getBottom() - 1);
+                doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
                 doorX = from.getEdgeOn(doorY, Direction.RIGHT);
             }
         } else if (!fromOnLeft && fromOnBottom) { // From on Bottom Right
@@ -145,7 +147,7 @@ public class HallwayCarver {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
                 doorY = from.getEdgeOn(doorX, Direction.UP);
             } else {
-                doorY = random.nextInt(from.getBottom() + 1, from.getBottom() - 1);
+                doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
                 doorX = from.getEdgeOn(doorY, Direction.LEFT);
             }
         } else if (!fromOnLeft && !fromOnBottom) { // From on Top Right
