@@ -6,6 +6,7 @@ import tileengine.TileType;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
 
 import static core.Config.*;
@@ -349,7 +350,7 @@ public class HallwayCarver {
             throw new IllegalArgumentException("Invalid pivot (must be axis-aligned)");
         }
 
-        int dx = Integer.compare(nextPivot.x, currentPos.x); // <<< destination - source
+        int dx = Integer.compare(nextPivot.x, currentPos.x);
         int dy = Integer.compare(nextPivot.y, currentPos.y);
         if (dx == 0 && dy == 0) return true;
 
@@ -382,7 +383,6 @@ public class HallwayCarver {
                 continue;
             }
 
-            // WALL-like: stage a door and keep counting
             doors.add(new Point(nx, ny));
             wallRun++;
             // too many walls in a row -> invalid attempt; nothing committed
@@ -392,7 +392,39 @@ public class HallwayCarver {
             x = nx; y = ny;
         }
 
-        // SUCCESS — commit staged changes to world and  masks
+        // Direction steps for wall placement
+        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
+        HashSet<Point> corridor = new HashSet<>();
+
+        for (Point p : floors) corridor.add(p);
+        for (Point p : doors)  corridor.add(p);
+
+        ArrayList<Point> walls = new ArrayList<>();
+
+        for (Point p : corridor) {
+            for (int i = 0; i < 4;i ++) {
+                int wx = p.x + dx4[i], wy = p.y + dy4[i];
+
+                // Allocating wall for given point will out of bounds (has leak on this allocation)
+                if (!inBounds(wx, wy)) return false;
+
+                // If the neighbor is also part of the corridor we’re committing, skip.
+                if (corridor.contains(new Point(wx, wy))) continue;
+
+                TileType t = TileType.toType(world[wx][wy]);
+
+                // neighbor is floor/door/locked door; do NOT overwrite
+                if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
+                // neighbor is NOTHING or other WALL type; overwrite
+                else {
+                    Point wallPoint = new Point(wx, wy);
+                    if (!walls.contains(wallPoint)) walls.add(wallPoint);
+                }
+            }
+        }
+
+
+        // Commit staged changes to world and  masks
         for (Point p : floors) {
             world[p.x][p.y] = tileengine.Tileset.FLOOR;
             setFloor(p.x, p.y);
@@ -401,6 +433,11 @@ public class HallwayCarver {
             world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
             setDoor(p.x, p.y);
         }
+        for (Point p: walls) {
+            world[p.x][p.y] = tileengine.Tileset.WALL;
+            setWall(p.x, p.y);
+        }
+
         return true;
     }
 
