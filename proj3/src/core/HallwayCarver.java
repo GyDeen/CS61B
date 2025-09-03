@@ -70,27 +70,27 @@ public class HallwayCarver {
 
 
     /** Connect two room without given Door*/
-    public boolean connect(Room a, Room b, boolean placeDoors) {
+    public boolean connect(MainRoom a, MainRoom b, boolean placeDoors) {
         return connect(a, null, b, null, placeDoors);
     }
 
     /** Connect two room with given Door */
-    public boolean connect(Room a, Point doorA, Room b, Point doorB, boolean placeDoors) {
+    public boolean connect(MainRoom a, Point doorA, MainRoom b, Point doorB, boolean placeDoors) {
         Point drA = (doorA != null) ? doorA : pickDoorOnPerimeter(a, b);
         Point drB = (doorB != null) ? doorB : pickDoorOnPerimeter(b, a);
         Direction direc = null;
 
         // Door on the horizontal
-        if (drA.x == a.getLeft()) {
+        if (drA.x == a.getEdgeOn(drA.y, Direction.LEFT)) {
             direc = Direction.LEFT;
-        } else if (drA.x == a.getRight()) {
+        } else if (drA.x == a.getEdgeOn(drA.y, Direction.RIGHT)) {
             direc = Direction.RIGHT;
         }
 
         // Door on vertical
-        if (drA.y == a.getTop()) {
+        if (drA.y == a.getEdgeOn(drA.x, Direction.UP)) {
             direc = Direction.UP;
-        } else if (drA.y == a.getBottom()) {
+        } else if (drA.y == a.getEdgeOn(drA.x, Direction.DOWN)) {
             direc = Direction.DOWN;
         }
 
@@ -121,7 +121,7 @@ public class HallwayCarver {
     }
 
 
-    private Point pickDoorOnPerimeter(Room from, Room to) {
+    private Point pickDoorOnPerimeter(MainRoom from, MainRoom to) {
         Point fromLoc = from.getLocation(), toLoc = to.getLocation();
 
         // Choose relatively closer side for each room as the destination. i.e. If a is at the Left Bottom of b, it
@@ -132,38 +132,39 @@ public class HallwayCarver {
         if (fromOnLeft && fromOnBottom) { // From on Bottom Left
             boolean onFromTop = random.nextBoolean();
             if (onFromTop) {
+                // + - 1 to avoid placing door on corner
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getTop();
+                doorY = from.getEdgeOn(doorX, Direction.UP);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getBottom() - 1);
-                doorX = from.getRight();
+                doorX = from.getEdgeOn(doorY, Direction.RIGHT);
             }
         } else if (!fromOnLeft && fromOnBottom) { // From on Bottom Right
             boolean onFromTop = random.nextBoolean();
             if (onFromTop) {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getTop();
+                doorY = from.getEdgeOn(doorX, Direction.UP);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getBottom() - 1);
-                doorX = from.getLeft();
+                doorX = from.getEdgeOn(doorY, Direction.LEFT);
             }
         } else if (!fromOnLeft && !fromOnBottom) { // From on Top Right
             boolean onFromBottom = random.nextBoolean();
             if (onFromBottom) {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getBottom();
+                doorY = from.getEdgeOn(doorX, Direction.DOWN);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
-                doorX = from.getLeft();
+                doorX = from.getEdgeOn(doorY, Direction.LEFT);
             }
         } else { // From on Top Left
             boolean onFromBottom = random.nextBoolean();
             if (onFromBottom) {
-                doorX = random.nextInt(from.getLeft(), from.getRight());
-                doorY = from.getBottom();
+                doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
+                doorY = from.getEdgeOn(doorX, Direction.DOWN);
             } else {
-                doorY = random.nextInt(from.getBottom(), from.getBottom());
-                doorX = from.getRight();
+                doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
+                doorX = from.getEdgeOn(doorY, Direction.RIGHT);
             }
         }
 
