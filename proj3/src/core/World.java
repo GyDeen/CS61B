@@ -179,7 +179,6 @@ public class World {
         }
 
         ter.renderFrame(world);
-
     }
 }
 
