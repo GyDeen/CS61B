@@ -61,4 +61,53 @@ public class MainRoom extends Room {
         return new ArrayList<>(subRooms);
     }
 
+
+    /** Return the left edge x based on given y
+     * @param n the axis of given direction line (y for horizontal direction; x for vertical direction)
+     * @param direction edge's direction */
+    public int getEdgeOn(int n, Direction direction) {
+        int edge;
+        switch (direction) {
+            case LEFT: {
+                edge = getLeft(); // start with main room
+                // consider any subroom that covers this row
+                for (SubRoom s : subRooms) {
+                    if (n > s.getBottom() && n < s.getTop()) {
+                        edge = Math.min(edge, s.getLeft());
+                    }
+                }
+                return edge;
+            }
+            case RIGHT: {
+                edge = getRight();
+                for (SubRoom s : subRooms) {
+                    if (n > s.getBottom() && n < s.getTop()) {
+                        edge = Math.max(edge, s.getRight());
+                    }
+                }
+                return edge;
+            }
+            case UP: {
+                edge = getTop();
+                for (SubRoom s : subRooms) {
+                    if (n > s.getLeft() && n < s.getRight()) {
+                        edge = Math.max(edge, s.getTop());
+                    }
+                }
+                return edge;
+            }
+            case DOWN: {
+                edge = getBottom();
+                for (SubRoom s : subRooms) {
+                    if (n > s.getLeft() && n < s.getRight()) {
+                        edge = Math.min(edge, s.getBottom());
+                    }
+                }
+                return edge;
+            }
+            default:
+                throw new IllegalArgumentException("Unknown direction: " + direction);
+        }
+    }
+
 }

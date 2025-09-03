@@ -143,4 +143,9 @@ public class SubRoom extends Room {
         return x >= left && x < left + mainRoomWidth
                 && y >= bottom  && y < bottom  + mainRoomHeight;
     }
+
+
+    /** Get direction of this subroom attached */
+    public Direction getDirection() {return direction;}
+
 }

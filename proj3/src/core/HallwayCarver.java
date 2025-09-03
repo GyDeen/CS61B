@@ -126,6 +126,7 @@ public class HallwayCarver {
 
         // Choose relatively closer side for each room as the destination. i.e. If a is at the Left Bottom of b, it
         // pick the door for a on the Top or Right and the door for b on Left or Bottom
+        // The door won't at the corner of the room
         boolean fromOnLeft = fromLoc.getX() < toLoc.getX(), fromOnBottom = fromLoc.getY() < toLoc.getY();
         int doorX, doorY;
         if (fromOnLeft && fromOnBottom) { // From on Bottom Left
