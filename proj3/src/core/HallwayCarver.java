@@ -106,13 +106,15 @@ public class HallwayCarver {
 
         ArrayList<Point> doors = new ArrayList<>();
         ArrayList<Point> floors = new ArrayList<>();
+        ArrayList<Point> walls = new ArrayList<>();
 
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
         while (pivotCount > 0) {
             Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
+            boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallway(currentPos, pivot)) {
+            if (!allocateHallway(currentPos, pivot, floors, doors, stageStartDoor)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return false;
                 continue;
             }
@@ -122,45 +124,7 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallway(currentPos, drB)) {
-
-            return false;
-        }
-
-
-        // Direction steps for wall placement
-        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
-        HashSet<Point> corridor = new HashSet<>();
-
-        for (Point p : floors) corridor.add(p);
-        for (Point p : doors)  corridor.add(p);
-
-        ArrayList<Point> walls = new ArrayList<>();
-
-        for (Point p : corridor) {
-            for (int i = 0; i < 4;i ++) {
-                int wx = p.x + dx4[i], wy = p.y + dy4[i];
-
-                // Allocating wall for given point will out of bounds (has leak on this allocation)
-                if (!inBounds(wx, wy)) return false;
-
-                // If the neighbor is also part of the corridor we’re committing, skip.
-                if (corridor.contains(new Point(wx, wy))) continue;
-
-                TileType t = typeAt(wx, wy);
-
-                // neighbor is floor/door/locked door; do NOT overwrite
-                if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
-                    // neighbor is NOTHING or other WALL type; overwrite
-                else {
-                    Point wallPoint = new Point(wx, wy);
-                    if (!walls.contains(wallPoint)) walls.add(wallPoint);
-                }
-            }
-        }
-
-
-        // Commit staged changes to world and  masks
+        // Commit staged changes to world and masks
         for (Point p : floors) {
             world[p.x][p.y] = tileengine.Tileset.FLOOR;
             setFloor(p.x, p.y);
@@ -399,12 +363,12 @@ public class HallwayCarver {
     }
 
     /* Allocate a straight segment currentPos to nextPivot.
-     * - If out of bounds, or > MAX_WALL_IN_A_ROW walls in a row: return false (no changes)
+     * - If out of bounds, or > MAX_WALL_IN_A_ROW walls in a row: return false
      * - NOTHING: stage floor
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
-     * On success, write staged floors/doors to world[][] and update floor[][]/wall[][]. */
-    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
+     * On success, update floor[][]/wall[][]. */
+    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, ArrayList<Point> walls, boolean stageStartDoor) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot (must be axis-aligned)");
         }
@@ -416,6 +380,7 @@ public class HallwayCarver {
         // Stage change not commit to the world
         ArrayList<Point> stageFloors = new ArrayList<>();
         ArrayList<Point> stageDoors  = new ArrayList<>();
+        ArrayList<Point> stageWalls = new ArrayList<>();
 
         // Current point is the starting point for current connection
         if (stageStartDoor) {
@@ -460,6 +425,39 @@ public class HallwayCarver {
 
     }
 
+
+    /* Checking whether current allocation of hallway won't lead to out of bound for the wall allocation*/
+    private boolean wallValidation(ArrayList<Point> segFloors, ArrayList<Point> segDoors, ArrayList<Point> hallFloors, ArrayList<Point> hallDoors) {
+        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
+
+        // Checking allocating walls around current floor plan
+        for (Point c : segFloors) {
+            for (int k = 0; k < 4; k++) {
+                int wx = c.x + dx4[k], wy = c.y + dy4[k];
+
+                // neighbor already corridor no wall needed on this side
+                if (contains(hallFloors, wx, wy) || contains(hallDoors, wx, wy) ||
+                        contains(segFloors,  wx, wy) || contains(segDoors,  wx, wy)) {
+                    continue;
+                }
+
+                // If not in bounds for wall allocation, it means it will lead to leak
+                if (!inBounds(wx, wy)) return false;
+            }
+        }
+
+        for (Point c : segDoors) {
+            for (int k = 0; k < 4; k++) {
+                int wx = c.x + dx4[k], wy = c.y + dy4[k];
+                if (contains(hallFloors, wx, wy) || contains(hallDoors, wx, wy) ||
+                        contains(segFloors,  wx, wy) || contains(segDoors,  wx, wy)) {
+                    continue;
+                }
+                if (!inBounds(wx, wy)) return false;
+            }
+        }
+        return true;
+    }
 
 
     /* Get the type of Tile at given position */
