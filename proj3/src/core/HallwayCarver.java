@@ -6,7 +6,6 @@ import tileengine.TileType;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
 
 import static core.Config.*;
@@ -70,12 +69,12 @@ public class HallwayCarver {
 
 
     /** Connect two room without given Door*/
-    public boolean connect(MainRoom a, MainRoom b, boolean placeDoors) {
-        return connect(a, null, b, null, placeDoors);
+    public boolean connect(MainRoom a, MainRoom b) {
+        return connect(a, null, b, null);
     }
 
     /** Connect two room with given Door */
-    public boolean connect(MainRoom a, Point doorA, MainRoom b, Point doorB, boolean placeDoors) {
+    public boolean connect(MainRoom a, Point doorA, MainRoom b, Point doorB) {
         Point drA = (doorA != null) ? doorA : pickDoorOnPerimeter(a, b);
         Point drB = (doorB != null) ? doorB : pickDoorOnPerimeter(b, a);
         Direction direc = null;
@@ -106,7 +105,6 @@ public class HallwayCarver {
 
         ArrayList<Point> doors = new ArrayList<>();
         ArrayList<Point> floors = new ArrayList<>();
-        ArrayList<Point> walls = new ArrayList<>();
 
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
@@ -114,7 +112,7 @@ public class HallwayCarver {
             Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallway(currentPos, pivot, floors, doors, walls, stageStartDoor)) {
+            if (!allocateHallway(currentPos, pivot, floors, doors, stageStartDoor)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return false;
                 continue;
             }
@@ -123,6 +121,8 @@ public class HallwayCarver {
             currentPos = pivot;
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
+
+        ArrayList<Point> walls = collectWalls(floors, doors);
 
         // Commit staged changes to world and masks
         for (Point p : floors) {
@@ -133,6 +133,8 @@ public class HallwayCarver {
             world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
             setDoor(p.x, p.y);
         }
+
+        assert walls != null;
         for (Point p: walls) {
             world[p.x][p.y] = tileengine.Tileset.WALL;
             setWall(p.x, p.y);
@@ -141,6 +143,43 @@ public class HallwayCarver {
         return true;
     }
 
+
+    /* Generte all the wall tiles that we need to allocate */
+    private ArrayList<Point> collectWalls(ArrayList<Point> floors, ArrayList<Point> doors) {
+        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
+        ArrayList<Point> walls = new ArrayList<>();
+
+        // Treat the final corridor set as passable
+        for (Point c : floors) {
+            for (int k = 0; k < 4; k++) {
+                int wx = c.x + dx4[k], wy = c.y + dy4[k];
+
+                // neighbor already corridor? skip
+                if (contains(floors, wx, wy) || contains(doors, wx, wy)) continue;
+
+                // leak guard (should already be prevented; keep as sanity check)
+                if (!inBounds(wx, wy)) return null;
+
+                TileType t = typeAt(wx, wy);
+                // Never overwrite passables / locked doors
+                if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
+
+                // Fill NOTHING or overwrite existing WALL
+                if (!contains(walls, wx, wy)) walls.add(new Point(wx, wy));
+            }
+        }
+        for (Point c : doors) {
+            for (int k = 0; k < 4; k++) {
+                int wx = c.x + dx4[k], wy = c.y + dy4[k];
+                if (contains(floors, wx, wy) || contains(doors, wx, wy)) continue;
+                if (!inBounds(wx, wy)) return null;
+                TileType t = typeAt(wx, wy);
+                if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
+                if (!contains(walls, wx, wy)) walls.add(new Point(wx, wy));
+            }
+        }
+        return walls;
+    }
 
     private Point pickDoorOnPerimeter(MainRoom from, MainRoom to) {
         Point fromLoc = from.getLocation(), toLoc = to.getLocation();
@@ -369,7 +408,7 @@ public class HallwayCarver {
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
      * On success, update floor[][]/wall[][]. */
-    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, ArrayList<Point> walls, boolean stageStartDoor) {
+    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot (must be axis-aligned)");
         }
@@ -392,7 +431,7 @@ public class HallwayCarver {
         // Already on the pivot point
         if (dx == 0 && dy == 0) {
             // If current hallway floor/door plan will lead to leak, fail fast
-            if (!wallValidation(stageFloors, stageDoors, floors, doors)) return false;
+            if (collectWalls(floors, doors) == null) return false;
             floors.addAll(stageFloors);
             doors.addAll(stageDoors);
             return true;
@@ -428,49 +467,19 @@ public class HallwayCarver {
             x = nx; y = ny;
         }
 
+        ArrayList<Point> tmpFloors = new ArrayList<>(floors);
+        tmpFloors.addAll(stageFloors);
+        ArrayList<Point> tmpDoors  = new ArrayList<>(doors);
+        tmpDoors.addAll(stageDoors);
+
         // This pivot allocation result in leak, fail fast
-        if (wallValidation(stageFloors, stageDoors, floors, doors)) return false;
+        if (collectWalls(tmpFloors, tmpDoors) == null) return false;
 
         // Only add to input floors or doors when it is a valid pivot
         floors.addAll(stageFloors);
         doors.addAll(stageDoors);
         return true;
     }
-
-
-    /* Checking whether current allocation of hallway won't lead to out of bound for the wall allocation*/
-    private boolean wallValidation(ArrayList<Point> segFloors, ArrayList<Point> segDoors, ArrayList<Point> hallFloors, ArrayList<Point> hallDoors) {
-        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
-
-        // Checking allocating walls around current floor plan
-        for (Point c : segFloors) {
-            for (int k = 0; k < 4; k++) {
-                int wx = c.x + dx4[k], wy = c.y + dy4[k];
-
-                // neighbor already corridor no wall needed on this side
-                if (contains(hallFloors, wx, wy) || contains(hallDoors, wx, wy) ||
-                        contains(segFloors,  wx, wy) || contains(segDoors,  wx, wy)) {
-                    continue;
-                }
-
-                // If not in bounds for wall allocation, it means it will lead to leak
-                if (!inBounds(wx, wy)) return false;
-            }
-        }
-
-        for (Point c : segDoors) {
-            for (int k = 0; k < 4; k++) {
-                int wx = c.x + dx4[k], wy = c.y + dy4[k];
-                if (contains(hallFloors, wx, wy) || contains(hallDoors, wx, wy) ||
-                        contains(segFloors,  wx, wy) || contains(segDoors,  wx, wy)) {
-                    continue;
-                }
-                if (!inBounds(wx, wy)) return false;
-            }
-        }
-        return true;
-    }
-
 
     /* Get the type of Tile at given position */
     private TileType typeAt(int x, int y) { return TileType.toType(world[x][y]); }
