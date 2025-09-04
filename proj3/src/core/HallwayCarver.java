@@ -104,6 +104,8 @@ public class HallwayCarver {
         // Randomly add more pivot for long distance hallway
         if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) pivotCount += 2;
 
+        ArrayList<Point> doors = new ArrayList<>();
+        ArrayList<Point> floors = new ArrayList<>();
 
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
@@ -112,6 +114,7 @@ public class HallwayCarver {
             // Try to allocate a pivot more than 50 times, this connection failed
             if (!allocateHallway(currentPos, pivot)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return false;
+                continue;
             }
 
             pivotCount--;
@@ -119,7 +122,59 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        return allocateHallway(currentPos, drB);
+        if (!allocateHallway(currentPos, drB)) {
+
+            return false;
+        }
+
+
+        // Direction steps for wall placement
+        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
+        HashSet<Point> corridor = new HashSet<>();
+
+        for (Point p : floors) corridor.add(p);
+        for (Point p : doors)  corridor.add(p);
+
+        ArrayList<Point> walls = new ArrayList<>();
+
+        for (Point p : corridor) {
+            for (int i = 0; i < 4;i ++) {
+                int wx = p.x + dx4[i], wy = p.y + dy4[i];
+
+                // Allocating wall for given point will out of bounds (has leak on this allocation)
+                if (!inBounds(wx, wy)) return false;
+
+                // If the neighbor is also part of the corridor we’re committing, skip.
+                if (corridor.contains(new Point(wx, wy))) continue;
+
+                TileType t = typeAt(wx, wy);
+
+                // neighbor is floor/door/locked door; do NOT overwrite
+                if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
+                    // neighbor is NOTHING or other WALL type; overwrite
+                else {
+                    Point wallPoint = new Point(wx, wy);
+                    if (!walls.contains(wallPoint)) walls.add(wallPoint);
+                }
+            }
+        }
+
+
+        // Commit staged changes to world and  masks
+        for (Point p : floors) {
+            world[p.x][p.y] = tileengine.Tileset.FLOOR;
+            setFloor(p.x, p.y);
+        }
+        for (Point p : doors) {
+            world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
+            setDoor(p.x, p.y);
+        }
+        for (Point p: walls) {
+            world[p.x][p.y] = tileengine.Tileset.WALL;
+            setWall(p.x, p.y);
+        }
+
+        return true;
     }
 
 
@@ -343,13 +398,13 @@ public class HallwayCarver {
         return false;
     }
 
-    /* Allocate a straight segment currentPos -> nextPivot.
-     * - If OOB, or > MAX_WALL_IN_A_ROW walls in a row: return false (no changes).
-     * - NOTHING: stage floor.
-     * - PASSABLE: walk over (don’t modify).
-     * - WALL: stage door, keep counting; if run exceeds limit -> fail.
+    /* Allocate a straight segment currentPos to nextPivot.
+     * - If out of bounds, or > MAX_WALL_IN_A_ROW walls in a row: return false (no changes)
+     * - NOTHING: stage floor
+     * - PASSABLE: walk over
+     * - WALL: stage door, keep counting; if run exceeds limit return false.
      * On success, write staged floors/doors to world[][] and update floor[][]/wall[][]. */
-    private boolean allocateHallway(Point currentPos, Point nextPivot) {
+    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot (must be axis-aligned)");
         }
@@ -359,90 +414,50 @@ public class HallwayCarver {
         if (dx == 0 && dy == 0) return true;
 
         // Stage change not commit to the world
-        ArrayList<Point> floors = new ArrayList<>();
-        ArrayList<Point> doors  = new ArrayList<>();
+        ArrayList<Point> stageFloors = new ArrayList<>();
+        ArrayList<Point> stageDoors  = new ArrayList<>();
+
+        // Current point is the starting point for current connection
+        if (stageStartDoor) {
+            TileType tile = TileType.toType(world[currentPos.x][currentPos.y]);
+            if (!tile.isPassable() && tile != TileType.NOTHING) {
+                stageDoors.add(new Point(currentPos));
+            }
+        }
 
         int x = currentPos.x, y = currentPos.y;
         int wallRun = 0;
-
         while (x != nextPivot.x || y != nextPivot.y) {
             int nx = x + dx, ny = y + dy;
             if (!inBounds(nx, ny)) return false;
 
             // Treat already-staged cells as passable while planning
-            boolean stagedPassable = contains(floors, nx, ny) || contains(doors, nx, ny);
+            boolean stagedPassable =
+                    floors.contains(new Point(nx, ny)) ||
+                            doors.contains(new Point(nx, ny))  ||
+                            stageFloors.contains(new Point(nx, ny)) ||
+                            stageDoors.contains(new Point(nx, ny));
+
             TileType nextType = stagedPassable ? TileType.FLOOR : TileType.toType(world[nx][ny]);
 
             if (nextType == TileType.NOTHING) {
-                floors.add(new Point(nx, ny));
+                stageFloors.add(new Point(nx, ny));
                 wallRun = 0;
-                x = nx; y = ny;
-                continue;
+            } else if (nextType.isPassable()) {
+                wallRun = 0;
+            } else {
+                stageDoors.add(new Point(nx, ny));
+                if (++wallRun > MAX_WALL_IN_A_ROW) return false;
             }
 
-            if (nextType.isPassable()) {
-                // walk across floors/doors; do not modify
-                wallRun = 0;
-                x = nx; y = ny;
-                continue;
-            }
-
-            doors.add(new Point(nx, ny));
-            wallRun++;
-            // too many walls in a row -> invalid attempt; nothing committed
-            if (wallRun > MAX_WALL_IN_A_ROW) {
-                return false;
-            }
             x = nx; y = ny;
         }
 
-        // Direction steps for wall placement
-        int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
-        HashSet<Point> corridor = new HashSet<>();
-
-        for (Point p : floors) corridor.add(p);
-        for (Point p : doors)  corridor.add(p);
-
-        ArrayList<Point> walls = new ArrayList<>();
-
-        for (Point p : corridor) {
-            for (int i = 0; i < 4;i ++) {
-                int wx = p.x + dx4[i], wy = p.y + dy4[i];
-
-                // Allocating wall for given point will out of bounds (has leak on this allocation)
-                if (!inBounds(wx, wy)) return false;
-
-                // If the neighbor is also part of the corridor we’re committing, skip.
-                if (corridor.contains(new Point(wx, wy))) continue;
-
-                TileType t = TileType.toType(world[wx][wy]);
-
-                // neighbor is floor/door/locked door; do NOT overwrite
-                if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
-                // neighbor is NOTHING or other WALL type; overwrite
-                else {
-                    Point wallPoint = new Point(wx, wy);
-                    if (!walls.contains(wallPoint)) walls.add(wallPoint);
-                }
-            }
-        }
-
-
-        // Commit staged changes to world and  masks
-        for (Point p : floors) {
-            world[p.x][p.y] = tileengine.Tileset.FLOOR;
-            setFloor(p.x, p.y);
-        }
-        for (Point p : doors) {
-            world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
-            setDoor(p.x, p.y);
-        }
-        for (Point p: walls) {
-            world[p.x][p.y] = tileengine.Tileset.WALL;
-            setWall(p.x, p.y);
-        }
-
+        // Only add to input floors or doors when it is a valid pivot
+        floors.addAll(stageFloors);
+        doors.addAll(stageDoors);
         return true;
+
     }
 
 
