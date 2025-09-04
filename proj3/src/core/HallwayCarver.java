@@ -114,7 +114,7 @@ public class HallwayCarver {
             Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallway(currentPos, pivot, floors, doors, stageStartDoor)) {
+            if (!allocateHallway(currentPos, pivot, floors, doors, walls, stageStartDoor)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return false;
                 continue;
             }
@@ -364,6 +364,7 @@ public class HallwayCarver {
 
     /* Allocate a straight segment currentPos to nextPivot.
      * - If out of bounds, or > MAX_WALL_IN_A_ROW walls in a row: return false
+     * - If allocating wall around the hallway will out of bounds: return false
      * - NOTHING: stage floor
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
@@ -375,12 +376,10 @@ public class HallwayCarver {
 
         int dx = Integer.compare(nextPivot.x, currentPos.x);
         int dy = Integer.compare(nextPivot.y, currentPos.y);
-        if (dx == 0 && dy == 0) return true;
 
         // Stage change not commit to the world
         ArrayList<Point> stageFloors = new ArrayList<>();
         ArrayList<Point> stageDoors  = new ArrayList<>();
-        ArrayList<Point> stageWalls = new ArrayList<>();
 
         // Current point is the starting point for current connection
         if (stageStartDoor) {
@@ -389,6 +388,17 @@ public class HallwayCarver {
                 stageDoors.add(new Point(currentPos));
             }
         }
+
+        // Already on the pivot point
+        if (dx == 0 && dy == 0) {
+            // If current hallway floor/door plan will lead to leak, fail fast
+            if (!wallValidation(stageFloors, stageDoors, floors, doors)) return false;
+            floors.addAll(stageFloors);
+            doors.addAll(stageDoors);
+            return true;
+        }
+
+
 
         int x = currentPos.x, y = currentPos.y;
         int wallRun = 0;
@@ -418,11 +428,13 @@ public class HallwayCarver {
             x = nx; y = ny;
         }
 
+        // This pivot allocation result in leak, fail fast
+        if (wallValidation(stageFloors, stageDoors, floors, doors)) return false;
+
         // Only add to input floors or doors when it is a valid pivot
         floors.addAll(stageFloors);
         doors.addAll(stageDoors);
         return true;
-
     }
 
 
