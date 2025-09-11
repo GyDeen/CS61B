@@ -250,9 +250,7 @@ public class HallwayCarver {
                 int yStart = Math.min(current.y + DOOR_BUFF, maxY);
 
                 if (pivotCount == 1) {
-                    if (destination.y <= current.y)
-                        throw new IllegalStateException("Final UP pivot impossible: dest.y is not ahead");
-                    int py = Math.min(destination.y, maxY);
+                    int py = clamp(destination.y, minY, maxY);
                     return new Point(current.x, py);
                 } else {
                     int yEnd;
@@ -275,9 +273,7 @@ public class HallwayCarver {
                 int yStart = Math.max(current.y - DOOR_BUFF, minY);
 
                 if (pivotCount == 1) {
-                    if (destination.y >= current.y)
-                        throw new IllegalStateException("Final DOWN pivot impossible: dest.y is not reachable");
-                    int py = Math.max(destination.y, minY);
+                    int py = clamp(destination.y, minY, maxY);
                     return new Point(current.x, py);
                 } else {
                     int yEnd;
@@ -300,9 +296,7 @@ public class HallwayCarver {
                 int xStart = Math.min(current.x + DOOR_BUFF, maxX);
 
                 if (pivotCount == 1) {
-                    if (destination.x <= current.x)
-                        throw new IllegalStateException("Final RIGHT pivot impossible: dest.x is not reachable");
-                    int px = Math.min(destination.x, maxX);
+                    int px = clamp(destination.x, minX, maxX);
                     return new Point(px, current.y);
                 } else {
                     int xEnd;
@@ -323,9 +317,7 @@ public class HallwayCarver {
                 int xStart = Math.max(current.x - DOOR_BUFF, minX);
 
                 if (pivotCount == 1) {
-                    if (destination.x >= current.x)
-                        throw new IllegalStateException("Final LEFT pivot impossible: dest.x is not reachable");
-                    int px = Math.max(destination.x, minX);
+                    int px = clamp(destination.x, minX, maxX);
                     return new Point(px, current.y);
                 } else {
                     int xEnd;
