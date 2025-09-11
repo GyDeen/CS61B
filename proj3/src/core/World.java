@@ -21,6 +21,7 @@ public class World {
 
     private int roomNum;
     private ArrayList<Room> rooms = new ArrayList<>();
+    private HallwayCarver carver = new HallwayCarver(world, random);
 
 
     /** Using the default seed to generate the world */
@@ -140,6 +141,35 @@ public class World {
     }
 
 
+    /* Generate hallway */
+    private void generateHallway() {
+        ArrayList<Room> unconnected = new ArrayList<>(rooms);
+        while (unconnected.size() > 1) {
+            int a = random.nextInt(0, rooms.size() + 1), b = random.nextInt(0, rooms.size() + 1);
+            MainRoom roomA= (MainRoom) unconnected.get(a);
+            MainRoom roomB= (MainRoom) unconnected.get(b);
+
+            if (!carver.connect(roomA, roomB)) continue;
+            unconnected.remove(a);
+            unconnected.remove(b);
+
+            roomA.increaseDegree();
+            roomB.increaseDegree();
+        }
+
+        for (Room room : rooms) {
+            if (room.equals(unconnected.getFirst())) continue;
+
+            carver.connect((MainRoom) room, (MainRoom) unconnected.getFirst());
+            break;
+        }
+
+        int extraHallwayNum = random.nextInt(0, 3);
+        for (int i = 0; i < extraHallwayNum; i++) {
+            carver.connect((MainRoom) rooms.get(random.nextInt(0, rooms.size() + 1)), (MainRoom) rooms.get(random.nextInt(0, rooms.size() + 1)));
+        }
+    }
+
 
 
     /** Draw the world and generate the whole picture of the world */
@@ -177,6 +207,8 @@ public class World {
         for (Room room : rooms) {
             room.allocateRoom(world);
         }
+
+        generateHallway();
 
         ter.renderFrame(world);
     }

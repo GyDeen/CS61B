@@ -483,5 +483,4 @@ public class HallwayCarver {
 
     /* Get the type of Tile at given position */
     private TileType typeAt(int x, int y) { return TileType.toType(world[x][y]); }
-
 }

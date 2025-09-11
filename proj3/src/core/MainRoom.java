@@ -12,6 +12,7 @@ import static java.lang.Math.clamp;
 public class MainRoom extends Room {
     // Only initialise when there is a subroom attach to this room
     private ArrayList<SubRoom> subRooms;
+    private int degree = 0;
 
 
     public MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
@@ -109,5 +110,8 @@ public class MainRoom extends Room {
                 throw new IllegalArgumentException("Unknown direction: " + direction);
         }
     }
+
+    public int getDegree() {return degree;}
+    public void increaseDegree() {degree++;}
 
 }
