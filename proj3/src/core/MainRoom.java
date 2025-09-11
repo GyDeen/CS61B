@@ -71,37 +71,45 @@ public class MainRoom extends Room {
         switch (direction) {
             case LEFT: {
                 edge = getLeft(); // start with main room
-                // consider any subroom that covers this row
-                for (SubRoom s : subRooms) {
-                    if (n > s.getBottom() && n < s.getTop()) {
-                        edge = Math.min(edge, s.getLeft());
+                if (subRooms != null) {
+                    // consider any subroom that covers this row
+                    for (SubRoom s : subRooms) {
+                        if (n > s.getBottom() && n < s.getTop()) {
+                            edge = Math.min(edge, s.getLeft());
+                        }
                     }
                 }
                 return edge;
             }
             case RIGHT: {
                 edge = getRight();
-                for (SubRoom s : subRooms) {
-                    if (n > s.getBottom() && n < s.getTop()) {
-                        edge = Math.max(edge, s.getRight());
+                if (subRooms != null) {
+                    for (SubRoom s : subRooms) {
+                        if (n > s.getBottom() && n < s.getTop()) {
+                            edge = Math.max(edge, s.getRight());
+                        }
                     }
                 }
                 return edge;
             }
             case UP: {
                 edge = getTop();
-                for (SubRoom s : subRooms) {
-                    if (n > s.getLeft() && n < s.getRight()) {
-                        edge = Math.max(edge, s.getTop());
+                if (subRooms != null) {
+                    for (SubRoom s : subRooms) {
+                        if (n > s.getLeft() && n < s.getRight()) {
+                            edge = Math.max(edge, s.getTop());
+                        }
                     }
                 }
                 return edge;
             }
             case DOWN: {
                 edge = getBottom();
-                for (SubRoom s : subRooms) {
-                    if (n > s.getLeft() && n < s.getRight()) {
-                        edge = Math.min(edge, s.getBottom());
+                if (subRooms != null) {
+                    for (SubRoom s : subRooms) {
+                        if (n > s.getLeft() && n < s.getRight()) {
+                            edge = Math.min(edge, s.getBottom());
+                        }
                     }
                 }
                 return edge;
