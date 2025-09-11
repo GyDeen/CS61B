@@ -21,7 +21,7 @@ public class World {
 
     private int roomNum;
     private ArrayList<Room> rooms = new ArrayList<>();
-    private HallwayCarver carver = new HallwayCarver(world, random);
+    private HallwayCarver carver;
 
 
     /** Using the default seed to generate the world */
@@ -143,9 +143,10 @@ public class World {
 
     /* Generate hallway */
     private void generateHallway() {
+        carver = new HallwayCarver(world, random);
         ArrayList<Room> unconnected = new ArrayList<>(rooms);
         while (unconnected.size() > 1) {
-            int a = random.nextInt(0, rooms.size() + 1), b = random.nextInt(0, rooms.size() + 1);
+            int a = random.nextInt(0, rooms.size()), b = random.nextInt(0, rooms.size());
             MainRoom roomA= (MainRoom) unconnected.get(a);
             MainRoom roomB= (MainRoom) unconnected.get(b);
 
@@ -166,7 +167,7 @@ public class World {
 
         int extraHallwayNum = random.nextInt(0, 3);
         for (int i = 0; i < extraHallwayNum; i++) {
-            carver.connect((MainRoom) rooms.get(random.nextInt(0, rooms.size() + 1)), (MainRoom) rooms.get(random.nextInt(0, rooms.size() + 1)));
+            carver.connect((MainRoom) rooms.get(random.nextInt(0, rooms.size())), (MainRoom) rooms.get(random.nextInt(0, rooms.size())));
         }
     }
 
