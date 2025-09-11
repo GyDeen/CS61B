@@ -147,12 +147,14 @@ public class World {
         ArrayList<Room> unconnected = new ArrayList<>(rooms);
         while (unconnected.size() > 1) {
             int a = random.nextInt(0, rooms.size()), b = random.nextInt(0, rooms.size());
+            if (b == a) b = (b + 1) % unconnected.size();
             MainRoom roomA= (MainRoom) unconnected.get(a);
             MainRoom roomB= (MainRoom) unconnected.get(b);
 
             if (!carver.connect(roomA, roomB)) continue;
-            unconnected.remove(a);
-            unconnected.remove(b);
+
+            unconnected.remove(roomA);
+            unconnected.remove(roomB);
 
             roomA.increaseDegree();
             roomB.increaseDegree();
@@ -210,6 +212,10 @@ public class World {
         }
 
         generateHallway();
+        TETile[][] carved = carver.getWorld();
+        for (int x = 0; x < world.length; x++) {
+            System.arraycopy(carved[x], 0, world[x], 0, world[0].length);
+        }
 
         ter.renderFrame(world);
     }

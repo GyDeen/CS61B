@@ -101,7 +101,7 @@ public class HallwayCarver {
         else pivotCount = 2;
 
         // Randomly add more pivot for long distance hallway
-        if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 & random.nextBoolean()) pivotCount += 2;
+        if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
 
         ArrayList<Point> doors = new ArrayList<>();
         ArrayList<Point> floors = new ArrayList<>();
@@ -121,6 +121,8 @@ public class HallwayCarver {
             currentPos = pivot;
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
+
+        if (!allocateHallway(currentPos, drB, floors, doors, false)) return false;
 
         ArrayList<Point> walls = collectWalls(floors, doors);
 
@@ -422,8 +424,9 @@ public class HallwayCarver {
 
         // Already on the pivot point
         if (dx == 0 && dy == 0) {
-            // If current hallway floor/door plan will lead to leak, fail fast
-            if (collectWalls(floors, doors) == null) return false;
+            ArrayList<Point> tmpF = new ArrayList<>(floors); tmpF.addAll(stageFloors);
+            ArrayList<Point> tmpD = new ArrayList<>(doors);  tmpD.addAll(stageDoors);
+            if (collectWalls(tmpF, tmpD) == null) return false;
             floors.addAll(stageFloors);
             doors.addAll(stageDoors);
             return true;
