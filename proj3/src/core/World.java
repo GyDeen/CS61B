@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 2048;
+    private static long seed = 1;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -146,7 +146,7 @@ public class World {
         carver = new HallwayCarver(world, random);
         ArrayList<Room> unconnected = new ArrayList<>(rooms);
         while (unconnected.size() > 1) {
-            int a = random.nextInt(0, rooms.size()), b = random.nextInt(0, rooms.size());
+            int a = random.nextInt(0, unconnected.size()), b = random.nextInt(0, unconnected.size());
             if (b == a) b = (b + 1) % unconnected.size();
             MainRoom roomA= (MainRoom) unconnected.get(a);
             MainRoom roomB= (MainRoom) unconnected.get(b);
@@ -161,6 +161,7 @@ public class World {
         }
 
         for (Room room : rooms) {
+            if (unconnected.isEmpty()) break;
             if (room.equals(unconnected.getFirst())) continue;
 
             carver.connect((MainRoom) room, (MainRoom) unconnected.getFirst());
