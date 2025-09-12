@@ -106,6 +106,22 @@ public class HallwayCarver {
         int attempts = 0;
         while (pivotCount > 0) {
             Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
+
+            // Current position is the only possible allocation for next pivot and it is the last pivot
+            // Just turn towards the door
+            if (pivotCount == 1 && pivot.equals(currentPos)) {
+                pivotCount--;
+                direc = nextDirection(direc, currentPos, drB, 0);
+                continue;
+            }
+
+            // Not the last pivot and has no valid pivot allocation, fail fast
+            if (pivot.equals(currentPos)) {
+                if (++attempts > MAX_ATTEMPT_PIVOT) return false;
+                continue;
+            }
+
+
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
             if (!allocateHallway(currentPos, pivot, floors, doors, stageStartDoor)) {
