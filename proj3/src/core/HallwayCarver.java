@@ -78,20 +78,16 @@ public class HallwayCarver {
         Point drA = (doorA != null) ? doorA : pickDoorOnPerimeter(a, b);
         Point drB = (doorB != null) ? doorB : pickDoorOnPerimeter(b, a);
         Direction direc = null;
+        int t = a.getThicknessOfWall();
+        int off = Math.max(0, t - 1);
 
-        // Door on the horizontal
-        if (drA.x == a.getEdgeOn(drA.y, Direction.LEFT)) {
-            direc = Direction.LEFT;
-        } else if (drA.x == a.getEdgeOn(drA.y, Direction.RIGHT)) {
-            direc = Direction.RIGHT;
-        }
+        // Horizontal sides (x equals left/right edge, shifted inward by off)
+        if (drA.x == a.getEdgeOn(drA.y, Direction.LEFT)  + off)  direc = Direction.LEFT;
+        else if (drA.x == a.getEdgeOn(drA.y, Direction.RIGHT) - off) direc = Direction.RIGHT;
 
-        // Door on vertical
-        if (drA.y == a.getEdgeOn(drA.x, Direction.UP)) {
-            direc = Direction.UP;
-        } else if (drA.y == a.getEdgeOn(drA.x, Direction.DOWN)) {
-            direc = Direction.DOWN;
-        }
+        // Vertical sides (y equals up/down edge, shifted inward by off)
+        else if (drA.y == a.getEdgeOn(drA.x, Direction.UP)   - off) direc = Direction.UP;
+        else if (drA.y == a.getEdgeOn(drA.x, Direction.DOWN) + off) direc = Direction.DOWN;
 
         // Find how many pivot we need. If it has no alignment for both doors, it needs 2. If it has either x or y align,
         // it needs 1. If both align, it needs 0
@@ -132,7 +128,7 @@ public class HallwayCarver {
             setFloor(p.x, p.y);
         }
         for (Point p : doors) {
-            world[p.x][p.y] = tileengine.Tileset.UNLOCKED_DOOR;
+            world[p.x][p.y] = tileengine.Tileset.FLOOR;
             setDoor(p.x, p.y);
         }
 
@@ -196,37 +192,45 @@ public class HallwayCarver {
             if (onFromTop) {
                 // + - 1 to avoid placing door on corner
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getEdgeOn(doorX, Direction.UP);
+                if (from.getThicknessOfWall() == 2) doorY = from.getEdgeOn(doorX, Direction.UP) - 1;
+                else doorY = from.getEdgeOn(doorX, Direction.UP);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
-                doorX = from.getEdgeOn(doorY, Direction.RIGHT);
+                if (from.getThicknessOfWall() == 2) doorX = from.getEdgeOn(doorY, Direction.RIGHT) - 1;
+                else doorX = from.getEdgeOn(doorY, Direction.RIGHT);
             }
         } else if (!fromOnLeft && fromOnBottom) { // From on Bottom Right
             boolean onFromTop = random.nextBoolean();
             if (onFromTop) {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getEdgeOn(doorX, Direction.UP);
+                if (from.getThicknessOfWall() == 2) doorY = from.getEdgeOn(doorX, Direction.UP) - 1;
+                else doorY = from.getEdgeOn(doorX, Direction.UP);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
-                doorX = from.getEdgeOn(doorY, Direction.LEFT);
+                if (from.getThicknessOfWall() == 2) doorX = from.getEdgeOn(doorY, Direction.LEFT) + 1;
+                else doorX = from.getEdgeOn(doorY, Direction.LEFT);
             }
         } else if (!fromOnLeft && !fromOnBottom) { // From on Top Right
             boolean onFromBottom = random.nextBoolean();
             if (onFromBottom) {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getEdgeOn(doorX, Direction.DOWN);
+                if (from.getThicknessOfWall() == 2) doorY = from.getEdgeOn(doorX, Direction.DOWN) + 1;
+                else doorY = from.getEdgeOn(doorX, Direction.DOWN);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
-                doorX = from.getEdgeOn(doorY, Direction.LEFT);
+                if (from.getThicknessOfWall() == 2) doorX = from.getEdgeOn(doorY, Direction.LEFT) + 1;
+                else doorX = from.getEdgeOn(doorY, Direction.LEFT);
             }
         } else { // From on Top Left
             boolean onFromBottom = random.nextBoolean();
             if (onFromBottom) {
                 doorX = random.nextInt(from.getLeft() + 1, from.getRight() - 1);
-                doorY = from.getEdgeOn(doorX, Direction.DOWN);
+                if (from.getThicknessOfWall() == 2) doorY = from.getEdgeOn(doorX, Direction.DOWN) + 1;
+                else doorY = from.getEdgeOn(doorX, Direction.DOWN);
             } else {
                 doorY = random.nextInt(from.getBottom() + 1, from.getTop() - 1);
-                doorX = from.getEdgeOn(doorY, Direction.RIGHT);
+                if (from.getThicknessOfWall() == 2) doorX = from.getEdgeOn(doorY, Direction.RIGHT) - 1;
+                else doorX = from.getEdgeOn(doorY, Direction.RIGHT);
             }
         }
 
@@ -357,35 +361,31 @@ public class HallwayCarver {
 
     /* Find next Direction for current carver */
     private Direction nextDirection(Direction currentDir, Point atPivot, Point dest, int remainingPivots) {
-        if (!isHorizontal(currentDir)) { // was UP/DOWN, go horizontal now
+        // Choose the straight direction toward dest
+        if (remainingPivots == 0) {
+            if (atPivot.x != dest.x) return (dest.x > atPivot.x) ? Direction.RIGHT : Direction.LEFT;
+            if (atPivot.y != dest.y) return (dest.y > atPivot.y) ? Direction.UP : Direction.DOWN;
+            return currentDir; // already there
+        }
+
+        // Otherwise: switch axis, but bias toward the side that moves us closer to dest
+        boolean wasHorizontal = (currentDir == Direction.LEFT || currentDir == Direction.RIGHT);
+
+        if (!wasHorizontal) { // came vertically; now go horizontal if possible
             if (dest.x > atPivot.x) return Direction.RIGHT;
             if (dest.x < atPivot.x) return Direction.LEFT;
-            // perfectly aligned on x
-            if (remainingPivots > 0) {
-                // pick the side with more space
-                int rightSpace = (world.length - 2) - atPivot.x;
-                int leftSpace  = atPivot.x - 1;
-                if (rightSpace == leftSpace) {
-                    return random.nextBoolean() ? Direction.RIGHT : Direction.LEFT;
-                }
-                return (rightSpace > leftSpace) ? Direction.RIGHT : Direction.LEFT;
-            } else {
-                // final leg will be vertical anyway
-                return Direction.RIGHT;
-            }
-        } else { // was LEFT/RIGHT, go vertical now
+            // tie-breaker (space heuristic retained)
+            int rightSpace = (world.length - 2) - atPivot.x;
+            int leftSpace  = atPivot.x - 1;
+            if (rightSpace == leftSpace) return (random.nextBoolean() ? Direction.RIGHT : Direction.LEFT);
+            return (rightSpace > leftSpace) ? Direction.RIGHT : Direction.LEFT;
+        } else { // came horizontally; now go vertical if possible
             if (dest.y > atPivot.y) return Direction.UP;
             if (dest.y < atPivot.y) return Direction.DOWN;
-            if (remainingPivots > 0) {
-                int upSpace   = (world[0].length - 2) - atPivot.y;
-                int downSpace = atPivot.y - 1;
-                if (upSpace == downSpace) {
-                    return random.nextBoolean() ? Direction.UP : Direction.DOWN;
-                }
-                return (upSpace > downSpace) ? Direction.UP : Direction.DOWN;
-            } else {
-                return Direction.UP;
-            }
+            int upSpace   = (world[0].length - 2) - atPivot.y;
+            int downSpace = atPivot.y - 1;
+            if (upSpace == downSpace) return (random.nextBoolean() ? Direction.UP : Direction.DOWN);
+            return (upSpace > downSpace) ? Direction.UP : Direction.DOWN;
         }
     }
 
