@@ -11,9 +11,17 @@ import java.util.Random;
 import static core.Config.*;
 
 public class HallwayCarver {
+
+    private static final class DoorPair {
+        final Point drA, drB;
+        final Direction outA, outB;
+        DoorPair(Point a, Point b, Direction da, Direction db) {
+            drA = a; drB = b; outA = da; outB = db;
+        }
+    }
+
+
     private static TETile[][] world;
-    private static boolean[][] floor;
-    private static boolean[][] wall;
     ArrayList<Point> door = new ArrayList<>();
     Random random;
 
@@ -25,41 +33,9 @@ public class HallwayCarver {
             HallwayCarver.world[i] = Arrays.copyOf(world[i], world[i].length);
         }
 
-        floor = new boolean[world.length][world[0].length];
-        wall = new boolean[world.length][world[0].length];
 
-        for (int x = 0; x < world.length; x++) {
-            for (int y = 0; y < world[0].length; y++) {
-                TileType worldTile= TileType.toType(world[x][y]);
-                if (worldTile.isPassable()) {
-                    floor[x][y] = true;
-                } else if (worldTile == TileType.NOTHING) {
-                    floor[x][y] = false;
-                    wall[x][y] = false;
-                } else {
-                    wall[x][y] = true;
-                }
-            }
-        }
     }
 
-
-    private void setFloor(int x, int y) {
-        floor[x][y] = true;
-        wall[x][y]  = false;
-    }
-
-
-    private void setWall(int x, int y) {
-        wall[x][y]  = true;
-        floor[x][y] = false;
-    }
-
-    private void setDoor(int x, int y) {
-        floor[x][y] = true;
-        wall[x][y]  = false;
-        door.add(new Point(x, y));
-    }
 
     private boolean inBounds(int x, int y) {
         return 0 <= x && x < world.length && 0 <= y && y < world[0].length;
@@ -75,9 +51,17 @@ public class HallwayCarver {
 
     /** Connect two room with given Door */
     public boolean connect(MainRoom a, Point doorA, MainRoom b, Point doorB) {
-        Point drA = (doorA != null) ? doorA : pickDoorOnPerimeter(a, b);
-        Point drB = (doorB != null) ? doorB : pickDoorOnPerimeter(b, a);
         Direction direc = null;
+        Point drA, drB;
+        if (doorA == null && doorB == null) {
+            DoorPair dp = pickDoorPairByEdges(a, b);
+            drA = dp.drA; drB = dp.drB;
+            direc = dp.outA;
+        } else {
+            drA = doorA == null ? pickDoorOnPerimeter(a, b) : doorA;
+            drB = doorB == null ? pickDoorOnPerimeter(b, a) : doorB;
+        }
+
         int t = a.getThicknessOfWall();
         int off = Math.max(0, t - 1);
 
@@ -99,6 +83,9 @@ public class HallwayCarver {
         // Randomly add more pivot for long distance hallway
         if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
 
+        System.out.println("drA: " + drA.toString());
+        System.out.println("drB: " + drB.toString());
+
         ArrayList<Point> doors = new ArrayList<>();
         ArrayList<Point> floors = new ArrayList<>();
 
@@ -111,7 +98,7 @@ public class HallwayCarver {
             // Just turn towards the door
             if (pivotCount == 1 && pivot.equals(currentPos)) {
                 pivotCount--;
-                direc = nextDirection(direc, currentPos, drB, 0);
+                direc = nextDirection(direc, currentPos, drB, pivotCount);
                 continue;
             }
 
@@ -137,28 +124,25 @@ public class HallwayCarver {
         if (!allocateHallway(currentPos, drB, floors, doors, false)) return false;
 
         ArrayList<Point> walls = collectWalls(floors, doors);
-
-        // Commit staged changes to world and masks
+        // Commit staged changes to world
         for (Point p : floors) {
             world[p.x][p.y] = tileengine.Tileset.FLOOR;
-            setFloor(p.x, p.y);
-        }
-        for (Point p : doors) {
-            world[p.x][p.y] = tileengine.Tileset.FLOOR;
-            setDoor(p.x, p.y);
         }
 
         assert walls != null;
         for (Point p: walls) {
             world[p.x][p.y] = tileengine.Tileset.WALL;
-            setWall(p.x, p.y);
         }
 
+
+        for (Point p : doors) {
+            world[p.x][p.y] = tileengine.Tileset.FLOOR;
+        }
         return true;
     }
 
 
-    /* Generte all the wall tiles that we need to allocate */
+    /* Generate all the wall tiles that we need to allocate */
     private ArrayList<Point> collectWalls(ArrayList<Point> floors, ArrayList<Point> doors) {
         int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
         ArrayList<Point> walls = new ArrayList<>();
@@ -175,7 +159,7 @@ public class HallwayCarver {
                 if (!inBounds(wx, wy)) return null;
 
                 TileType t = typeAt(wx, wy);
-                // Never overwrite passables / locked doors
+                // Never overwrite passable / locked doors
                 if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
 
                 // Fill NOTHING or overwrite existing WALL
@@ -253,10 +237,72 @@ public class HallwayCarver {
         return new Point(doorX, doorY);
     }
 
-    /* Return the distance between given two point */
-    private static double distancePoint(int x1, int y1, int x2, int y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+    /** Pick doors for A and B as a *pair* using only edges
+     *  - Uses the axis with the smaller rectangle gap
+     *  - If one axis has gap==0 (walls touching), use the another axis to avoid punch-through
+     *  - Doors face each other; Y (for horizontal) or X (for vertical) is chosen from the overlap band
+     */
+    private DoorPair pickDoorPairByEdges(MainRoom A, MainRoom B) {
+        // door coords avoid corners
+        int aL=A.getLeft()+1, aR=A.getRight()-1, aB=A.getBottom()+1, aT=A.getTop()-1;
+        int bL=B.getLeft()+1, bR=B.getRight()-1, bB=B.getBottom()+1, bT=B.getTop()-1;
+
+        int offA = Math.max(0, A.getThicknessOfWall() - 1);
+        int offB = Math.max(0, B.getThicknessOfWall() - 1);
+
+        int gx = gapX(A,B), gy = gapY(A,B);
+
+        boolean useHorizontal;
+        if (gx==0 && gy>0) useHorizontal = false;
+        else if (gy==0 && gx>0) useHorizontal = true;
+        else if (gx!=gy) useHorizontal = (gx < gy);
+        else useHorizontal = false; // Two room on the same level, using vertical
+
+        if (useHorizontal) {
+            // A faces RIGHT if B is to its right; else LEFT. B is opposite
+            boolean bOnRight = (A.getRight() <= B.getLeft());
+            Direction aSide = bOnRight ? Direction.RIGHT : Direction.LEFT;
+            Direction bSide = bOnRight ? Direction.LEFT  : Direction.RIGHT;
+
+            // vertical overlap band for picking Y
+            int yLow = Math.max(aB, bB), yHigh = Math.min(aT, bT);
+            int y = (yLow <= yHigh) ? random.nextInt(yLow, yHigh + 1)
+                    : clamp((A.getLocation().y + B.getLocation().y) / 2,
+                    Math.min(aB,bB), Math.max(aT,bT));
+
+            int ax = (aSide==Direction.RIGHT) ? A.getEdgeOn(y, Direction.RIGHT) - offA
+                    : A.getEdgeOn(y, Direction.LEFT)  + offA;
+            int bx = (bSide==Direction.LEFT)  ? B.getEdgeOn(y, Direction.LEFT)   + offB
+                    : B.getEdgeOn(y, Direction.RIGHT)  - offB;
+
+            Point drA = new Point(ax, clamp(y, aB, aT));
+            Point drB = new Point(bx, clamp(y, bB, bT));
+            return new DoorPair(drA, drB, aSide, bSide);
+
+        } else {
+            // vertical pairing
+            boolean bAbove = (A.getTop() <= B.getBottom());
+            Direction aSide = bAbove ? Direction.UP : Direction.DOWN;
+            Direction bSide = bAbove ? Direction.DOWN : Direction.UP;
+
+            // horizontal overlap band for picking X
+            int xLow = Math.max(aL, bL), xHigh = Math.min(aR, bR);
+            int x = (xLow <= xHigh) ? random.nextInt(xLow, xHigh + 1)
+                    : clamp((A.getLocation().x + B.getLocation().x) / 2,
+                    Math.min(aL,bL), Math.max(aR,bR));
+
+            int ay = (aSide==Direction.UP)   ? A.getEdgeOn(x, Direction.UP)   - offA
+                    : A.getEdgeOn(x, Direction.DOWN) + offA;
+            int by = (bSide==Direction.DOWN) ? B.getEdgeOn(x, Direction.DOWN) + offB
+                    : B.getEdgeOn(x, Direction.UP)   - offB;
+
+            Point drA = new Point(clamp(x, aL, aR), ay);
+            Point drB = new Point(clamp(x, bL, bR), by);
+            return new DoorPair(drA, drB, aSide, bSide);
+        }
     }
+
 
 
     /* It will generate a pivot based on given direction, current position, and destination */
@@ -381,18 +427,17 @@ public class HallwayCarver {
         if (remainingPivots == 0) {
             if (atPivot.x != dest.x) return (dest.x > atPivot.x) ? Direction.RIGHT : Direction.LEFT;
             if (atPivot.y != dest.y) return (dest.y > atPivot.y) ? Direction.UP : Direction.DOWN;
-            return currentDir; // already there
+            return currentDir;
         }
 
-        // Otherwise: switch axis, but bias toward the side that moves us closer to dest
         boolean wasHorizontal = (currentDir == Direction.LEFT || currentDir == Direction.RIGHT);
 
         if (!wasHorizontal) { // came vertically; now go horizontal if possible
             if (dest.x > atPivot.x) return Direction.RIGHT;
             if (dest.x < atPivot.x) return Direction.LEFT;
-            // tie-breaker (space heuristic retained)
+            // tie-breaker
             int rightSpace = (world.length - 2) - atPivot.x;
-            int leftSpace  = atPivot.x - 1;
+            int leftSpace = atPivot.x - 1;
             if (rightSpace == leftSpace) return (random.nextBoolean() ? Direction.RIGHT : Direction.LEFT);
             return (rightSpace > leftSpace) ? Direction.RIGHT : Direction.LEFT;
         } else { // came horizontally; now go vertical if possible
@@ -417,10 +462,10 @@ public class HallwayCarver {
      * - NOTHING: stage floor
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
-     * On success, update floor[][]/wall[][]. */
+     */
     private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
-            throw new IllegalArgumentException("Invalid pivot (must be axis-aligned)");
+            throw new IllegalArgumentException("Invalid pivot: " + nextPivot.toString() + "with current Position: " + currentPos.toString());
         }
 
         int dx = Integer.compare(nextPivot.x, currentPos.x);
@@ -439,16 +484,7 @@ public class HallwayCarver {
         }
 
         // Already on the pivot point
-        if (dx == 0 && dy == 0) {
-            ArrayList<Point> tmpF = new ArrayList<>(floors); tmpF.addAll(stageFloors);
-            ArrayList<Point> tmpD = new ArrayList<>(doors);  tmpD.addAll(stageDoors);
-            if (collectWalls(tmpF, tmpD) == null) return false;
-            floors.addAll(stageFloors);
-            doors.addAll(stageDoors);
-            return true;
-        }
-
-
+        if (dx == 0 && dy == 0) return false;
 
         int x = currentPos.x, y = currentPos.y;
         int wallRun = 0;
@@ -469,6 +505,7 @@ public class HallwayCarver {
                 stageFloors.add(new Point(nx, ny));
                 wallRun = 0;
             } else if (nextType.isPassable()) {
+                stageFloors.add(new Point(nx, ny));
                 wallRun = 0;
             } else {
                 stageDoors.add(new Point(nx, ny));
@@ -494,4 +531,75 @@ public class HallwayCarver {
 
     /* Get the type of Tile at given position */
     private TileType typeAt(int x, int y) { return TileType.toType(world[x][y]); }
+
+    /* Return the distance between given two point */
+    private static double distancePoint(int x1, int y1, int x2, int y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    /* Get the distance between A and B horizontally */
+    private int gapX(MainRoom A, MainRoom B) {
+        if (A.getRight() < B.getLeft())  return B.getLeft() - A.getRight();
+        if (B.getRight() < A.getLeft())  return A.getLeft() - B.getRight();
+        return 0;
+    }
+
+    /* Get the distance between A and B vertically */
+    private int gapY(MainRoom A, MainRoom B) {
+        if (A.getTop() < B.getBottom())  return B.getBottom() - A.getTop();
+        if (B.getTop() < A.getBottom())  return A.getBottom() - B.getTop();
+        return 0;
+    }
+
+
+    /* Find the closest room for u to connect */
+    private MainRoom nearestOf(MainRoom u, java.util.List<Room> connected) {
+        MainRoom best = null; int bestD2 = Integer.MAX_VALUE;
+        for (Room r : connected) {
+            MainRoom v = (MainRoom) r;
+            int dx = v.getLocation().x - u.getLocation().x;
+            int dy = v.getLocation().y - u.getLocation().y;
+            int d2 = dx*dx + dy*dy;
+            if (d2 < bestD2) { bestD2 = d2; best = v; }
+        }
+        return best;
+    }
+
+
+    /* Simple connection for a constant failing connection */
+    public boolean connectSimpleL(MainRoom a, MainRoom b) {
+        DoorPair dp = pickDoorPairByEdges(a, b);
+        Point drA = dp.drA, drB = dp.drB;
+
+        ArrayList<Point> floors = new ArrayList<>(), doors = new ArrayList<>();
+
+        // straight case
+        if (drA.x == drB.x || drA.y == drB.y) {
+            if (!allocateHallway(drA, drB, floors, doors, true)) return false;
+        } else {
+            Point p1 = new Point(drB.x, drA.y);
+            if (!(allocateHallway(drA, p1, floors, doors, true) && allocateHallway(p1, drB, floors, doors, false))) {
+                floors.clear(); doors.clear();
+                Point p2 = new Point(drA.x, drB.y);
+                if (!(allocateHallway(drA, p2, floors, doors, true) && allocateHallway(p2, drB, floors, doors, false))) {
+                    return false;
+                }
+            }
+        }
+
+        // guarantee endpoint opens if last hop stopped adjacent
+        if (!TileType.toType(world[drB.x][drB.y]).isPassable()
+                && !contains(doors, drB.x, drB.y) && !contains(floors, drB.x, drB.y)) {
+            doors.add(new Point(drB));
+        }
+
+        ArrayList<Point> walls = collectWalls(floors, doors);
+        if (walls == null) return false;
+        walls.removeIf(p -> contains(floors,p.x,p.y) || contains(doors,p.x,p.y));
+
+        for (Point f : floors) world[f.x][f.y] = tileengine.Tileset.FLOOR;
+        for (Point w : walls)  world[w.x][w.y] = tileengine.Tileset.WALL;
+        for (Point d : doors)  world[d.x][d.y] = tileengine.Tileset.FLOOR;
+        return true;
+    }
 }

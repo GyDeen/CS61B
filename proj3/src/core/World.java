@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 1;
+    private static long seed = 3;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -143,35 +143,46 @@ public class World {
 
     /* Generate hallway */
     private void generateHallway() {
+        int attempts = 0;
         carver = new HallwayCarver(world, random);
+        ArrayList<Room> connected = new ArrayList<>();
         ArrayList<Room> unconnected = new ArrayList<>(rooms);
-        while (unconnected.size() > 1) {
-            int a = random.nextInt(0, unconnected.size()), b = random.nextInt(0, unconnected.size());
-            if (b == a) b = (b + 1) % unconnected.size();
-            MainRoom roomA= (MainRoom) unconnected.get(a);
-            MainRoom roomB= (MainRoom) unconnected.get(b);
 
-            if (!carver.connect(roomA, roomB)) continue;
+        connected.add(unconnected.removeFirst());
 
-            unconnected.remove(roomA);
-            unconnected.remove(roomB);
+        while (!unconnected.isEmpty()) {
+            MainRoom u = (MainRoom) unconnected.getFirst();
+            boolean linked = false;
 
-            roomA.increaseDegree();
-            roomB.increaseDegree();
+            for (Room vR : connected) {
+                if (attempts >= ALLOCATE_FAIL_CAP) {
+                    if (carver.connectSimpleL((MainRoom) vR, u)) {
+                        connected.add(u);
+                        unconnected.removeFirst();
+                        linked = true;
+                        attempts = 0;
+                        break;
+                    } else {
+                        attempts = 0;
+                    }
+                }
+                if (carver.connect((MainRoom) vR, u)) {
+                    connected.add(u);
+                    unconnected.removeFirst();
+                    linked = true;
+                    attempts = 0;
+                    break;
+                }
+
+                attempts++;
+            }
+
+            if (!linked) unconnected.add(unconnected.removeFirst());
         }
 
-        for (Room room : rooms) {
-            if (unconnected.isEmpty()) break;
-            if (room.equals(unconnected.getFirst())) continue;
-
-            carver.connect((MainRoom) room, (MainRoom) unconnected.getFirst());
-            break;
-        }
-
-        int extraHallwayNum = random.nextInt(0, 3);
-        for (int i = 0; i < extraHallwayNum; i++) {
-            carver.connect((MainRoom) rooms.get(random.nextInt(0, rooms.size())), (MainRoom) rooms.get(random.nextInt(0, rooms.size())));
-        }
+        for (int i = 0; i < random.nextInt(0, 3); i++)
+            carver.connect((MainRoom) rooms.get(random.nextInt(rooms.size())),
+                    (MainRoom) rooms.get(random.nextInt(rooms.size())));
     }
 
 
@@ -193,8 +204,6 @@ public class World {
         for (Room room : rooms) {
                     int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
                     int allocateSubroomMaxAttempt = subRoomNum * 50;
-
-
                     // Try to allocate desire subroom number
                     for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
                         if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
