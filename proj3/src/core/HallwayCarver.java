@@ -32,8 +32,6 @@ public class HallwayCarver {
         for (int i = 0; i < world.length; i++) {
             HallwayCarver.world[i] = Arrays.copyOf(world[i], world[i].length);
         }
-
-
     }
 
 
@@ -66,11 +64,11 @@ public class HallwayCarver {
         int off = Math.max(0, t - 1);
 
         // Horizontal sides (x equals left/right edge, shifted inward by off)
-        if (drA.x == a.getEdgeOn(drA.y, Direction.LEFT)  + off)  direc = Direction.LEFT;
+        if (drA.x == a.getEdgeOn(drA.y, Direction.LEFT) + off)  direc = Direction.LEFT;
         else if (drA.x == a.getEdgeOn(drA.y, Direction.RIGHT) - off) direc = Direction.RIGHT;
 
         // Vertical sides (y equals up/down edge, shifted inward by off)
-        else if (drA.y == a.getEdgeOn(drA.x, Direction.UP)   - off) direc = Direction.UP;
+        else if (drA.y == a.getEdgeOn(drA.x, Direction.UP) - off) direc = Direction.UP;
         else if (drA.y == a.getEdgeOn(drA.x, Direction.DOWN) + off) direc = Direction.DOWN;
 
         // Find how many pivot we need. If it has no alignment for both doors, it needs 2. If it has either x or y align,
@@ -81,7 +79,7 @@ public class HallwayCarver {
         else pivotCount = 2;
 
         // Randomly add more pivot for long distance hallway
-        if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
+        // if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
 
         System.out.println("drA: " + drA.toString());
         System.out.println("drB: " + drB.toString());
@@ -155,7 +153,7 @@ public class HallwayCarver {
                 // neighbor already corridor? skip
                 if (contains(floors, wx, wy) || contains(doors, wx, wy)) continue;
 
-                // leak guard (should already be prevented; keep as sanity check)
+                // leak guard
                 if (!inBounds(wx, wy)) return null;
 
                 TileType t = typeAt(wx, wy);
@@ -163,7 +161,9 @@ public class HallwayCarver {
                 if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
 
                 // Fill NOTHING or overwrite existing WALL
-                if (!contains(walls, wx, wy)) walls.add(new Point(wx, wy));
+                if (t == TileType.NOTHING && !contains(walls, wx, wy)) {
+                    walls.add(new Point(wx, wy));
+                }
             }
         }
         for (Point c : doors) {
@@ -244,63 +244,93 @@ public class HallwayCarver {
      *  - Doors face each other; Y (for horizontal) or X (for vertical) is chosen from the overlap band
      */
     private DoorPair pickDoorPairByEdges(MainRoom A, MainRoom B) {
-        // door coords avoid corners
-        int aL=A.getLeft()+1, aR=A.getRight()-1, aB=A.getBottom()+1, aT=A.getTop()-1;
-        int bL=B.getLeft()+1, bR=B.getRight()-1, bB=B.getBottom()+1, bT=B.getTop()-1;
+        // legal (non-corner) bands for door coordinates
+        int aXL = A.getLeft()+1,  aXR = A.getRight()-1;
+        int aYB = A.getBottom()+1, aYT = A.getTop()-1;
+        int bXL = B.getLeft()+1,  bXR = B.getRight()-1;
+        int bYB = B.getBottom()+1, bYT = B.getTop()-1;
 
         int offA = Math.max(0, A.getThicknessOfWall() - 1);
         int offB = Math.max(0, B.getThicknessOfWall() - 1);
 
-        int gx = gapX(A,B), gy = gapY(A,B);
+        int gx = gapX(A, B);
+        int gy = gapY(A, B);
 
-        boolean useHorizontal;
-        if (gx==0 && gy>0) useHorizontal = false;
-        else if (gy==0 && gx>0) useHorizontal = true;
-        else if (gx!=gy) useHorizontal = (gx < gy);
-        else useHorizontal = false; // Two room on the same level, using vertical
+        boolean horizontal;
+        if (gx == 0 && gy > 0) horizontal = false;
+        else if (gy == 0 && gx > 0) horizontal = true;
+        else if (gx != gy) horizontal = (gx < gy);
+        else horizontal = (Math.abs(A.getLocation().x - B.getLocation().x) >= Math.abs(A.getLocation().y - B.getLocation().y));
 
-        if (useHorizontal) {
-            // A faces RIGHT if B is to its right; else LEFT. B is opposite
-            boolean bOnRight = (A.getRight() <= B.getLeft());
-            Direction aSide = bOnRight ? Direction.RIGHT : Direction.LEFT;
-            Direction bSide = bOnRight ? Direction.LEFT  : Direction.RIGHT;
+        if (horizontal) {
+            // pick independent rows near the middle, clamped to each room
+            int yMid = (A.getLocation().y + B.getLocation().y) / 2;
+            int yA = clamp(yMid, aYB, aYT);
+            int yB = clamp(yMid, bYB, bYT);
 
-            // vertical overlap band for picking Y
-            int yLow = Math.max(aB, bB), yHigh = Math.min(aT, bT);
-            int y = (yLow <= yHigh) ? random.nextInt(yLow, yHigh + 1)
-                    : clamp((A.getLocation().y + B.getLocation().y) / 2,
-                    Math.min(aB,bB), Math.max(aT,bT));
+            // edge intervals at those rows
+            int aLx = A.getEdgeOn(yA, Direction.LEFT),  aRx = A.getEdgeOn(yA, Direction.RIGHT);
+            int bLx = B.getEdgeOn(yB, Direction.LEFT),  bRx = B.getEdgeOn(yB, Direction.RIGHT);
 
-            int ax = (aSide==Direction.RIGHT) ? A.getEdgeOn(y, Direction.RIGHT) - offA
-                    : A.getEdgeOn(y, Direction.LEFT)  + offA;
-            int bx = (bSide==Direction.LEFT)  ? B.getEdgeOn(y, Direction.LEFT)   + offB
-                    : B.getEdgeOn(y, Direction.RIGHT)  - offB;
+            Direction outA, outB;
+            if (aRx <= bLx) { outA = Direction.RIGHT; outB = Direction.LEFT; }
+            else if (bRx <= aLx) { outA = Direction.LEFT; outB = Direction.RIGHT; }
+            else { // projections overlap at these rows (possible with notches) → tie-break by centers
+                outA = (A.getLocation().x <= B.getLocation().x) ? Direction.RIGHT : Direction.LEFT;
+                outB = (outA == Direction.RIGHT) ? Direction.LEFT : Direction.RIGHT;
+            }
 
-            Point drA = new Point(ax, clamp(y, aB, aT));
-            Point drB = new Point(bx, clamp(y, bB, bT));
-            return new DoorPair(drA, drB, aSide, bSide);
+            int ax = (outA == Direction.RIGHT)
+                    ? A.getEdgeOn(yA, Direction.RIGHT) - offA
+                    : A.getEdgeOn(yA, Direction.LEFT) + offA;
+            int bx = (outB == Direction.RIGHT)
+                    ? B.getEdgeOn(yB, Direction.RIGHT) - offB
+                    : B.getEdgeOn(yB, Direction.LEFT) + offB;
+
+            return new DoorPair(new Point(ax, yA), new Point(bx, yB), outA, outB);
 
         } else {
-            // vertical pairing
-            boolean bAbove = (A.getTop() <= B.getBottom());
-            Direction aSide = bAbove ? Direction.UP : Direction.DOWN;
-            Direction bSide = bAbove ? Direction.DOWN : Direction.UP;
+            // vertical: pick independent columns near the middle, clamped to each room
+            int xMid = (A.getLocation().x + B.getLocation().x) / 2;
+            int xA = clamp(xMid, aXL, aXR);
+            int xB = clamp(xMid, bXL, bXR);
 
-            // horizontal overlap band for picking X
-            int xLow = Math.max(aL, bL), xHigh = Math.min(aR, bR);
-            int x = (xLow <= xHigh) ? random.nextInt(xLow, xHigh + 1)
-                    : clamp((A.getLocation().x + B.getLocation().x) / 2,
-                    Math.min(aL,bL), Math.max(aR,bR));
+            // edge intervals at those columns
+            int aBy = A.getEdgeOn(xA, Direction.DOWN), aUy = A.getEdgeOn(xA, Direction.UP);
+            int bBy = B.getEdgeOn(xB, Direction.DOWN), bUy = B.getEdgeOn(xB, Direction.UP);
 
-            int ay = (aSide==Direction.UP)   ? A.getEdgeOn(x, Direction.UP)   - offA
-                    : A.getEdgeOn(x, Direction.DOWN) + offA;
-            int by = (bSide==Direction.DOWN) ? B.getEdgeOn(x, Direction.DOWN) + offB
-                    : B.getEdgeOn(x, Direction.UP)   - offB;
+            Direction outA, outB;
+            if (aUy <= bBy) { outA = Direction.UP; outB = Direction.DOWN; }
+            else if (bUy <= aBy) { outA = Direction.DOWN; outB = Direction.UP; }
+            else {
+                outA = (A.getLocation().y <= B.getLocation().y) ? Direction.UP : Direction.DOWN;
+                outB = (outA == Direction.UP) ? Direction.DOWN : Direction.UP;
+            }
 
-            Point drA = new Point(clamp(x, aL, aR), ay);
-            Point drB = new Point(clamp(x, bL, bR), by);
-            return new DoorPair(drA, drB, aSide, bSide);
+            int ay = (outA == Direction.UP)
+                    ? A.getEdgeOn(xA, Direction.UP)   - offA
+                    : A.getEdgeOn(xA, Direction.DOWN) + offA;
+            int by = (outB == Direction.UP)
+                    ? B.getEdgeOn(xB, Direction.UP)   - offB
+                    : B.getEdgeOn(xB, Direction.DOWN) + offB;
+
+            return new DoorPair(new Point(xA, ay), new Point(xB, by), outA, outB);
         }
+    }
+
+
+    private boolean shouldConnectHorizontally(MainRoom A, MainRoom B) {
+        int gx = (A.getRight() < B.getLeft())  ? B.getLeft()  - A.getRight()
+                : (B.getRight() < A.getLeft())  ? A.getLeft()  - B.getRight()
+                : 0;
+        int gy = (A.getTop() < B.getBottom()) ? B.getBottom() - A.getTop()
+                : (B.getTop() < A.getBottom()) ? A.getBottom() - B.getTop()
+                : 0;
+
+        if (gx==0 && gy>0) return false;
+        if (gy==0 && gx>0) return true;
+        if (gx != gy) return gx < gy;
+        return true;
     }
 
 

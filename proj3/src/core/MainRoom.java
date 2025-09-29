@@ -82,22 +82,22 @@ public class MainRoom extends Room {
                 return edge;
             }
             case RIGHT: {
-                edge = getRight();
+                edge = getRight() - 1;
                 if (subRooms != null) {
                     for (SubRoom s : subRooms) {
                         if (n > s.getBottom() && n < s.getTop()) {
-                            edge = Math.max(edge, s.getRight());
+                            edge = Math.max(edge, s.getRight() - 1);
                         }
                     }
                 }
                 return edge;
             }
             case UP: {
-                edge = getTop();
+                edge = getTop() - 1;
                 if (subRooms != null) {
                     for (SubRoom s : subRooms) {
                         if (n > s.getLeft() && n < s.getRight()) {
-                            edge = Math.max(edge, s.getTop());
+                            edge = Math.max(edge, s.getTop() - 1);
                         }
                     }
                 }

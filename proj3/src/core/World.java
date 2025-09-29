@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 3;
+    private static long seed = 7;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -179,10 +179,6 @@ public class World {
 
             if (!linked) unconnected.add(unconnected.removeFirst());
         }
-
-        for (int i = 0; i < random.nextInt(0, 3); i++)
-            carver.connect((MainRoom) rooms.get(random.nextInt(rooms.size())),
-                    (MainRoom) rooms.get(random.nextInt(rooms.size())));
     }
 
 
