@@ -2,6 +2,7 @@ package core;
 
 import tileengine.TERenderer;
 import tileengine.TETile;
+import tileengine.TileType;
 import utils.RandomUtils;
 
 import java.awt.*;
@@ -29,16 +30,16 @@ public class SubRoom extends Room {
         int width  = (int) Math.sqrt(idealSize * aspectRatio);
         int height = (int) (idealSize / (double) width);
 
-        width  += RandomUtils.uniform(random, -2, 3);
+        width += RandomUtils.uniform(random, -2, 3);
         height += RandomUtils.uniform(random, -2, 3);
 
-        width  = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
+        width = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
 
-        int minOverlapX = baseRoom.getThicknessOfWall() + 1;
-        int minOverlapY = baseRoom.getThicknessOfWall() + 1;
+        int minOverlapX = baseRoom.getThicknessOfWall() + baseRoom.getThicknessOfWall();
+        int minOverlapY = baseRoom.getThicknessOfWall() + baseRoom.getThicknessOfWall();
 
-        // At least wall tiles overlap with the main room. At most hal of the subroom overlap with main room
+        // At least wall tiles overlap with the main room's out-most floor. At most half of the subroom overlap with main room
         int overlap;
 
         int x, y;
@@ -90,47 +91,45 @@ public class SubRoom extends Room {
             for (int j = startY; j < endY; j++) {
 
                 // Belong to subroom wall
-                boolean subRoomWall =
-                        (i < startX + t) || (i >= endX - t) ||
-                                (j < startY + t) || (j >= endY - t);
+                boolean subWall  = (i < startX + t) || (i >= endX - t) || (j < startY + t) || (j >= endY - t);
+                boolean subFloor = !subWall;
 
-                boolean onSubroomFloor =
-                        (i >= startX + t) && (i < endX - t) &&
-                                (j >= startY + t) && (j < endY - t);
-
-                // Belong to main room
+                // Main room membership
                 boolean inMainBounds = belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight);
-
-                boolean onMainFloor =
-                        (i >= mainRoom.getLeft() + t && i < mainRoom.getRight() - t) &&
-                                (j >= mainRoom.getBottom() + t && j < mainRoom.getTop() - t);
-
+                boolean onMainFloor = (i >= mainRoom.getLeft() + t && i < mainRoom.getRight() - t) &&
+                        (j >= mainRoom.getBottom() + t && j < mainRoom.getTop() - t);
                 boolean onMainWall = inMainBounds && !onMainFloor;
 
                 // Doorway only along the shared edge for this subroom's direction
-                boolean onDoorway = (onMainWall && onSubroomFloor) || (onMainWall && subRoomWall) || (subRoomWall && onMainFloor);
+                boolean onSharedEdgeBand =
+                        switch (direction) {
+                            case LEFT -> (i >= endX - t);
+                            case RIGHT -> (i >= startX && i < startX + t);
+                            case DOWN -> (j >= endY - t);
+                            case UP -> (j >= startY && j < startY + t);
+                        };
 
-                // Only skip rounded *interior* corners; keep wall corners solid
-                if (!isCornered() && isCornerArea(i, j, startX, startY, endX, endY, t) && !subRoomWall) {
-                    continue;
-                }
+                boolean againstMainWallBand =
+                        switch (direction) {
+                            case LEFT -> (i >= mainRoom.getLeft() && i < mainRoom.getLeft() + t) && j >= Math.max(startY,mainRoom.getBottom()) && j < Math.min(endY,mainRoom.getTop());
+                            case RIGHT -> (i >= mainRoom.getRight() - t && i < mainRoom.getRight()) && j >= Math.max(startY,mainRoom.getBottom()) && j < Math.min(endY,mainRoom.getTop());
+                            case DOWN -> (j >= mainRoom.getBottom() && j < mainRoom.getBottom() + t) && i >= Math.max(startX,mainRoom.getLeft()) && i < Math.min(endX,mainRoom.getRight());
+                            case UP -> (j >= mainRoom.getTop() - t && j < mainRoom.getTop()) && i >= Math.max(startX, mainRoom.getLeft()) && i < Math.min(endX,mainRoom.getRight());
+                        };
 
-                if (onDoorway) {
-                    world[i][j] = getFloorType().toTETile();
-                    continue;
-                }
-
+                boolean onSharedDoorway = onSharedEdgeBand && againstMainWallBand;
+                boolean placeFloor;
                 if (onMainFloor) {
-                    continue;
+                    placeFloor = true;
+                } else if (onSharedDoorway) {
+                    placeFloor = true;
+                } else if (onMainWall) {
+                    placeFloor = false;
+                } else {
+                    placeFloor = subFloor && !wouldLeakToNothing(world, i, j, mainRoom, this);
                 }
 
-                if (onMainWall) {
-                    world[i][j] = getWallType().toTETile();
-                    continue;
-                }
-
-                // Otherwise, place the subroom's intended tile
-                world[i][j] = (subRoomWall ? getWallType().toTETile() : getFloorType().toTETile());
+                world[i][j] = (placeFloor ? getFloorType() : getWallType()).toTETile();
             }
         }
     }
@@ -147,5 +146,24 @@ public class SubRoom extends Room {
 
     /** Get direction of this subroom attached */
     public Direction getDirection() {return direction;}
+
+
+    private boolean wouldLeakToNothing(TETile[][] world, int x, int y,
+                                       MainRoom mainRoom, SubRoom subRoom) {
+        int[] dx = {1, -1, 0, 0}, dy = {0, 0, 1, -1};
+        for (int k = 0; k < 4; k++) {
+            int nx = x + dx[k], ny = y + dy[k];
+            if (nx < 0 || ny < 0 || nx >= world.length || ny >= world[0].length) return true;
+
+            boolean inMain = belongMainRoom(nx, ny, mainRoom.getLocation(), mainRoom.getWidth(), mainRoom.getHeight());
+            boolean inSub  = nx >= subRoom.getLeft() && nx < subRoom.getRight()
+                    && ny >= subRoom.getBottom() && ny < subRoom.getTop();
+
+            if (!inMain && !inSub && TileType.toType(world[nx][ny]) == TileType.NOTHING) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
