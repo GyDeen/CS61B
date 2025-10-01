@@ -35,36 +35,25 @@ public class SubRoom extends Room {
 
         width = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
-
-        int minOverlapX = baseRoom.getThicknessOfWall() + baseRoom.getThicknessOfWall();
-        int minOverlapY = baseRoom.getThicknessOfWall() + baseRoom.getThicknessOfWall();
-
-        // At least wall tiles overlap with the main room's out-most floor. At most half of the subroom overlap with main room
-        int overlap;
-
         int x, y;
         switch (direction) {
-            case LEFT: // left
-                overlap = RandomUtils.uniform(random, minOverlapX, width / 2);
-                x = baseRoom.getLeft() + overlap - width / 2;
+            case LEFT -> {
+                x = baseRoom.getLeft() - (width / 2) + RandomUtils.uniform(random, 0, width / 3 + 1);
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
-                break;
-            case RIGHT: // right
-                overlap = RandomUtils.uniform(random, minOverlapX, width / 2);
-                x = baseRoom.getRight() - overlap + width / 2;
+            }
+            case RIGHT -> {
+                x = baseRoom.getRight() + (width / 2) - RandomUtils.uniform(random, 0, width / 3 + 1);
                 y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
-                break;
-            case DOWN: // bottom
-                overlap = RandomUtils.uniform(random, minOverlapY, height / 2);
-                y = baseRoom.getBottom() + overlap - height / 2;
+            }
+            case DOWN -> {
+                y = baseRoom.getBottom() - (height / 2) + RandomUtils.uniform(random, 0, height / 3 + 1);
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
-                break;
-            case UP: // top
-            default:
-                overlap = RandomUtils.uniform(random, minOverlapY, height / 2);
-                y = baseRoom.getTop() - overlap + height / 2;
+            }
+            case UP -> {
+                y = baseRoom.getTop() + (height / 2) - RandomUtils.uniform(random, 0, height / 3 + 1);
                 x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
-                break;
+            }
+            default -> throw new IllegalStateException("Unexpected direction: " + direction);
         }
 
         SubRoom sub = new SubRoom(height, width, x, y, baseRoom.getThicknessOfWall(), baseRoom.isCornered(), baseRoom, direction);
@@ -119,12 +108,10 @@ public class SubRoom extends Room {
 
                 boolean onSharedDoorway = onSharedEdgeBand && againstMainWallBand;
                 boolean placeFloor;
-                if (onMainFloor) {
+                if (onMainFloor || onSharedDoorway) {
                     placeFloor = true;
-                } else if (onSharedDoorway) {
+                } else if (subFloor && onMainWall) {
                     placeFloor = true;
-                } else if (onMainWall) {
-                    placeFloor = false;
                 } else {
                     placeFloor = subFloor && !wouldLeakToNothing(world, i, j, mainRoom, this);
                 }

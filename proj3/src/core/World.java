@@ -15,7 +15,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 7;
+    private static long seed = 2020;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 

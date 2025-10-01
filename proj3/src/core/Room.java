@@ -78,8 +78,8 @@ public abstract class Room {
         int endX = startX + getWidth();
         int endY = startY + getHeight();
 
-        for (int i = startX; i <= endX; i++) {
-            for (int j = startY; j <= endY; j++) {
+        for (int i = startX; i < endX; i++) {
+            for (int j = startY; j < endY; j++) {
                 // If it don't have corner, skip the corner tiles
                 if (!isCornered && isCornerArea(i, j, startX, startY, endX, endY, thicknessOfWall)) continue;
 
