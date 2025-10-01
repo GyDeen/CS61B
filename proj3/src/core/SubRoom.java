@@ -29,6 +29,7 @@ public class SubRoom extends Room {
         double aspectRatio = random.nextDouble(0.8, 1.3);
         int width  = (int) Math.sqrt(idealSize * aspectRatio);
         int height = (int) (idealSize / (double) width);
+        int t = baseRoom.getThicknessOfWall();
 
         width += RandomUtils.uniform(random, -2, 3);
         height += RandomUtils.uniform(random, -2, 3);
@@ -36,22 +37,25 @@ public class SubRoom extends Room {
         width = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
         int x, y;
+        /* + - t to make sure it will always have at least the outmost floor connected */
         switch (direction) {
             case LEFT -> {
-                x = baseRoom.getLeft() - (width / 2) + RandomUtils.uniform(random, 0, width / 3 + 1);
-                y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
+                x = baseRoom.getLeft() - (width / 2) + RandomUtils.uniform(random, 0, width / 3 + 1) + t;
+                y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height);
             }
             case RIGHT -> {
-                x = baseRoom.getRight() + (width / 2) - RandomUtils.uniform(random, 0, width / 3 + 1);
-                y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height + 1);
+                // - 1 due to allocation is open range
+                x = baseRoom.getRight() + (width / 2) - RandomUtils.uniform(random, 0, width / 3 + 1) - 1 - t;
+                y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height);
             }
             case DOWN -> {
-                y = baseRoom.getBottom() - (height / 2) + RandomUtils.uniform(random, 0, height / 3 + 1);
-                x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
+                y = baseRoom.getBottom() - (height / 2) + RandomUtils.uniform(random, 0, height / 3 + 1) + t;
+                x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width);
             }
             case UP -> {
-                y = baseRoom.getTop() + (height / 2) - RandomUtils.uniform(random, 0, height / 3 + 1);
-                x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width + 1);
+                // - 1 due to allocation is open range
+                y = baseRoom.getTop() + (height / 2) - RandomUtils.uniform(random, 0, height / 3 + 1) - 1 - t;
+                x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width);
             }
             default -> throw new IllegalStateException("Unexpected direction: " + direction);
         }
