@@ -1,6 +1,5 @@
 package core;
 
-import org.knowm.xchart.internal.chartpart.Axis;
 import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
@@ -15,7 +14,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 726;
+    private static long seed = 1024;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
