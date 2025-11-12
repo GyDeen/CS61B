@@ -15,19 +15,18 @@ public class InitPage {
     private String[] prompts = {"New Game", "Load Game", "Exit Game"};
 
     public void draw() {
+        StringBuilder sb = new StringBuilder();
+
         StdDraw.setCanvasSize(WINDOW_WIDTH * Config.TILE_SIZE, WINDOW_HEIGHT * Config.TILE_SIZE);
         StdDraw.setXscale(0, WINDOW_WIDTH);
         StdDraw.setYscale(0, WINDOW_HEIGHT);
-        StdDraw.clear(Color.BLACK );
+        StdDraw.clear(Color.BLACK);
         StdDraw.setPenColor(Color.WHITE);
 
         StdDraw.setFont(titleFont);
-        StdDraw.setPenRadius(10);
         StdDraw.text(45, 30, "GAME");
 
         StdDraw.setFont(promptFont);
-        for (int i = 0; i < prompts.length; i++) {
-            StdDraw.text(45, 20 - Config.BUFFER*i, prompts[i]);
-        }
+        for (int i = 0; i < prompts.length; i++) StdDraw.text(45, 20 - Config.BUFFER*i, prompts[i]);
     }
 }

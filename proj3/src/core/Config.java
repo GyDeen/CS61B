@@ -8,12 +8,10 @@ public class Config {
     // Could self define the ratio of thickness of wall
     public static final double WALL_THICKNESS_1_PROBABILITY = 0.9;
 
-
     // Window setting
     public static final int WINDOW_HEIGHT = 50;
     public static final int WINDOW_WIDTH = 90;
     public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
-
 
     // Main room setting
     public static final int MIN_MAIN_ROOM_WIDTH = 17;
@@ -23,7 +21,6 @@ public class Config {
     public static final int MIN_MAIN_ROOM_NUM = 3;
     public static final int MAX_MAIN_ROOM_NUM = 5;
 
-
     // Subroom setting
     public static final int MIN_SUB_ROOM_WIDTH = 8;
     public static final int MAX_SUB_ROOM_WIDTH = 10;
@@ -31,7 +28,6 @@ public class Config {
     public static final int MAX_SUB_ROOM_HEIGHT = 10;
     public static final int MIN_SUB_ROOM_NUM = 2;
     public static final int MAX_SUB_ROOM_NUM = 7;
-
 
     // Render world setting
     public static final int DOOR_BUFF = 1;
@@ -41,8 +37,6 @@ public class Config {
     public static final int MAX_WALL_IN_A_ROW = 2;
     public static final int MAX_ATTEMPT_PIVOT = 50;
     public static final int ALLOCATE_FAIL_CAP = 200;
-
-
 
     // Init page setting
     public static final int BUFFER = 4;
