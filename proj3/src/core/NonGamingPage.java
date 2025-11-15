@@ -14,7 +14,7 @@ public abstract class NonGamingPage {
     private Font promptFont = plainGameFont(Config.PROMPT_SIZE, PROMPT_FONT_PATH);
 
 
-    public void draw() {
+    public void setUpScreen() {
         StdDraw.setCanvasSize(WINDOW_WIDTH * Config.TILE_SIZE, WINDOW_HEIGHT * Config.TILE_SIZE);
         StdDraw.setXscale(0, WINDOW_WIDTH);
         StdDraw.setYscale(0, WINDOW_HEIGHT);

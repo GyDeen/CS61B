@@ -9,24 +9,22 @@ import static core.Config.WINDOW_WIDTH;
 import static core.UI.PROMPT_FONT_PATH;
 import static core.UI.plainGameFont;
 
-public class SeedScreen {
-    private Font prompt = plainGameFont(Config.PROMPT_SIZE, PROMPT_FONT_PATH);
+public class SeedScreen extends NonGamingPage {
 
     public long draw() {
-        StringBuilder sb = new StringBuilder();
-        StdDraw.setCanvasSize(WINDOW_WIDTH * Config.TILE_SIZE, WINDOW_HEIGHT * Config.TILE_SIZE);
-        StdDraw.setXscale(0, WINDOW_WIDTH);
-        StdDraw.setYscale(0, WINDOW_HEIGHT);
+        super.setUpScreen();
         StdDraw.enableDoubleBuffering();
+
+        StringBuilder sb = new StringBuilder();
 
         while (true) {
             StdDraw.clear(Color.BLACK);
             StdDraw.setPenColor(Color.WHITE);
 
-            StdDraw.setFont(prompt);
+            StdDraw.setFont(getDefaultPromptFont());
             StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.70, "ENTER SEED");
 
-            StdDraw.setFont(prompt);
+            StdDraw.setFont(getDefaultPromptFont());
             StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.56,
                     "Type digits. Press S to start. ESC to cancel.");
             StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.46, sb.isEmpty() ? "_" : sb.toString());
@@ -57,4 +55,3 @@ public class SeedScreen {
         }
     }
 }
-

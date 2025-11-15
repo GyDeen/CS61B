@@ -7,7 +7,7 @@ public class Main {
     private final SeedScreen seedScreen = new SeedScreen();
 
     public static void main(String[] args) {
-        init.draw();
+
 
 //      World world = new World();
 //      world.renderWorld();
