@@ -11,8 +11,8 @@ public class UI {
     public static final int BOTTOM_UI = 1;
 
 
-    public static final String TITLE_FONT_PATH = "src/resources/debrosee-font/Debrosee-ALPnL.ttf";
-    public static final String PROMPT_FONT_PATH = "src/resources/freedom-font/Freedom-10eM.ttf";
+    public static final String TITLE_FONT_PATH = "src/resources/font/Rich Eatin'.otf";
+    public static final String PROMPT_FONT_PATH = "src/resources/font/liera-sans/LieraSans-Regular.ttf";
     public static final String GAME_UI_FONT = "src/resources/cabal-font/Cabal-w5j3.ttf";
 
 

@@ -2,31 +2,37 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 
-import java.awt.*;
 
-import static core.Config.WINDOW_HEIGHT;
-import static core.Config.WINDOW_WIDTH;
-import static core.UI.*;
+/** Initial page interface and manage the branch go to different pages such as seed page and loading page. */
+public class InitPage extends NonGamingPage{
+    private enum MenuChoice {
+        NEW_GAME("New Game"),
+        LOAD_GAME("Load Game"),
+        EXIT_GAME("Exit Game");
 
+        private final String displayText;
 
-public class InitPage {
-    private static Font titleFont = plainGameFont(Config.TITLE_SIZE, TITLE_FONT_PATH);
-    private Font promptFont = plainGameFont(Config.PROMPT_SIZE, PROMPT_FONT_PATH);
-    private String[] prompts = {"New Game", "Load Game", "Exit Game"};
+        MenuChoice(String text) {
+            this.displayText = text;
+        }
+    }
 
-    public void draw() {
-        StringBuilder sb = new StringBuilder();
+    @Override
+    public void draw(){
+        super.draw();
+        StdDraw.setFont(super.getDefaultTitleFont());
+        StdDraw.text((double) Config.WINDOW_WIDTH / 2, (double) (Config.WINDOW_HEIGHT * 4) /5, "GAME");
 
-        StdDraw.setCanvasSize(WINDOW_WIDTH * Config.TILE_SIZE, WINDOW_HEIGHT * Config.TILE_SIZE);
-        StdDraw.setXscale(0, WINDOW_WIDTH);
-        StdDraw.setYscale(0, WINDOW_HEIGHT);
-        StdDraw.clear(Color.BLACK);
-        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.setFont(super.getDefaultPromptFont());
 
-        StdDraw.setFont(titleFont);
-        StdDraw.text(45, 30, "GAME");
+        double centerX = Config.WINDOW_WIDTH / 2.0;
 
-        StdDraw.setFont(promptFont);
-        for (int i = 0; i < prompts.length; i++) StdDraw.text(45, 20 - Config.BUFFER*i, prompts[i]);
+        double startY = Config.WINDOW_HEIGHT / 2.0;
+        int i = 0;
+        for (MenuChoice choice : MenuChoice.values()) {
+            double y = startY - i * Config.BUFFER * 2;
+            StdDraw.text(centerX, y, choice.displayText);
+            i++;
+        }
     }
 }
