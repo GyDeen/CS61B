@@ -10,30 +10,33 @@ public class Main {
     private static final LoadingPage loading = new LoadingPage();
 
     public static void main(String[] args) {
-        while (true) {
-            init.setUpScreen();
-            InitPage.MenuChoice nextPage = init.initialRun();
+//        while (true) {
+//            init.setUpScreen();
+//            InitPage.MenuChoice nextPage = init.initialRun();
+//
+//            switch (nextPage) {
+//                case NEW_GAME : {
+//                    long worldSeed = seedScreen.run();
+//
+//                    if (worldSeed == -1L) {
+//                        continue;
+//                    }
+//
+//                    World world = new World(worldSeed);
+//                    world.renderWorld();
+//                    break;
+//                }
+//                case EXIT_GAME:System.exit(0);
+//                case LOAD_GAME : {
+//                    loading.run();
+//                    break;
+//                }
+//            }
+//
+//            break;
+//        }
 
-            switch (nextPage) {
-                case NEW_GAME : {
-                    long worldSeed = seedScreen.run();
-
-                    if (worldSeed == -1L) {
-                        continue;
-                    }
-
-                    World world = new World(worldSeed);
-                    world.renderWorld();
-                    break;
-                }
-                case EXIT_GAME:System.exit(0);
-                case LOAD_GAME : {
-                    loading.run();
-                    break;
-                }
-            }
-
-            break;
-        }
+        World world = new World();
+        world.renderWorld();
     }
 }

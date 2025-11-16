@@ -28,7 +28,6 @@ public class InitPage extends NonGamingPage{
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.text((double) Config.WINDOW_WIDTH / 2, (double) (Config.WINDOW_HEIGHT * 4) / 5, "GAME");
 
-        // Draw menu options
         StdDraw.setFont(super.getDefaultPromptFont());
 
         double centerX = Config.WINDOW_WIDTH / 2.0;
@@ -49,6 +48,10 @@ public class InitPage extends NonGamingPage{
             StdDraw.text(centerX, y, choice.displayText);
             i++;
         }
+
+        StdDraw.setPenColor(Color.WHITE);
+        StdDraw.setFont(UI.loadFont(UI.PROMPT_FONT_PATH, 20));
+        StdDraw.text(20, UI.BOTTOM_UI, "Press S to Start Game. Press L to Load Saves. Press ESC to Exit.");
 
         StdDraw.show();
     }
@@ -99,6 +102,13 @@ public class InitPage extends NonGamingPage{
             boolean downNow = StdDraw.isKeyPressed(KeyEvent.VK_DOWN);
             boolean enterNow = StdDraw.isKeyPressed(KeyEvent.VK_ENTER);
             boolean escNow = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
+            boolean startGame = StdDraw.isKeyPressed(KeyEvent.VK_S);
+            boolean loadGame = StdDraw.isKeyPressed(KeyEvent.VK_L);
+            boolean exitGame = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
+
+            if (startGame) return MenuChoice.NEW_GAME;
+            if (loadGame) return MenuChoice.LOAD_GAME;
+            if (exitGame) return MenuChoice.EXIT_GAME;
 
             if (upNow && !upPrev) {
                 selectedIndex = (selectedIndex - 1 + count) % count;
