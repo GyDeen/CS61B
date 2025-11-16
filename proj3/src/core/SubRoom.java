@@ -87,7 +87,7 @@ public class SubRoom extends Room {
                 boolean subWall  = (i < startX + t) || (i >= endX - t) || (j < startY + t) || (j >= endY - t);
                 boolean subFloor = !subWall;
 
-                // Main room membership
+                // Main room
                 boolean inMainBounds = belongMainRoom(i, j, mainRoomPosition, mainRoomWidth, mainRoomHeight);
                 boolean onMainFloor = (i >= mainRoom.getLeft() + t && i < mainRoom.getRight() - t) &&
                         (j >= mainRoom.getBottom() + t && j < mainRoom.getTop() - t);
@@ -132,6 +132,21 @@ public class SubRoom extends Room {
         int bottom  = mainRoomPosition.y - mainRoomHeight / 2;
         return x >= left && x < left + mainRoomWidth
                 && y >= bottom  && y < bottom  + mainRoomHeight;
+    }
+
+
+    /* Place subroom floor only if:
+    * 1. It is on the direction with the main room, and we are connecting them with floor
+    * 2. It only belongs to subroom floor */
+    private boolean shouldPlaceFloor(TETile[][] world, int i, int j, boolean subFloor, boolean onMainFloor,
+                                     boolean onMainWall, boolean onSharedDoorway) {
+        if (onMainFloor || onSharedDoorway) {
+            return true;
+        }
+        if (subFloor && onMainWall) {
+            return true;
+        }
+        return subFloor && !wouldLeakToNothing(world, i, j, mainRoom, this);
     }
 
 
