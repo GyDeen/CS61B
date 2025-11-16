@@ -26,12 +26,14 @@ public class Main {
                     world.renderWorld();
                     break;
                 }
-                case EXIT_GAME: return;
+                case EXIT_GAME:System.exit(0);
                 case LOAD_GAME : {
                     loading.run();
                     break;
                 }
             }
+
+            break;
         }
     }
 }
