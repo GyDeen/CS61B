@@ -6,13 +6,10 @@ import java.awt.*;
 
 import static core.Config.WINDOW_HEIGHT;
 import static core.Config.WINDOW_WIDTH;
-import static core.UI.PROMPT_FONT_PATH;
-import static core.UI.plainGameFont;
 
 public class SeedScreen extends NonGamingPage {
 
-    public long draw() {
-        super.setUpScreen();
+    public long run() {
         StdDraw.enableDoubleBuffering();
 
         StringBuilder sb = new StringBuilder();
@@ -22,11 +19,11 @@ public class SeedScreen extends NonGamingPage {
             StdDraw.setPenColor(Color.WHITE);
 
             StdDraw.setFont(getDefaultPromptFont());
-            StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.70, "ENTER SEED");
+            StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.70, "WORLD GENERATION");
 
-            StdDraw.setFont(getDefaultPromptFont());
+            StdDraw.setFont(UI.loadFont(UI.PROMPT_FONT_PATH, 40));
             StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.56,
-                    "Type digits. Press S to start. ESC to cancel.");
+                    "Type seed in digits. Press S to start. ESC to cancel.");
             StdDraw.text(WINDOW_WIDTH / 2.0, WINDOW_HEIGHT * 0.46, sb.isEmpty() ? "_" : sb.toString());
 
             StdDraw.show();

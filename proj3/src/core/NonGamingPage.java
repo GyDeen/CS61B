@@ -22,10 +22,18 @@ public abstract class NonGamingPage {
         StdDraw.setPenColor(Color.WHITE);
     }
 
-    /** The default title font */
-    public Font getDefaultTitleFont() {return titleFont;}
+    /**
+     * The default title font
+     */
+    public Font getDefaultTitleFont() {
+        return titleFont;
+    }
 
 
-    /** The default prompt font */
-    public Font getDefaultPromptFont() {return promptFont;}
+    /**
+     * The default prompt font
+     */
+    public Font getDefaultPromptFont() {
+        return promptFont;
+    }
 }

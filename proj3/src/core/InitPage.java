@@ -22,7 +22,6 @@ public class InitPage extends NonGamingPage{
 
     /** Set up the initial page */
     private void draw(int selectedIndex, int hoveredIndex){
-        super.setUpScreen();
 
         // Draw title
         StdDraw.setFont(super.getDefaultTitleFont());
@@ -125,7 +124,7 @@ public class InitPage extends NonGamingPage{
             }
             mousePrev = mouseNow;
 
-            StdDraw.pause(16);
+            StdDraw.pause(8);
         }
     }
 
