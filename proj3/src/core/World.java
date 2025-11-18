@@ -14,7 +14,7 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 1231;
+    private static long seed = 7076;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
@@ -180,6 +180,46 @@ public class World {
         }
     }
 
+    /* Generate hallway with given rooms */
+    private void generateHallway(ArrayList<Room> givenRooms) {
+        int attempts = 0;
+        carver = new HallwayCarver(world, random);
+        ArrayList<Room> connected = new ArrayList<>();
+        ArrayList<Room> unconnected = new ArrayList<>(givenRooms.size());
+
+        connected.add(unconnected.removeFirst());
+
+        while (!unconnected.isEmpty()) {
+            MainRoom u = (MainRoom) unconnected.getFirst();
+            boolean linked = false;
+
+            for (Room vR : connected) {
+                if (attempts >= ALLOCATE_FAIL_CAP) {
+                    if (carver.connectSimpleL((MainRoom) vR, u)) {
+                        connected.add(u);
+                        unconnected.removeFirst();
+                        linked = true;
+                        attempts = 0;
+                        break;
+                    } else {
+                        attempts = 0;
+                    }
+                }
+                if (carver.connect((MainRoom) vR, u)) {
+                    connected.add(u);
+                    unconnected.removeFirst();
+                    linked = true;
+                    attempts = 0;
+                    break;
+                }
+
+                attempts++;
+            }
+
+            if (!linked) unconnected.add(unconnected.removeFirst());
+        }
+    }
+
 
 
     /** Draw the world and generate the whole picture of the world */
@@ -217,6 +257,7 @@ public class World {
         }
 
         generateHallway();
+
         TETile[][] carved = carver.getWorld();
         for (int x = 0; x < world.length; x++) {
             System.arraycopy(carved[x], 0, world[x], 0, world[0].length);

@@ -114,8 +114,6 @@ public class SubRoom extends Room {
                 boolean placeFloor;
                 if (onMainFloor || onSharedDoorway) {
                     placeFloor = true;
-                } else if (subFloor && onMainWall) {
-                    placeFloor = true;
                 } else {
                     placeFloor = subFloor && !wouldLeakToNothing(world, i, j, mainRoom, this);
                 }
