@@ -135,21 +135,6 @@ public class SubRoom extends Room {
     }
 
 
-    /* Place subroom floor only if:
-    * 1. It is on the direction with the main room, and we are connecting them with floor
-    * 2. It only belongs to subroom floor */
-    private boolean shouldPlaceFloor(TETile[][] world, int i, int j, boolean subFloor, boolean onMainFloor,
-                                     boolean onMainWall, boolean onSharedDoorway) {
-        if (onMainFloor || onSharedDoorway) {
-            return true;
-        }
-        if (subFloor && onMainWall) {
-            return true;
-        }
-        return subFloor && !wouldLeakToNothing(world, i, j, mainRoom, this);
-    }
-
-
     /** Get direction of this subroom attached */
     public Direction getDirection() {return direction;}
 

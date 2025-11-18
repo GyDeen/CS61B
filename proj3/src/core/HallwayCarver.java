@@ -22,7 +22,6 @@ public class HallwayCarver {
 
 
     private static TETile[][] world;
-    ArrayList<Point> door = new ArrayList<>();
     Random random;
 
     public HallwayCarver(TETile[][] world, Random rand) {
@@ -81,8 +80,8 @@ public class HallwayCarver {
         // Randomly add more pivot for long distance hallway
         // if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
 
-        System.out.println("drA: " + drA.toString());
-        System.out.println("drB: " + drB.toString());
+//        System.out.println("drA: " + drA.toString());
+//        System.out.println("drB: " + drB.toString());
 
         ArrayList<Point> doors = new ArrayList<>();
         ArrayList<Point> floors = new ArrayList<>();
@@ -245,9 +244,9 @@ public class HallwayCarver {
      */
     private DoorPair pickDoorPairByEdges(MainRoom A, MainRoom B) {
         // legal (non-corner) bands for door coordinates
-        int aXL = A.getLeft()+1,  aXR = A.getRight()-1;
+        int aXL = A.getLeft()+1, aXR = A.getRight()-1;
         int aYB = A.getBottom()+1, aYT = A.getTop()-1;
-        int bXL = B.getLeft()+1,  bXR = B.getRight()-1;
+        int bXL = B.getLeft()+1, bXR = B.getRight()-1;
         int bYB = B.getBottom()+1, bYT = B.getTop()-1;
 
         int offA = Math.max(0, A.getThicknessOfWall() - 1);
@@ -265,8 +264,8 @@ public class HallwayCarver {
         if (horizontal) {
             // pick independent rows near the middle, clamped to each room
             int yMid = (A.getLocation().y + B.getLocation().y) / 2;
-            int yA = clamp(yMid, aYB, aYT);
-            int yB = clamp(yMid, bYB, bYT);
+            int yA = clamp(yMid, aYB + A.getThicknessOfWall(), aYT - A.getThicknessOfWall());
+            int yB = clamp(yMid, bYB + A.getThicknessOfWall(), bYT - A.getThicknessOfWall());
 
             // edge intervals at those rows
             int aLx = A.getEdgeOn(yA, Direction.LEFT),  aRx = A.getEdgeOn(yA, Direction.RIGHT);
@@ -292,8 +291,8 @@ public class HallwayCarver {
         } else {
             // vertical: pick independent columns near the middle, clamped to each room
             int xMid = (A.getLocation().x + B.getLocation().x) / 2;
-            int xA = clamp(xMid, aXL, aXR);
-            int xB = clamp(xMid, bXL, bXR);
+            int xA = clamp(xMid, aXL + A.getThicknessOfWall(), aXR - A.getThicknessOfWall());
+            int xB = clamp(xMid, bXL + A.getThicknessOfWall(), bXR - A.getThicknessOfWall());
 
             // edge intervals at those columns
             int aBy = A.getEdgeOn(xA, Direction.DOWN), aUy = A.getEdgeOn(xA, Direction.UP);
