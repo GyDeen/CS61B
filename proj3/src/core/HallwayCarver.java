@@ -80,8 +80,8 @@ public class HallwayCarver {
         // Randomly add more pivot for long distance hallway
         // if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
 
-//        System.out.println("drA: " + drA.toString());
-//        System.out.println("drB: " + drB.toString());
+        System.out.println("drA: " + drA.toString());
+        System.out.println("drB: " + drB.toString());
 
         ArrayList<Point> doors = new ArrayList<>();
         ArrayList<Point> floors = new ArrayList<>();
