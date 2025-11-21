@@ -26,8 +26,11 @@ public class Config {
     public static final int MAX_SUB_ROOM_WIDTH = 10;
     public static final int MIN_SUB_ROOM_HEIGHT = 4;
     public static final int MAX_SUB_ROOM_HEIGHT = 10;
-    public static final int MIN_SUB_ROOM_NUM = 0;
+    public static final int MIN_SUB_ROOM_NUM = 1;
     public static final int MAX_SUB_ROOM_NUM = 7;
+
+    // Full fill room setting
+    public static final int MIN_VOID_AREA = 100;
 
     // Render world setting
     public static final int DOOR_BUFF = 1;

@@ -6,6 +6,7 @@ import tileengine.Tileset;
 import utils.RandomUtils;
 
 import java.awt.*;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -14,12 +15,13 @@ import static core.Config.*;
 
 
 public class World {
-    private static long seed = 221212121;
+    private static long seed = 07266262;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
     private int roomNum;
-    private ArrayList<Room> rooms = new ArrayList<>();
+    private ArrayList<Room> majorRooms = new ArrayList<>();
+    private ArrayList<Room> fullFillRooms = new ArrayList<>();
     private HallwayCarver carver;
 
 
@@ -39,104 +41,16 @@ public class World {
     }
 
 
-    /** Generate a random room for the world. Randomly generate information such as size, location,
-     * the thickness of the "wall" of the room, whether it has corner. It will stop generate when it has more than
-     * minimum number of room and fails to many times to generate new rooms
-     */
-    public void generateRoomsUsingCells() {
-        int rows = 3;
-        int cols = 3;
-        int cellWidth = WINDOW_WIDTH / cols;
-        int cellHeight = WORLD_HEIGHT / rows;
-
-        // Make a list of all cells
-        ArrayList<Point> cells = new ArrayList<>();
-        for (int i = 0; i < cols; i++) {
-            for (int j = 0; j < rows; j++) {
-                int centerX = i * cellWidth + cellWidth / 2;
-                int centerY = j * cellHeight + cellHeight / 2;
-                cells.add(new Point(centerX, centerY));
-            }
-        }
-
-        // Shuffle to ensure random order of selection
-        Collections.shuffle(cells, random);
-
-        int roomsToPlace = RandomUtils.uniform(random, MIN_MAIN_ROOM_NUM, cells.size() + 1);
-        int placed = 0;
-
-        for (Point cell : cells) {
-            if (placed >= roomsToPlace) break;
-            if (generateRoomInCell(cell.x, cell.y, cellWidth, cellHeight)) {
-                placed++;
-            }
-        }
-
-        // Retry with new random cells if under MIN_ROOM_NUM
-        int retryLimit = 50;
-        int retries = 0;
-        while (rooms.size() < MIN_MAIN_ROOM_NUM && retries++ < retryLimit) {
-            Collections.shuffle(cells, random);
-            for (Point cell : cells) {
-                if (rooms.size() >= MIN_MAIN_ROOM_NUM) break;
-                generateRoomInCell(cell.x, cell.y, cellWidth, cellHeight);
-            }
-        }
-    }
-
-
     /** Method that generate the room purely randomly, not using cells */
-    public void generateRoom() {
-        int maxAttempt = 1000, currentAttempt = 0;
+    private void generateRoom() {
+        int maxAttempt = 10000, currentAttempt = 0;
         int idealSize = WORLD_HEIGHT * WINDOW_WIDTH / roomNum;
 
-        while (rooms.size() < roomNum &&  currentAttempt++ < maxAttempt) {
+        while (majorRooms.size() < roomNum &&  currentAttempt++ < maxAttempt) {
             // Generate a main room
             MainRoom newRoom = MainRoom.generate(idealSize, random);
-            if (Room.validRoom(newRoom, rooms, null)) rooms.add(newRoom);
+            if (Room.validRoom(newRoom, majorRooms, null)) majorRooms.add(newRoom);
         }
-    }
-
-
-
-
-    /* Generate location of cell(bucket) to make the distribution of room more uniform. Return true if successfully
-    *  generate a room else false */
-    private boolean generateRoomInCell(int cellX, int cellY, int cellWidth, int cellHeight) {
-        int maxAttempts = 10;
-
-        for (int i = 0; i < maxAttempts; i++) {
-            int maxRoomHeight = cellHeight - 1;
-
-            if (maxRoomHeight < 10) return false;
-
-
-            // Make the room be able to be square or not square rectangle
-            int width = RandomUtils.uniform(random, 25, 35);
-            int height = RandomUtils.uniform(random, 10, maxRoomHeight + 1);
-
-            // Make the room not exactly the central of the cell
-            int maxX = cellX + cellWidth / 2 - width / 2 - 1;
-            int maxY = cellY + cellHeight / 2 - height / 2 - 1;
-
-            int x = RandomUtils.uniform(random, cellX + 1, maxX);
-            int y = RandomUtils.uniform(random, cellY + 1,  maxY);
-
-            if (!Room.validRoom(x, y, width, height, rooms)) continue;
-
-            boolean isCornered = random.nextInt(100) % 4 != 0;
-            int wallThickness = (random.nextDouble(0,1) < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
-
-            MainRoom newRoom = new MainRoom(height, width, x, y, wallThickness, isCornered);
-            newRoom.getRandomPassable(random);
-            newRoom.getRandomImpassable(random);
-
-            rooms.add(newRoom);
-            return true;
-        }
-
-        // Cannot generate a valid room
-        return false;
     }
 
 
@@ -145,7 +59,7 @@ public class World {
         int attempts = 0;
         carver = new HallwayCarver(world, random);
         ArrayList<Room> connected = new ArrayList<>();
-        ArrayList<Room> unconnected = new ArrayList<>(rooms);
+        ArrayList<Room> unconnected = new ArrayList<>(majorRooms);
 
         connected.add(unconnected.removeFirst());
 
@@ -180,46 +94,67 @@ public class World {
         }
     }
 
-    /* Generate hallway with given rooms */
-    private void generateHallway(ArrayList<Room> givenRooms) {
-        int attempts = 0;
-        carver = new HallwayCarver(world, random);
-        ArrayList<Room> connected = new ArrayList<>();
-        ArrayList<Room> unconnected = new ArrayList<>(givenRooms.size());
 
-        connected.add(unconnected.removeFirst());
-
-        while (!unconnected.isEmpty()) {
-            MainRoom u = (MainRoom) unconnected.getFirst();
-            boolean linked = false;
-
-            for (Room vR : connected) {
-                if (attempts >= ALLOCATE_FAIL_CAP) {
-                    if (carver.connectSimpleL((MainRoom) vR, u)) {
-                        connected.add(u);
-                        unconnected.removeFirst();
-                        linked = true;
-                        attempts = 0;
-                        break;
-                    } else {
-                        attempts = 0;
-                    }
-                }
-                if (carver.connect((MainRoom) vR, u)) {
-                    connected.add(u);
-                    unconnected.removeFirst();
-                    linked = true;
-                    attempts = 0;
-                    break;
-                }
-
-                attempts++;
-            }
-
-            if (!linked) unconnected.add(unconnected.removeFirst());
-        }
+    private boolean isNothing(int x, int y) {
+        return world[x][y] == Tileset.NOTHING;
     }
 
+
+
+    private void fullFillRooms() {
+        int width = world[0].length, height = world.length;
+        boolean[][] visited =  new boolean[width][height];
+        boolean[][] newAllocated = new boolean[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (!isNothing(x, y) || visited[x][y]) continue;
+
+                // start counting the NOTHING area size
+                int minX = x, maxX = x, minY = y, maxY = y, area = 0;
+                ArrayDeque<Point> dq = new ArrayDeque<>();
+                dq.add(new Point(x, y));
+                visited[x][y] = true;
+
+                while (!dq.isEmpty()) {
+                    Point p = dq.removeFirst();
+                    int currentX = p.x, currentY = p.y;
+                    area++;
+
+                    // Expand the NOTHING area
+                    if (currentX < minX) minX = currentX;
+                    if (currentX > maxX) maxX = currentX;
+                    if (currentY < minY) minY = currentY;
+                    if (currentY > maxY) maxY = currentY;
+
+                    if (currentX > 0 && !visited[currentX - 1][currentY] && isNothing(currentX-1, currentY)) {
+                        visited[currentX - 1][currentY] = true;
+                        dq.add(new Point(currentX - 1, currentY));
+                    }
+
+                    if (currentX + 1 < width &&  !visited[currentX + 1][currentY] && isNothing(currentX + 1, currentY)) {
+                        visited[currentX + 1][currentY] = true;
+                        dq.add(new Point(currentX + 1, currentY));
+                    }
+
+                    if (currentY > 0 && !visited[currentX][currentY - 1] && isNothing(currentX, currentY - 1)) {
+                        visited[currentX][currentY - 1] = true;
+                        dq.add(new Point(currentX, currentY - 1));
+                    }
+
+                    if (currentY + 1 < height && !visited[currentX][currentY + 1] && isNothing(currentX, currentY + 1)) {
+                        visited[currentX][currentY + 1] = true;
+                        dq.add(new Point(currentX, currentY + 1));
+                    }
+
+                    if (area < MIN_VOID_AREA) continue;
+
+
+                }
+
+            }
+        }
+
+    }
 
 
     /** Draw the world and generate the whole picture of the world */
@@ -236,23 +171,23 @@ public class World {
 
         generateRoom();
         // Generate subroom for each main room
-        for (Room room : rooms) {
-                    int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
-                    int allocateSubroomMaxAttempt = subRoomNum * 50;
-                    // Try to allocate desire subroom number
-                    for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
-                        if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
+        for (Room room : majorRooms) {
+            int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
+            int allocateSubroomMaxAttempt = subRoomNum * 50;
+            // Try to allocate desire subroom number
+            for (int i = 0; i < allocateSubroomMaxAttempt; i++) {
+                if (((MainRoom) room).getSubRooms().size() >= subRoomNum) break;
 
-                        Direction direction = Direction.values()[RandomUtils.uniform(random, Direction.values().length)];
-                        SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, (MainRoom) room, direction);
-                        if (Room.validRoom(subRoom, rooms, (MainRoom) room)) {
-                            ((MainRoom) room).attachRoom(subRoom);
-                        }
-                    }
+                Direction direction = Direction.values()[RandomUtils.uniform(random, Direction.values().length)];
+                SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, (MainRoom) room, direction);
+                if (Room.validRoom(subRoom, majorRooms, (MainRoom) room)) {
+                    ((MainRoom) room).attachRoom(subRoom);
+                }
+            }
 
         }
 
-        for (Room room : rooms) {
+        for (Room room : majorRooms) {
             room.allocateRoom(world);
         }
 
