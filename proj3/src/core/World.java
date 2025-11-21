@@ -126,11 +126,14 @@ public class World {
                     if (currentY < minY) minY = currentY;
                     if (currentY > maxY) maxY = currentY;
 
+
+                    // Explore the neighbour tiles
                     if (currentX > 0 && !visited[currentX - 1][currentY] && isNothing(currentX-1, currentY)) {
                         visited[currentX - 1][currentY] = true;
                         dq.add(new Point(currentX - 1, currentY));
                     }
 
+                    // Add neighbour NOTHING tiles for further explore
                     if (currentX + 1 < width &&  !visited[currentX + 1][currentY] && isNothing(currentX + 1, currentY)) {
                         visited[currentX + 1][currentY] = true;
                         dq.add(new Point(currentX + 1, currentY));
@@ -148,12 +151,63 @@ public class World {
 
                     if (area < MIN_VOID_AREA) continue;
 
+                    // Have each fulfill room around 150 * 0.6 size big and leave some room for hallway
+                    int numberOfRoom = (int) Math.max(1, (double) area / MIN_VOID_AREA * 0.6);
+                    int maxAttempt = 1000, placedRoom = 0;
+                    int boxW = maxX - minX + 1, boxH = maxY - minY + 1;
+                    int roomMinW = MIN_MAIN_ROOM_WIDTH, roomMaxW = Math.min(MAX_MAIN_ROOM_WIDTH, boxW);
+                    int roomMinH = MIN_MAIN_ROOM_HEIGHT, roomMaxH = Math.min(MAX_MAIN_ROOM_HEIGHT, boxH);
+                    if (roomMinW > roomMaxW || roomMinH > roomMaxH) continue;
 
+                    while (placedRoom < numberOfRoom && maxAttempt -- > 0) {
+                        Room fullFillRoom = generateFullFIllRoom(minX, minY, maxX, maxY, roomMinW, roomMaxW, roomMinH, roomMaxH);
+                        assert fullFillRoom != null;
+                        if (!Room.validRoom(fullFillRoom, majorRooms, null)) continue;
+                        if (!Room.validRoom(fullFillRoom, fullFillRooms, null)) continue;
+
+                        fullFillRooms.add(fullFillRoom);
+                        placedRoom++;
+                    }
                 }
 
             }
         }
+    }
 
+
+    private Room generateFullFIllRoom(int minX, int minY, int maxX, int maxY, int minW, int minH, int maxW, int maxH) {
+        int w = RandomUtils.uniform(random, minW, maxW + 1);
+        int h = RandomUtils.uniform(random, minH, maxH + 1);
+        int halfW = w / 2, rightHalf = w - halfW;
+        int halfH = h / 2, topHalf = h - halfH;
+
+        int minRoomX = minX + halfW, maxRoomX = (maxX + 1) - rightHalf;
+        int minRoomY = minY + halfH, maxRoomY = (maxY + 1) - topHalf;
+        if (minRoomX > maxRoomX || minRoomY > maxRoomY) return null;
+
+        int roomX = RandomUtils.uniform(random, minRoomX, maxRoomX + 1), roomY = RandomUtils.uniform(random, minRoomY, maxRoomY + 1);
+        int left = roomX - halfW;
+        int bottom = roomY - halfH;
+        if (!rectIsNothing(left, bottom, w, h)) return null;
+        boolean isCornered = random.nextBoolean();
+        MainRoom filler = new MainRoom(h, w, roomX, roomY, 1, isCornered);
+        filler.getRandomPassable(random);
+        filler.getRandomImpassable(random);
+        return filler;
+    }
+
+
+    /* Return true iff the given area only has NOTHING tile */
+    private boolean rectIsNothing(int left, int bottom, int width, int height) {
+        if (left < 0 || bottom < 0) return false;
+        if (left + width > world[0].length || bottom + height > world.length) return false;
+
+        for (int i = left; i < left+width; i++) {
+            for (int j = bottom; j < bottom+height; j++) {
+                if (world[i][j] != Tileset.NOTHING) return false;
+            }
+        }
+        return true;
     }
 
 
