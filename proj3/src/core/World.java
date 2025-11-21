@@ -8,7 +8,6 @@ import utils.RandomUtils;
 import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 
 import static core.Config.*;
@@ -160,8 +159,8 @@ public class World {
                     if (roomMinW > roomMaxW || roomMinH > roomMaxH) continue;
 
                     while (placedRoom < numberOfRoom && maxAttempt -- > 0) {
-                        Room fullFillRoom = generateFullFIllRoom(minX, minY, maxX, maxY, roomMinW, roomMaxW, roomMinH, roomMaxH);
-                        assert fullFillRoom != null;
+                        Room fullFillRoom = generateFullFIllRoom(minX, minY, maxX, maxY, roomMinW, roomMinH, roomMaxW, roomMaxH);
+                        if (fullFillRoom == null) continue;
                         if (!Room.validRoom(fullFillRoom, majorRooms, null)) continue;
                         if (!Room.validRoom(fullFillRoom, fullFillRooms, null)) continue;
 
@@ -238,13 +237,18 @@ public class World {
                     ((MainRoom) room).attachRoom(subRoom);
                 }
             }
-
         }
 
         for (Room room : majorRooms) {
             room.allocateRoom(world);
         }
 
+        fullFillRooms();
+        for (Room room : fullFillRooms) {
+            room.allocateRoom(world);
+        }
+
+        majorRooms.addAll(fullFillRooms);
         generateHallway();
 
         TETile[][] carved = carver.getWorld();
