@@ -93,11 +93,6 @@ public class World {
     }
 
 
-
-
-
-
-
     // Generate subroom for each room
     private void attachSubRoom(MainRoom room) {
         int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
