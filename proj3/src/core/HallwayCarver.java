@@ -20,6 +20,14 @@ public class HallwayCarver {
         }
     }
 
+    private class WallPoint extends Point {
+        private TileType tile;
+        private WallPoint(int x, int y, TileType tile) {
+            super(x, y);
+            this.tile = tile;
+        }
+    }
+
 
     private static TETile[][] world;
     Random random;
@@ -120,7 +128,7 @@ public class HallwayCarver {
 
         if (!allocateHallway(currentPos, drB, floors, doors, false)) return false;
 
-        ArrayList<Point> walls = collectWalls(floors, doors);
+        ArrayList<WallPoint> walls = collectWalls(floors, doors);
         // Commit staged changes to world
         for (Point p : floors) {
             world[p.x][p.y] = tileengine.Tileset.FLOOR;
@@ -140,9 +148,9 @@ public class HallwayCarver {
 
 
     /* Generate all the wall tiles that we need to allocate */
-    private ArrayList<Point> collectWalls(ArrayList<Point> floors, ArrayList<Point> doors) {
+    private ArrayList<WallPoint> collectWalls(ArrayList<Point> floors, ArrayList<Point> doors) {
         int[] dx4 = {1,-1,0,0}, dy4 = {0,0,1,-1};
-        ArrayList<Point> walls = new ArrayList<>();
+        ArrayList<WallPoint> walls = new ArrayList<>();
 
         // Treat the final corridor set as passable
         for (Point c : floors) {
@@ -156,15 +164,17 @@ public class HallwayCarver {
                 if (!inBounds(wx, wy)) return null;
 
                 TileType t = typeAt(wx, wy);
+                // Fill NOTHING with WALL; if it is not passable, remain the same type
+                if (!t.isPassable() && !contains(walls, wx, wy)) {
+                    if (t == TileType.NOTHING) walls.add(new WallPoint(wx, wy, TileType.WALL));
+                    else walls.add(new WallPoint(wx, wy, t));
+                }
+
                 // Never overwrite passable / locked doors
                 if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
-
-                // Fill NOTHING or overwrite existing WALL
-                if (t == TileType.NOTHING && !contains(walls, wx, wy)) {
-                    walls.add(new Point(wx, wy));
-                }
             }
         }
+
         for (Point c : doors) {
             for (int k = 0; k < 4; k++) {
                 int wx = c.x + dx4[k], wy = c.y + dy4[k];
@@ -172,7 +182,10 @@ public class HallwayCarver {
                 if (!inBounds(wx, wy)) return null;
                 TileType t = typeAt(wx, wy);
                 if (t.isPassable() || t == TileType.LOCKED_DOOR) continue;
-                if (!contains(walls, wx, wy)) walls.add(new Point(wx, wy));
+                if (!contains(walls, wx, wy)) {
+                    if (t == TileType.NOTHING) walls.add(new WallPoint(wx, wy, TileType.WALL));
+                    else walls.add(new WallPoint(wx, wy, t));
+                }
             }
         }
         return walls;
@@ -480,7 +493,7 @@ public class HallwayCarver {
     }
 
 
-    private static boolean contains(ArrayList<Point> pts, int x, int y) {
+    private static boolean contains(java.util.List<? extends Point> pts, int x, int y) {
         for (Point p : pts) if (p.x == x && p.y == y) return true;
         return false;
     }
@@ -622,12 +635,12 @@ public class HallwayCarver {
             doors.add(new Point(drB));
         }
 
-        ArrayList<Point> walls = collectWalls(floors, doors);
+        ArrayList<WallPoint> walls = collectWalls(floors, doors);
         if (walls == null) return false;
         walls.removeIf(p -> contains(floors,p.x,p.y) || contains(doors,p.x,p.y));
 
         for (Point f : floors) world[f.x][f.y] = tileengine.Tileset.FLOOR;
-        for (Point w : walls)  world[w.x][w.y] = tileengine.Tileset.WALL;
+        for (WallPoint w : walls)  world[w.x][w.y] = w.tile.toTETile();
         for (Point d : doors)  world[d.x][d.y] = tileengine.Tileset.FLOOR;
         return true;
     }
