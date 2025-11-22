@@ -1,6 +1,5 @@
 package core;
 
-import core.Game.HallwayCarver;
 import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
