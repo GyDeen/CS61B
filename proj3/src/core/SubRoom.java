@@ -1,6 +1,5 @@
 package core;
 
-import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.TileType;
 import utils.RandomUtils;
@@ -13,13 +12,13 @@ import static java.lang.Math.clamp;
 
 public class SubRoom extends Room {
     private MainRoom mainRoom;
-    private Direction direction;
+    private Direction directionOnMain;
 
 
     public SubRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, MainRoom baseRoom, Direction direction) {
         super(height, width, x, y, thicknessOfWall, isCornered);
         mainRoom = baseRoom;
-        this.direction = direction;
+        this.directionOnMain = direction;
     }
 
     /** Generate a subroom attached to a base main room
@@ -71,7 +70,7 @@ public class SubRoom extends Room {
     @Override
     public void allocateRoom(TETile[][] world) {
         Point mainRoomPosition = mainRoom.getLocation();
-        int mainRoomWidth  = mainRoom.getWidth();
+        int mainRoomWidth = mainRoom.getWidth();
         int mainRoomHeight = mainRoom.getHeight();
 
         int startX = getLeft();
@@ -84,7 +83,7 @@ public class SubRoom extends Room {
             for (int j = startY; j < endY; j++) {
 
                 // Belong to subroom wall
-                boolean subWall  = (i < startX + t) || (i >= endX - t) || (j < startY + t) || (j >= endY - t);
+                boolean subWall = (i < startX + t) || (i >= endX - t) || (j < startY + t) || (j >= endY - t);
                 boolean subFloor = !subWall;
 
                 // Main room
@@ -95,7 +94,7 @@ public class SubRoom extends Room {
 
                 // Doorway only along the shared edge for this subroom's direction
                 boolean onSharedEdgeBand =
-                        switch (direction) {
+                        switch (directionOnMain) {
                             case LEFT -> (i >= endX - t);
                             case RIGHT -> (i >= startX && i < startX + t);
                             case DOWN -> (j >= endY - t);
@@ -103,11 +102,11 @@ public class SubRoom extends Room {
                         };
 
                 boolean againstMainWallBand =
-                        switch (direction) {
-                            case LEFT -> (i >= mainRoom.getLeft() && i < mainRoom.getLeft() + t) && j >= Math.max(startY,mainRoom.getBottom()) && j < Math.min(endY,mainRoom.getTop());
-                            case RIGHT -> (i >= mainRoom.getRight() - t && i < mainRoom.getRight()) && j >= Math.max(startY,mainRoom.getBottom()) && j < Math.min(endY,mainRoom.getTop());
-                            case DOWN -> (j >= mainRoom.getBottom() && j < mainRoom.getBottom() + t) && i >= Math.max(startX,mainRoom.getLeft()) && i < Math.min(endX,mainRoom.getRight());
-                            case UP -> (j >= mainRoom.getTop() - t && j < mainRoom.getTop()) && i >= Math.max(startX, mainRoom.getLeft()) && i < Math.min(endX,mainRoom.getRight());
+                        switch (directionOnMain) {
+                            case LEFT -> (i >= mainRoom.getLeft() && i < mainRoom.getLeft() + t) && j > Math.max(startY,mainRoom.getBottom()) && j < Math.min(endY,mainRoom.getTop());
+                            case RIGHT -> (i >= mainRoom.getRight() - t && i < mainRoom.getRight()) && j > Math.max(startY,mainRoom.getBottom()) && j < Math.min(endY,mainRoom.getTop());
+                            case DOWN -> (j >= mainRoom.getBottom() && j < mainRoom.getBottom() + t) && i > Math.max(startX,mainRoom.getLeft()) && i < Math.min(endX,mainRoom.getRight());
+                            case UP -> (j >= mainRoom.getTop() - t && j < mainRoom.getTop()) && i > Math.max(startX, mainRoom.getLeft()) && i < Math.min(endX,mainRoom.getRight());
                         };
 
                 boolean onSharedDoorway = onSharedEdgeBand && againstMainWallBand;
@@ -134,7 +133,7 @@ public class SubRoom extends Room {
 
 
     /** Get direction of this subroom attached */
-    public Direction getDirection() {return direction;}
+    public Direction getDirectionOnMain() {return directionOnMain;}
 
 
     private boolean wouldLeakToNothing(TETile[][] world, int x, int y,
