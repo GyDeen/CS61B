@@ -1,10 +1,14 @@
 package core;
 
+import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TERenderer;
 import tileengine.TETile;
 import tileengine.Tileset;
 import utils.RandomUtils;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,6 +17,8 @@ import static core.MainRoom.fullFillRooms;
 
 
 public class World {
+    private TERenderer ter = new TERenderer();
+
     private static long seed = 654326789;
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
@@ -21,6 +27,13 @@ public class World {
     private ArrayList<Room> majorRooms = new ArrayList<>();
     private ArrayList<Room> fullFillRooms = new ArrayList<>();
     private HallwayCarver carver;
+
+    private enum PlayState { RUNNING, PAUSED }
+    private PlayState playState = PlayState.RUNNING;
+    private boolean escHeld = false;
+    private boolean mouseHeld = false;
+
+    private Image settingIcon = new ImageIcon("resources/Icon/settings.png").getImage();
 
 
     /** Using the default seed to generate the world */
@@ -112,7 +125,7 @@ public class World {
 
     /** Draw the world and generate the whole picture of the world */
     public void renderWorld() {
-        TERenderer ter = new TERenderer();
+
         ter.initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         for (int x = 0; x < WINDOW_WIDTH; x++) {
@@ -149,6 +162,43 @@ public class World {
         }
 
         ter.renderFrame(world);
+    }
+
+
+
+    private boolean pauseRequest() {
+        boolean escNow = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
+        if (escNow && !escHeld) {
+            escHeld = true;
+            return true;
+        }
+
+        if (!escNow) escHeld = false;
+
+        boolean clicking = StdDraw.isMousePressed();
+        if (clicking && !mouseHeld) {
+            double x = StdDraw.mouseX(), y = StdDraw.mouseY();
+            // If the mouse is clicking on the setting icon, return true
+            if (onSetting(x, y)) {
+                mouseHeld = true;
+                return true;
+            }
+        }
+
+        mouseHeld = clicking;
+        return false;
+    }
+
+
+    private boolean onSetting(double x, double y) {
+
+    }
+
+
+
+    /** The game loop of the game */
+    public void gameLoop() {
+
     }
 }
 

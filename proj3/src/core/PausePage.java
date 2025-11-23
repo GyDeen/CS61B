@@ -18,7 +18,6 @@ public class PausePage extends NonGamingPage {
     }
 
 
-
     private void draw(int selectedIndex, int hoveredIndex) {
         // Draw title
         StdDraw.setFont(super.getDefaultTitleFont());
@@ -125,8 +124,6 @@ public class PausePage extends NonGamingPage {
 
             upPrev = upNow;
             downPrev = downNow;
-            enterPrev = enterNow;
-            escPrev = escNow;
 
             boolean mouseNow = StdDraw.isMousePressed();
             if (mouseNow && !mousePrev && hoveredIndex != -1) {

@@ -125,8 +125,6 @@ public class InitPage extends NonGamingPage{
 
             upPrev = upNow;
             downPrev = downNow;
-            enterPrev = enterNow;
-            escPrev = escNow;
 
             boolean mouseNow = StdDraw.isMousePressed();
             if (mouseNow && !mousePrev && hoveredIndex != -1) {
