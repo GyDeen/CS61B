@@ -88,6 +88,13 @@ public class TERenderer {
         StdDraw.show();
     }
 
+
+    /** RenderFrame without show() method */
+    public void renderFrameNoShow(TETile[][] world) {
+        StdDraw.clear(new Color(0,0,0));
+        drawTiles(world);
+    }
+
     /**
      * Draws all world tiles without clearing the canvas or showing the tiles.
      * @param world the 2D TETile[][] array to render

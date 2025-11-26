@@ -7,8 +7,10 @@ import java.io.IOException;
 import static java.awt.Font.PLAIN;
 
 public class UI {
-    public static final int TOP_UI = 3;
+    public static final int TOP_UI = 4;
     public static final int BOTTOM_UI = 3;
+    public static final int SETTING_HEIGHT = 4;
+    public static final int SETTING_WIDTH = 4;
 
 
     public static final String TITLE_FONT_PATH = "src/resources/font/Rich Eatin'.otf";

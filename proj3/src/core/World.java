@@ -6,14 +6,13 @@ import tileengine.TETile;
 import tileengine.Tileset;
 import utils.RandomUtils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
 import static core.Config.*;
 import static core.MainRoom.fullFillRooms;
+import static core.UI.*;
 
 
 public class World {
@@ -33,7 +32,8 @@ public class World {
     private boolean escHeld = false;
     private boolean mouseHeld = false;
 
-    private Image settingIcon = new ImageIcon("resources/Icon/settings.png").getImage();
+    private int settingX = SETTING_WIDTH / 2;
+    private int settingY = WINDOW_HEIGHT - SETTING_HEIGHT / 2;
 
 
     /** Using the default seed to generate the world */
@@ -52,7 +52,7 @@ public class World {
     }
 
 
-    /** Method that generate the room purely randomly, not using cells */
+    /* Method that generate the room purely randomly, not using cells */
     private void generateRoom() {
         int maxAttempt = 10000, currentAttempt = 0;
         int idealSize = WORLD_HEIGHT * WINDOW_WIDTH / roomNum;
@@ -125,9 +125,7 @@ public class World {
 
     /** Draw the world and generate the whole picture of the world */
     public void renderWorld() {
-
         ter.initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
-
         for (int x = 0; x < WINDOW_WIDTH; x++) {
             for (int y = 0; y < WORLD_HEIGHT; y++) {
                 world[x][y] = Tileset.NOTHING;
@@ -191,13 +189,37 @@ public class World {
 
 
     private boolean onSetting(double x, double y) {
+        return x >= settingX && x < settingX + SETTING_WIDTH && y >= settingY && y < settingY;
+    }
 
+
+    private void drawSetting() {
+        java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
+        System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
+        StdDraw.picture(settingX, settingY, "src/resources/Icon/icons8-settings-50.png");
+    }
+
+    private void update() {
+        ter.renderFrameNoShow(world);
+        drawSetting();
+        StdDraw.show();
     }
 
 
 
+
     /** The game loop of the game */
-    public void gameLoop() {
+    public boolean gameLoop() {
+        while (true) {
+
+            if (pauseRequest()) {
+                playState = PlayState.PAUSED;
+                return true;
+            }
+
+            update();
+
+        }
 
     }
 }
