@@ -30,8 +30,8 @@ public class SubRoom extends Room {
         int height = (int) (idealSize / (double) width);
         int t = baseRoom.getThicknessOfWall();
 
-        width += RandomUtils.uniform(random, -2, 3);
-        height += RandomUtils.uniform(random, -2, 3);
+        width += RandomUtils.uniform(random, -2, 2);
+        height += RandomUtils.uniform(random, -2, 2);
 
         width = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
         height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);

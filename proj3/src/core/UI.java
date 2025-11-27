@@ -8,7 +8,7 @@ import static java.awt.Font.PLAIN;
 
 public class UI {
     public static final int TOP_UI = 4;
-    public static final int BOTTOM_UI = 3;
+    public static final int BOTTOM_UI = 2;
     public static final int SETTING_HEIGHT = 4;
     public static final int SETTING_WIDTH = 4;
 

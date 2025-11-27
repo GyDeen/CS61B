@@ -19,15 +19,16 @@ public class PausePage extends NonGamingPage {
 
 
     private void draw(int selectedIndex, int hoveredIndex) {
+        StdDraw.clear(Color.BLACK);
         // Draw title
         StdDraw.setFont(super.getDefaultTitleFont());
         StdDraw.setPenColor(Color.WHITE);
-        StdDraw.text((double) Config.WINDOW_WIDTH / 5, (double) (Config.WINDOW_HEIGHT * 9) / 10, "Pause");
+        StdDraw.text((double) Config.WINDOW_WIDTH / 2, (double) (Config.WINDOW_HEIGHT * 7) / 8, "Pause");
 
         StdDraw.setFont(super.getDefaultPromptFont());
 
         double centerX = Config.WINDOW_WIDTH / 2.0;
-        double startY = Config.WINDOW_HEIGHT / 2.0;
+        double startY = Config.WINDOW_HEIGHT * 3 / 5.0;
         double spacing = Config.BUFFER * 2;
         int i = 0;
         for (PausePage.PauseChoice choice : PausePage.PauseChoice.values()) {
@@ -47,7 +48,7 @@ public class PausePage extends NonGamingPage {
 
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(UI.loadFont(UI.PROMPT_FONT_PATH, 20));
-        StdDraw.text(20, UI.BOTTOM_UI, "Press E to exit the game. Press S to save current game. Press C to continue");
+        StdDraw.text(22, UI.BOTTOM_UI, "Press E to exit the game. Press S to save current game. Press C to continue");
 
         StdDraw.show();
     }

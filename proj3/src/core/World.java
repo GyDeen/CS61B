@@ -194,8 +194,6 @@ public class World {
 
 
     private void drawSetting() {
-        java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
-        System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
         StdDraw.picture(settingX, settingY, "src/resources/Icon/icons8-settings-50.png");
     }
 
