@@ -49,6 +49,25 @@ public class MainRoom extends Room {
     }
 
 
+    /** Return true if the given position belongs to this room (including wall part of the room) */
+    public boolean isInRoom(int x, int y) {
+        if (x >= getLeft() + getThicknessOfWall() && x <= getRight() - getThicknessOfWall()
+                && y >= getBottom() + getThicknessOfWall() && y <= getTop() - getThicknessOfWall()) {
+            return true;
+        }
+
+        if (subRooms != null) {
+            for (SubRoom subRoom : subRooms) {
+                if (x >= subRoom.getLeft() + subRoom.getThicknessOfWall() && x <= subRoom.getRight() - subRoom.getThicknessOfWall()
+                && y <= subRoom.getTop() - subRoom.getThicknessOfWall() && y >= subRoom.getBottom() + subRoom.getThicknessOfWall()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 
     /** Attach the input subRoom to current MainRoom
      * @param subRoom the subRoom that attach to current MainRoom */
