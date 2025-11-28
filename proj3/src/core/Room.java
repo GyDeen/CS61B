@@ -35,8 +35,6 @@ public abstract class Room {
         this(height, width, new Point(x, y), thicknessOfWall, isCornered);
     }
 
-
-
     // Getter for often used property
     public int getHeight() { return height; }
     public int getWidth()  { return width; }
@@ -60,14 +58,10 @@ public abstract class Room {
 
 
 
-
-
     /** Check whether generated terrain will not exceed the window */
     public static boolean withinBounds(int x, int y, int width, int height) {
-        return x - width / 2 > 0
-                && y - height / 2 > 0
-                && x + width / 2 < WINDOW_WIDTH
-                && y + height / 2 < WORLD_HEIGHT;
+        return x - width / 2 > 0 && y - height / 2 > 0
+                && x + width / 2 < WINDOW_WIDTH && y + height / 2 < WORLD_HEIGHT;
     }
 
 
