@@ -43,7 +43,10 @@ public class Main {
                 System.out.println("Current pause choice: " + pauseChoice.toString());
                 switch (pauseChoice) {
                     case EXIT ->  state = GameState.QUIT;
-                    case CONTINUE ->  state = GameState.PLAYING;
+                    case CONTINUE ->  {
+                        state = GameState.PLAYING;
+                        world.continueGame();
+                    }
                     case RETURN_TO_MENU -> state = GameState.INIT_MENU;
                     case SAVE_GAME -> state = GameState.SAVE;
                 }

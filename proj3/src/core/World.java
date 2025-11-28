@@ -202,6 +202,7 @@ public class World {
 
     private void update() {
         ter.renderFrameNoShow(world);
+        ter.resetFont();
         drawSetting();
         StdDraw.show();
     }
@@ -219,9 +220,13 @@ public class World {
             }
 
             update();
-
         }
+    }
 
+
+    /** Return to gaming */
+    public void continueGame() {
+        playState = PlayState.RUNNING;
     }
 }
 
