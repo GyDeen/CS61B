@@ -34,6 +34,7 @@ public class World {
 
     private int settingX = SETTING_WIDTH / 2;
     private int settingY = WINDOW_HEIGHT - SETTING_HEIGHT / 2;
+    private String settingImage = "src/resources/Icon/icons8-settings-50.png";
 
 
     /** Using the default seed to generate the world */
@@ -194,7 +195,9 @@ public class World {
 
 
     private void drawSetting() {
-        StdDraw.picture(settingX, settingY, "src/resources/Icon/icons8-settings-50.png");
+//        java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
+//        System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
+        StdDraw.picture(settingX, settingY, settingImage);
     }
 
     private void update() {

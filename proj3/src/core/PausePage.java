@@ -3,7 +3,6 @@ package core;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 
 public class PausePage extends NonGamingPage {
     public enum PauseChoice {
@@ -14,8 +13,17 @@ public class PausePage extends NonGamingPage {
 
         private final String text;
 
-        PauseChoice(String text) {this.text = text;}
+        PauseChoice(String text) {
+            this.text = text;
+        }
+
+        public String toString() {
+            return text;
+        }
     }
+
+    private boolean upPrev, downPrev, enterPrev, escPrev, mousePrev;
+    private int selectedIndex;
 
 
     private void draw(int selectedIndex, int hoveredIndex) {
@@ -54,19 +62,70 @@ public class PausePage extends NonGamingPage {
     }
 
 
+    private void drainInputs() {
+        while (StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ESCAPE)
+                || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_UP)
+                || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_DOWN)
+                || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ENTER)
+                || StdDraw.isMousePressed()) {
+            StdDraw.pause(10);
+        }
+        upPrev = downPrev = enterPrev = escPrev = mousePrev = false;
+    }
+
+    private PauseChoice poll(PauseChoice[] options, int hoveredIndex) {
+        final int count = options.length;
+
+        boolean upNow = StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_UP);
+        boolean downNow = StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_DOWN);
+        boolean enterNow = StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ENTER);
+        boolean escNow = StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ESCAPE);
+
+        if (StdDraw.hasNextKeyTyped()) {
+            char c = Character.toLowerCase(StdDraw.nextKeyTyped());
+            if (c == 'c') return PauseChoice.CONTINUE;
+            if (c == 'r') return PauseChoice.RETURN_TO_MENU;
+            if (c == 's') return PauseChoice.SAVE_GAME;
+            if (c == 'q') return PauseChoice.EXIT;
+        }
+
+        if (upNow && !upPrev) {
+            selectedIndex = (selectedIndex - 1 + count) % count;
+        }
+        if (downNow && !downPrev) {
+            selectedIndex = (selectedIndex + 1) % count;
+        }
+
+        if (enterNow && !enterPrev) {
+            return options[selectedIndex];
+        }
+
+        if (escNow && !escPrev) {
+            return PauseChoice.CONTINUE;
+        }
+
+        boolean mouseNow = StdDraw.isMousePressed();
+        if (mouseNow && !mousePrev && hoveredIndex != -1) {
+            return options[hoveredIndex];
+        }
+
+        // update latches for next frame
+        upPrev = upNow;
+        downPrev = downNow;
+        enterPrev = enterNow;
+        escPrev = escNow;
+        mousePrev = mouseNow;
+
+        return null;
+    }
+
 
     public PausePage.PauseChoice run() {
         PausePage.PauseChoice[] options = PausePage.PauseChoice.values();
         int count = options.length;
 
         int selectedIndex = 0;
-
-        // Edge tracking so we only react once per key press
-        boolean upPrev = false;
-        boolean downPrev = false;
-        boolean enterPrev = false;
-        boolean escPrev = false;
-        boolean mousePrev = false;
+        drainInputs();
 
         while (true) {
             double centerX = Config.WINDOW_WIDTH / 2.0;
@@ -96,44 +155,11 @@ public class PausePage extends NonGamingPage {
             // Draw current frame with highlight/hover
             draw(selectedIndex, hoveredIndex);
 
-            boolean upNow = StdDraw.isKeyPressed(KeyEvent.VK_UP);
-            boolean downNow = StdDraw.isKeyPressed(KeyEvent.VK_DOWN);
-            boolean enterNow = StdDraw.isKeyPressed(KeyEvent.VK_ENTER);
-            boolean escNow = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
-            boolean saveGame = StdDraw.isKeyPressed(KeyEvent.VK_S);
-            boolean continueGame = StdDraw.isKeyPressed(KeyEvent.VK_C);
-            boolean returnMenu = StdDraw.isKeyPressed(KeyEvent.VK_R);
-            boolean exitGame = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
+            PauseChoice choice = poll(options, hoveredIndex);
+            if (choice != null) return choice;
 
-            if (saveGame) return PauseChoice.SAVE_GAME;
-            if (continueGame) return PauseChoice.CONTINUE;
-            if (returnMenu) return PauseChoice.RETURN_TO_MENU;
-            if (exitGame) return PauseChoice.EXIT;
-
-            if (upNow && !upPrev) {
-                selectedIndex = (selectedIndex - 1 + count) % count;
-            }
-            if (downNow && !downPrev) {
-                selectedIndex = (selectedIndex + 1) % count;
-            }
-            if (enterNow && !enterPrev) {
-                return options[selectedIndex];
-            }
-            if (escNow && !escPrev) {
-                return PauseChoice.EXIT;
-            }
-
-            upPrev = upNow;
-            downPrev = downNow;
-
-            boolean mouseNow = StdDraw.isMousePressed();
-            if (mouseNow && !mousePrev && hoveredIndex != -1) {
-                return options[hoveredIndex];
-            }
-            mousePrev = mouseNow;
-
-            StdDraw.pause(8);
+            StdDraw.pause(16);
         }
-    }
 
+    }
 }

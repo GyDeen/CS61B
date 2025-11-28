@@ -40,6 +40,7 @@ public class Main {
             if (state == GameState.PAUSE) {
                 PausePage pause = new PausePage();
                 PausePage.PauseChoice pauseChoice = pause.run();
+                System.out.println("Current pause choice: " + pauseChoice.toString());
                 switch (pauseChoice) {
                     case EXIT ->  state = GameState.QUIT;
                     case CONTINUE ->  state = GameState.PLAYING;
@@ -49,8 +50,13 @@ public class Main {
             }
 
             if (state == GameState.SAVE) {}
-            if (state == GameState.QUIT) {}
-            if (state == GameState.PLAYING) {world.gameLoop();}
+            if (state == GameState.QUIT) {
+                System.exit(0);
+            }
+            if (state == GameState.PLAYING) {
+                boolean paused = world.gameLoop();
+                if (paused) state = GameState.PAUSE;
+            }
         }
     }
 }
