@@ -17,6 +17,8 @@ import static core.UI.*;
 
 public class World {
     private TERenderer ter = new TERenderer();
+    private int gameTime = GAME_TIME_IN_SEC;
+    private long gameStartTimeMs;
 
     private static long seed = 654326789;
     private static Random random = new Random(seed);
@@ -161,6 +163,9 @@ public class World {
         }
 
         ter.renderFrame(world);
+
+        // start game timer
+        gameStartTimeMs = System.currentTimeMillis();
     }
 
 
@@ -200,7 +205,21 @@ public class World {
         StdDraw.picture(settingX, settingY, settingImage);
     }
 
+    private void drawTimer(int remainingSeconds) {
+        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
+        String text = "Time: " + remainingSeconds + "s";
+        // assuming your UI bar is at the top and WINDOW_HEIGHT is your Y scale
+        StdDraw.textRight(WINDOW_WIDTH, WINDOW_HEIGHT - 1, text);
+    }
+
     private void update() {
+        long currentTime = System.currentTimeMillis();
+        int elapsedSeconds = (int) ((currentTime - gameStartTimeMs) / 1000);
+        int remainingSeconds = gameTime - elapsedSeconds;
+        if (remainingSeconds < 0) remainingSeconds = 0;
+        drawTimer(remainingSeconds);
+
         ter.renderFrameNoShow(world);
         ter.resetFont();
         drawSetting();
