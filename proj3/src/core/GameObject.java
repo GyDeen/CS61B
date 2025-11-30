@@ -10,8 +10,10 @@ public abstract class GameObject {
     private int imageWidth;
     private int imageHeight;
     private boolean active = true;
-    private Room belongsTo;
+    private MainRoom belongsTo;
 
+
+    /** Constructor for object that doesn't move */
     public GameObject(int x, int y, String imagePath, int imageWidth, int imageHeight) {
         position = new Point(x, y);
         this.imagePath = imagePath;
@@ -20,6 +22,14 @@ public abstract class GameObject {
     public GameObject(Point position, String imagePath, int imageWidth, int imageHeight) {
         this.position = new Point(position);
         this.imagePath = imagePath;
+    }
+
+
+    /** Constructor for moving object such as PacMan and Ghost */
+    public GameObject(int x, int y, int width, int height) {
+        position = new Point(x, y);
+        this.imageWidth = width;
+        this.imageHeight = height;
     }
 
     public Point getPosition() {
@@ -53,7 +63,7 @@ public abstract class GameObject {
 
     }
 
-    public void setRoom(Room belongsTo) {
+    public void setRoom(MainRoom belongsTo) {
         this.belongsTo = belongsTo;
     }
 
@@ -63,5 +73,11 @@ public abstract class GameObject {
 
     public void destroy() {
         active = false;
+    }
+
+    public boolean isActive() { return active;}
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }
