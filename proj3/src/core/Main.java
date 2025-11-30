@@ -11,32 +11,6 @@ public class Main {
 
     public static void main(String[] args) {
         while (state != GameState.QUIT) {
-            init.setUpScreen();
-            InitPage.MenuChoice nextPage = init.run();
-
-            switch (nextPage) {
-                case NEW_GAME : {
-                    long worldSeed = seedScreen.run();
-
-                    if (worldSeed == -1L) {
-                        continue;
-                    }
-
-                    world = new World(worldSeed);
-                    world.renderWorld();
-                    state = GameState.PLAYING;
-                    boolean paused = world.gameLoop();
-                    if (paused) state = GameState.PAUSE;
-                    break;
-                }
-                case EXIT_GAME : System.exit(0);
-                case LOAD_GAME : {
-                    loading.run();
-                    break;
-                }
-
-            }
-
             if (state == GameState.PAUSE) {
                 PausePage pause = new PausePage();
                 PausePage.PauseChoice pauseChoice = pause.run();
@@ -51,11 +25,36 @@ public class Main {
                     case SAVE_GAME -> state = GameState.SAVE;
                 }
             }
+            if (state == GameState.INIT_MENU) {
+                init.setUpScreen();
+                InitPage.MenuChoice nextPage = init.run();
+                switch (nextPage) {
+                    case NEW_GAME : {
+                        long worldSeed = seedScreen.run();
+
+                        if (worldSeed == -1L) {
+                            continue;
+                        }
+
+                        world = new World(worldSeed);
+                        world.renderWorld();
+                        state = GameState.PLAYING;
+                        break;
+                    }
+                    case EXIT_GAME : System.exit(0);
+                    case LOAD_GAME : {
+                        loading.run();
+                        break;
+                    }
+
+                }
+            }
 
             if (state == GameState.SAVE) {}
             if (state == GameState.QUIT) {
                 System.exit(0);
             }
+
             if (state == GameState.PLAYING) {
                 boolean paused = world.gameLoop();
                 if (paused) state = GameState.PAUSE;
