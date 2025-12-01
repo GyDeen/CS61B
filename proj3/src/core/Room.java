@@ -167,7 +167,8 @@ public abstract class Room {
 
     /* Checking whether given information will have collision with existing room */
     private static boolean boundingBoxesOverlap(Room a, Room b) {
-        int aLeft = a.getLeft(), aBottom = a.getBottom(), aRight = a.getRight(),  aTop = a.getTop();
+        int aLeft = a.getLeft() - MIN_GAP_BETWEEN_MAIN_ROOM, aBottom = a.getBottom() - MIN_GAP_BETWEEN_MAIN_ROOM;
+        int aRight = a.getRight() + MIN_GAP_BETWEEN_MAIN_ROOM,  aTop = a.getTop() + MIN_GAP_BETWEEN_MAIN_ROOM;
         int bLeft = b.getLeft(), bBottom = b.getBottom(), bRight = b.getRight(),  bTop = b.getTop();
         return aLeft < bRight && aRight > bLeft && aBottom < bTop && aTop > bBottom;
     }
