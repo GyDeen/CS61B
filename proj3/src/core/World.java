@@ -110,7 +110,7 @@ public class World {
 
 
     // Generate subroom for each room
-    private void attachSubRoom(MainRoom room) {
+    private void attachSubRoom(MainRoom room, int minW, int maxW, int minH, int maxH) {
         int subRoomNum = RandomUtils.uniform(random, MIN_SUB_ROOM_NUM, MAX_SUB_ROOM_NUM);
         int allocateSubroomMaxAttempt = subRoomNum * 50;
         // Try to allocate desire subroom number
@@ -118,7 +118,7 @@ public class World {
             if (room.getSubRooms().size() >= subRoomNum) break;
 
             Direction direction = Direction.values()[RandomUtils.uniform(random, Direction.values().length)];
-            SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, room, direction);
+            SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, room, direction, minW, maxW, minH, maxH);
             if (Room.validRoom(subRoom, majorRooms, room)) {
                 room.attachRoom(subRoom);
             }
@@ -138,7 +138,8 @@ public class World {
 
         generateRoom();
         for (Room room : majorRooms) {
-            attachSubRoom((MainRoom) room);
+            attachSubRoom((MainRoom) room, MIN_SUB_ROOM_FOR_MAIN_WIDTH, MAX_SUB_ROOM_FOR_MAIN_WIDTH,
+                    MIN_SUB_ROOM_FOR_MAIN_HEIGHT, MAX_SUB_ROOM_FOR_MAIN_HEIGHT);
         }
 
         for (Room room : majorRooms) {
@@ -147,7 +148,8 @@ public class World {
 
         fullFillRooms(world, fullFillRooms, majorRooms, random);
         for (Room room : fullFillRooms) {
-            attachSubRoom((MainRoom) room);
+            attachSubRoom((MainRoom) room, MIN_SUB_ROOM_WIDTH_FOR_FILL, room.getWidth(),
+                    MIN_SUB_ROOM_HEIGHT_FOR_FILL, room.getHeight());
         }
 
         for (Room room : fullFillRooms) {
@@ -231,7 +233,7 @@ public class World {
 
     /** The game loop of the game */
     public boolean gameLoop() {
-        while (true) {
+        while (playState == PlayState.RUNNING) {
 
             if (pauseRequest()) {
                 playState = PlayState.PAUSED;
@@ -240,6 +242,8 @@ public class World {
 
             update();
         }
+
+        return true;
     }
 
 
