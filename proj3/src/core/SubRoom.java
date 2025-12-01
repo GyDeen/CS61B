@@ -24,17 +24,18 @@ public class SubRoom extends Room {
     /** Generate a subroom attached to a base main room
      * direction: 0=left, 1=right, 2=bottom, 3=top
      */
-    public static SubRoom generate(int idealSize, Random random, MainRoom baseRoom, Direction direction) {
+    public static SubRoom generate(int idealSize, Random random, MainRoom baseRoom, Direction direction,
+                                int minWidth, int maxWidth, int minHeight, int maxHeight) {
         double aspectRatio = random.nextDouble(0.8, 1.3);
         int width  = (int) Math.sqrt(idealSize * aspectRatio);
         int height = (int) (idealSize / (double) width);
         int t = baseRoom.getThicknessOfWall();
 
-        width += RandomUtils.uniform(random, -2, 2);
-        height += RandomUtils.uniform(random, -2, 2);
+        width += RandomUtils.uniform(random, -3, 2);
+        height += RandomUtils.uniform(random, -3, 2);
 
-        width = clamp(width,  MIN_SUB_ROOM_WIDTH,  MAX_SUB_ROOM_WIDTH);
-        height = clamp(height, MIN_SUB_ROOM_HEIGHT, MAX_SUB_ROOM_HEIGHT);
+        width = clamp(width,  minWidth,  maxWidth);
+        height = clamp(height, minHeight, maxHeight);
         int x, y;
         /* + - t to make sure it will always have at least the outmost floor connected */
         switch (direction) {
