@@ -16,23 +16,31 @@ public class Config {
     public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
 
     // Main room setting
-    public static final int MIN_MAIN_ROOM_WIDTH = 10;
-    public static final int MAX_MAIN_ROOM_WIDTH = 22;
-    public static final int MIN_MAIN_ROOM_HEIGHT = 10;
-    public static final int MAX_MAIN_ROOM_HEIGHT = 19;
+    public static final int MIN_MAIN_ROOM_WIDTH = 14;
+    public static final int MAX_MAIN_ROOM_WIDTH = 20;
+    public static final int MIN_MAIN_ROOM_HEIGHT = 12;
+    public static final int MAX_MAIN_ROOM_HEIGHT = 24;
     public static final int MIN_MAIN_ROOM_NUM = 6;
-    public static final int MAX_MAIN_ROOM_NUM = 9;
+    public static final int MAX_MAIN_ROOM_NUM = 10;
+    public static final int MIN_GAP_BETWEEN_MAIN_ROOM = 1;
 
     // Subroom setting
-    public static final int MIN_SUB_ROOM_WIDTH = 2;
-    public static final int MAX_SUB_ROOM_WIDTH = 10;
-    public static final int MIN_SUB_ROOM_HEIGHT = 4;
-    public static final int MAX_SUB_ROOM_HEIGHT = 10;
+    public static final int MIN_SUB_ROOM_FOR_MAIN_WIDTH = 5;
+    public static final int MAX_SUB_ROOM_FOR_MAIN_WIDTH = 12;
+    public static final int MIN_SUB_ROOM_FOR_MAIN_HEIGHT = 5;
+    public static final int MAX_SUB_ROOM_FOR_MAIN_HEIGHT = 12;
     public static final int MIN_SUB_ROOM_NUM = 1;
-    public static final int MAX_SUB_ROOM_NUM = 7;
+    public static final int MAX_SUB_ROOM_NUM = 5;
 
     // Full fill room setting
-    public static final int MIN_VOID_AREA = 100;
+    public static final int MIN_VOID_AREA = 80;
+    public static final int MIN_FILL_ROOM_WIDTH  = 8;
+    public static final int MAX_FILL_ROOM_WIDTH  = 10;
+    public static final int MIN_FILL_ROOM_HEIGHT = 8;
+    public static final int MAX_FILL_ROOM_HEIGHT = 10;
+
+    public static final int MIN_SUB_ROOM_WIDTH_FOR_FILL = 3;
+    public static final int MIN_SUB_ROOM_HEIGHT_FOR_FILL = 3;
 
     // Render world setting
     public static final int DOOR_BUFF = 1;

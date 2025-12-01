@@ -51,15 +51,27 @@ public class MainRoom extends Room {
 
     /** Return true if the given position belongs to this room (including wall part of the room) */
     public boolean isInRoom(int x, int y) {
-        if (x >= getLeft() + getThicknessOfWall() && x <= getRight() - getThicknessOfWall()
-                && y >= getBottom() + getThicknessOfWall() && y <= getTop() - getThicknessOfWall()) {
+        int startX = getLeft();
+        int startY = getBottom();
+        int endX = startX + getWidth();
+        int endY = startY + getHeight();
+        int t = getThicknessOfWall();
+
+        if (x >= startX + t && x < endX - t
+                && y >= startY + t && y < endY - t) {
             return true;
         }
 
         if (subRooms != null) {
             for (SubRoom subRoom : subRooms) {
-                if (x >= subRoom.getLeft() + subRoom.getThicknessOfWall() && x <= subRoom.getRight() - subRoom.getThicknessOfWall()
-                && y <= subRoom.getTop() - subRoom.getThicknessOfWall() && y >= subRoom.getBottom() + subRoom.getThicknessOfWall()) {
+                int sx = subRoom.getLeft();
+                int sy = subRoom.getBottom();
+                int ex = sx + subRoom.getWidth();
+                int ey = sy + subRoom.getHeight();
+                int st = subRoom.getThicknessOfWall();
+
+                if (x >= sx + st && x < ex - st
+                        && y >= sy + st && y < ey - st) {
                     return true;
                 }
             }
@@ -214,12 +226,12 @@ public class MainRoom extends Room {
 
                     if (area < MIN_VOID_AREA) continue;
 
-                    // Have each fulfill room around 150 * 0.6 size big and leave some room for hallway
-                    int numberOfRoom = (int) Math.max(1, (double) area / MIN_VOID_AREA * 0.6);
+                    // Have each fulfill room around 40 size big and leave some room for hallway
+                    int numberOfRoom = (int) Math.max(1, (double) area / MIN_VOID_AREA);
                     int maxAttempt = 1000, placedRoom = 0;
                     int boxW = maxX - minX + 1, boxH = maxY - minY + 1;
-                    int roomMinW = MIN_MAIN_ROOM_WIDTH, roomMaxW = Math.min(MAX_MAIN_ROOM_WIDTH, boxW);
-                    int roomMinH = MIN_MAIN_ROOM_HEIGHT, roomMaxH = Math.min(MAX_MAIN_ROOM_HEIGHT, boxH);
+                    int roomMinW = MIN_FILL_ROOM_WIDTH, roomMaxW = Math.min(MAX_FILL_ROOM_WIDTH, boxW);
+                    int roomMinH = MIN_FILL_ROOM_HEIGHT, roomMaxH = Math.min(MAX_FILL_ROOM_HEIGHT, boxH);
                     if (roomMinW > roomMaxW || roomMinH > roomMaxH) continue;
 
                     while (placedRoom < numberOfRoom && maxAttempt -- > 0) {
@@ -229,6 +241,7 @@ public class MainRoom extends Room {
                         if (!Room.validRoom(fullFillRoom, fullFillRooms, null)) continue;
 
                         fullFillRooms.add(fullFillRoom);
+                        System.out.println("Successfully added room "   );
                         placedRoom++;
                     }
                 }
