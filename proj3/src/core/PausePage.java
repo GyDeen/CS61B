@@ -129,7 +129,7 @@ public class PausePage extends NonGamingPage {
 
         while (true) {
             double centerX = Config.WINDOW_WIDTH / 2.0;
-            double startY = Config.WINDOW_HEIGHT / 2.0;
+            double startY = Config.WINDOW_HEIGHT * 3 / 5.0;
             double spacing = Config.BUFFER * 2;
 
             // Checking mouse hovering
