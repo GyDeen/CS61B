@@ -22,7 +22,7 @@ public class Config {
     public static final int MAX_MAIN_ROOM_HEIGHT = 24;
     public static final int MIN_MAIN_ROOM_NUM = 6;
     public static final int MAX_MAIN_ROOM_NUM = 10;
-    public static final int MIN_GAP_BETWEEN_MAIN_ROOM = 1;
+    public static final int MIN_GAP_BETWEEN_MAIN_ROOM = 2;
 
     // Subroom setting
     public static final int MIN_SUB_ROOM_FOR_MAIN_WIDTH = 5;
@@ -33,10 +33,10 @@ public class Config {
     public static final int MAX_SUB_ROOM_NUM = 5;
 
     // Full fill room setting
-    public static final int MIN_VOID_AREA = 80;
-    public static final int MIN_FILL_ROOM_WIDTH  = 8;
+    public static final int MIN_VOID_AREA = 35;
+    public static final int MIN_FILL_ROOM_WIDTH  = 6;
     public static final int MAX_FILL_ROOM_WIDTH  = 10;
-    public static final int MIN_FILL_ROOM_HEIGHT = 8;
+    public static final int MIN_FILL_ROOM_HEIGHT = 6;
     public static final int MAX_FILL_ROOM_HEIGHT = 10;
 
     public static final int MIN_SUB_ROOM_WIDTH_FOR_FILL = 3;
