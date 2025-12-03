@@ -8,6 +8,7 @@ import utils.RandomUtils;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static core.Config.*;
@@ -69,14 +70,14 @@ public class World {
 
 
     /* Find the closest room for u to connect */
-    private MainRoom nearestOf(MainRoom u, java.util.List<Room> connected) {
+    private MainRoom nearestOf(MainRoom u, List<Room> connected) {
         MainRoom best = null; int bestD2 = Integer.MAX_VALUE;
         for (Room r : connected) {
             MainRoom v = (MainRoom) r;
-            int dx = v.getLocation().x - u.getLocation().x;
-            int dy = v.getLocation().y - u.getLocation().y;
-            int d2 = dx*dx + dy*dy;
-            if (d2 < bestD2) { bestD2 = d2; best = v; }
+            int distanceX = v.getLocation().x - u.getLocation().x;
+            int distanceY = v.getLocation().y - u.getLocation().y;
+            int absoluteDistance = distanceX*distanceX + distanceY*distanceY;
+            if (absoluteDistance < bestD2) { bestD2 = absoluteDistance; best = v; }
         }
         return best;
     }
@@ -118,6 +119,24 @@ public class World {
             }
 
             if (!linked) unconnected.add(unconnected.removeFirst());
+        }
+
+        int extraEdges = Math.max(1, majorRooms.size() / random.nextInt(3));
+
+        for (int i = 0; i < extraEdges; i++) {
+            if (majorRooms.size() < 2) break;
+
+            // pick two distinct random main rooms
+            MainRoom a = (MainRoom) majorRooms.get(random.nextInt(majorRooms.size()));
+            MainRoom b = (MainRoom) majorRooms.get(random.nextInt(majorRooms.size()));
+            if (a == b) {
+                i--;
+                continue;
+            }
+
+            if (!carver.connect(a, b)) {
+                carver.connectSimpleL(a, b);
+            }
         }
     }
 
