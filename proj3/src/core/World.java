@@ -121,7 +121,7 @@ public class World {
             if (!linked) unconnected.add(unconnected.removeFirst());
         }
 
-        int extraEdges = Math.max(1, majorRooms.size() / random.nextInt(3));
+        int extraEdges = Math.max(1, majorRooms.size() / random.nextInt(1, 3));
 
         for (int i = 0; i < extraEdges; i++) {
             if (majorRooms.size() < 2) break;
@@ -151,6 +151,7 @@ public class World {
 
             Direction direction = Direction.values()[RandomUtils.uniform(random, Direction.values().length)];
             SubRoom subRoom = SubRoom.generate(room.getSize() / 4, random, room, direction, minW, maxW, minH, maxH);
+            if (subRoom == null) continue;
             if (Room.validRoom(subRoom, majorRooms, room)) {
                 room.attachRoom(subRoom);
             }
