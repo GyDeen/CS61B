@@ -68,6 +68,19 @@ public class World {
     }
 
 
+    /* Find the closest room for u to connect */
+    private MainRoom nearestOf(MainRoom u, java.util.List<Room> connected) {
+        MainRoom best = null; int bestD2 = Integer.MAX_VALUE;
+        for (Room r : connected) {
+            MainRoom v = (MainRoom) r;
+            int dx = v.getLocation().x - u.getLocation().x;
+            int dy = v.getLocation().y - u.getLocation().y;
+            int d2 = dx*dx + dy*dy;
+            if (d2 < bestD2) { bestD2 = d2; best = v; }
+        }
+        return best;
+    }
+
     /* Generate hallway */
     private void generateHallway() {
         int attempts = 0;
