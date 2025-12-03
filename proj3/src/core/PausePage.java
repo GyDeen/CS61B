@@ -56,7 +56,7 @@ public class PausePage extends NonGamingPage {
 
         StdDraw.setPenColor(Color.WHITE);
         StdDraw.setFont(UI.loadFont(UI.PROMPT_FONT_PATH, 20));
-        StdDraw.text(22, UI.BOTTOM_UI, "Press E to exit the game. Press S to save current game. Press C to continue");
+        StdDraw.text(30, UI.BOTTOM_UI, "Press Q to exit the game.  Press R to return menu.  Press S to save current game. Press C to continue");
 
         StdDraw.show();
     }
