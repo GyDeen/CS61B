@@ -35,9 +35,9 @@ public class Config {
     // Full fill room setting
     public static final int MIN_VOID_AREA = 35;
     public static final int MIN_FILL_ROOM_WIDTH  = 6;
-    public static final int MAX_FILL_ROOM_WIDTH  = 10;
+    public static final int MAX_FILL_ROOM_WIDTH  = 20;
     public static final int MIN_FILL_ROOM_HEIGHT = 6;
-    public static final int MAX_FILL_ROOM_HEIGHT = 10;
+    public static final int MAX_FILL_ROOM_HEIGHT = 20;
 
     public static final int MIN_SUB_ROOM_WIDTH_FOR_FILL = 3;
     public static final int MIN_SUB_ROOM_HEIGHT_FOR_FILL = 3;
