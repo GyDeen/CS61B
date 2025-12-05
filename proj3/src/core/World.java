@@ -238,14 +238,15 @@ public class World {
 //        java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
 //        System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
         StdDraw.picture(settingX, settingY, settingImage);
+        StdDraw.show();
     }
 
     private void drawTimer(int remainingSeconds) {
         StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
         String text = "Time: " + remainingSeconds + "s";
-        // assuming your UI bar is at the top and WINDOW_HEIGHT is your Y scale
         StdDraw.textRight(WINDOW_WIDTH, WINDOW_HEIGHT - 1, text);
+        StdDraw.show();
     }
 
     private void update() {
@@ -258,7 +259,7 @@ public class World {
         ter.renderFrameNoShow(world);
         ter.resetFont();
         drawSetting();
-        StdDraw.show();
+
     }
 
 
