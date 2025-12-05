@@ -219,6 +219,7 @@ public class World {
             double x = StdDraw.mouseX(), y = StdDraw.mouseY();
             // If the mouse is clicking on the setting icon, return true
             if (onSetting(x, y)) {
+                System.out.println("Currently on setting icon");
                 mouseHeld = true;
                 return true;
             }
@@ -230,7 +231,8 @@ public class World {
 
 
     private boolean onSetting(double x, double y) {
-        return x >= settingX && x < settingX + SETTING_WIDTH && y >= settingY && y < settingY;
+        return x >= 0 && x < SETTING_WIDTH
+                && y >= settingY - (double) SETTING_HEIGHT / 2 && y < settingY + SETTING_HEIGHT;
     }
 
 
