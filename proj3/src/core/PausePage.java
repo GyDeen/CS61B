@@ -66,8 +66,7 @@ public class PausePage extends NonGamingPage {
         while (StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ESCAPE)
                 || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_UP)
                 || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_DOWN)
-                || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ENTER)
-                || StdDraw.isMousePressed()) {
+                || StdDraw.isKeyPressed(java.awt.event.KeyEvent.VK_ENTER)) {
             StdDraw.pause(10);
         }
         upPrev = downPrev = enterPrev = escPrev = mousePrev = false;
