@@ -66,8 +66,6 @@ public class PacMan extends GameObject{
 
     /* Movement update based on input key */
     private void updateBasedInput(Direction direction, TETile[][] world) {
-        if (!isActive()) return;
-
         int newX = getPosition().x, newY = getPosition().y;
         Point curPosition = getPosition();
         switch (direction) {
@@ -93,8 +91,31 @@ public class PacMan extends GameObject{
     }
 
 
+    /* Based on the input update the PacMan position and direction */
+    private void handleInput(TETile[][] world) {
+        if (!isActive()) return;
+
+        if (!StdDraw.hasNextKeyTyped()) {
+            return;
+        }
+
+        char key = StdDraw.nextKeyTyped();
+        Direction dir = null;
+
+        switch (Character.toLowerCase(key)) {
+            case 'w', 'W' -> dir = Direction.UP;
+            case 's', 'S' -> dir = Direction.DOWN;
+            case 'a', 'A' -> dir = Direction.LEFT;
+            case 'd', 'D' -> dir = Direction.RIGHT;
+            default -> { return; }
+        }
+
+        updateBasedInput(dir, world);
+    }
+
+
     @Override
-    /** Draw the image based on current facing. It should be able switch the image based on the time. */
+    /** Draw the image based on current facing. It should be able to switch the image based on the time */
     public void drawImage() {
         double angle = 0d;
         int scaledX = 1, scaledY = 1;
