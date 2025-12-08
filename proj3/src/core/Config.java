@@ -56,4 +56,8 @@ public class Config {
     public static final int TITLE_SIZE = 150;
     public static final int PROMPT_SIZE = 70;
     public static final int TILE_SIZE = 16;
+
+
+    // PacMan config
+    public static final int IMAGE_SWITCHING_PERIOD = 500;
 }

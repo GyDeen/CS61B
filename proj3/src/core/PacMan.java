@@ -7,6 +7,8 @@ import tileengine.TileType;
 import java.awt.*;
 import java.util.Objects;
 
+import static core.Config.IMAGE_SWITCHING_PERIOD;
+
 public class PacMan extends GameObject{
     private final String[] activeImage = {
             getImagePath() + "pac man/pac_man_1.png",
@@ -23,7 +25,7 @@ public class PacMan extends GameObject{
     private String currentImage;
     private Direction curDirection;
 
-    private long nextSwitchTime = 0;
+    private long nextSwitchTimeMs = 0;
 
     public PacMan(int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -35,13 +37,21 @@ public class PacMan extends GameObject{
     public void updateImageBasedOnTime(long worldTimeMs) {
         if (!isActive()) return;
 
-        if (worldTimeMs > nextSwitchTime) {
-            if (Objects.equals(currentImage, activeImage[0])) {
-                currentImage = activeImage[1];
-            } else {
-                currentImage = activeImage[0];
-            }
+        // first time: initialise nextSwitchTime
+        if (nextSwitchTimeMs == 0) {
+            nextSwitchTimeMs = worldTimeMs + IMAGE_SWITCHING_PERIOD;
+            return;
         }
+
+        if (worldTimeMs < nextSwitchTimeMs) return;
+
+
+        // time to toggle frame
+        frameIndex = 1 - frameIndex;
+        currentImage = activeImage[frameIndex];
+
+        // Compute the next switch time
+        nextSwitchTimeMs = worldTimeMs + IMAGE_SWITCHING_PERIOD;
     }
 
     /** Return current facing direction */
@@ -57,6 +67,8 @@ public class PacMan extends GameObject{
         setPosition(x, y);
     }
 
+
+    // Check whether PacMan can move to the desire position
     private void validMove(int x, int y, TETile[][] world) {
         if (!TileType.toType(world[x][y]).isPassable())  return;
 
@@ -95,9 +107,8 @@ public class PacMan extends GameObject{
     private void handleInput(TETile[][] world) {
         if (!isActive()) return;
 
-        if (!StdDraw.hasNextKeyTyped()) {
-            return;
-        }
+        if (!StdDraw.hasNextKeyTyped()) return;
+
 
         char key = StdDraw.nextKeyTyped();
         Direction dir = null;
@@ -107,7 +118,7 @@ public class PacMan extends GameObject{
             case 's', 'S' -> dir = Direction.DOWN;
             case 'a', 'A' -> dir = Direction.LEFT;
             case 'd', 'D' -> dir = Direction.RIGHT;
-            default -> { return; }
+            default -> {return;}
         }
 
         updateBasedInput(dir, world);
@@ -137,5 +148,14 @@ public class PacMan extends GameObject{
         }
 
         StdDraw.picture(getPosition().x, getPosition().y, currentImage, scaledX, scaledY, angle);
+    }
+
+
+    /** Update the image first (switch image based on world time). Then handle the input to determine whether it could move
+     * and adjust its facing. */
+    public void update(long worldTime, TETile[][] world) {
+        updateImageBasedOnTime(worldTime);
+        handleInput(world);
+        drawImage();
     }
 }
