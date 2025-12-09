@@ -50,6 +50,9 @@ public class Config {
     public static final int MAX_WALL_IN_A_ROW = 2;
     public static final int MAX_ATTEMPT_PIVOT = 50;
     public static final int ALLOCATE_FAIL_CAP = 200;
+    public static final int PAUSE = 0;
+    public static final int WIN = 1;
+    public static final int LOSE = -1;
 
     // Init page setting
     public static final int BUFFER = 4;
@@ -60,4 +63,9 @@ public class Config {
 
     // PacMan config
     public static final int IMAGE_SWITCHING_PERIOD = 500;
+
+
+    // Loot Box type
+    public static final int FINAL_BOX = 1;
+    public static final int MYSTERY_BOX = 0;
 }

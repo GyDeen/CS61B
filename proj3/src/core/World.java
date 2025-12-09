@@ -8,7 +8,6 @@ import utils.RandomUtils;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static core.Config.*;
@@ -17,27 +16,46 @@ import static core.UI.*;
 
 
 public class World {
-    private TERenderer ter = new TERenderer();
-    private int gameTime = GAME_TIME_IN_SEC;
-    private long gameStartTimeMs;
+    private class Setting {
+        private int settingX = SETTING_WIDTH / 2;
+        private int settingY = WINDOW_HEIGHT - SETTING_HEIGHT / 2;
+        private String settingImage = "src/resources/Icon/icons8-settings-50.png";
 
-    private static long seed = 654326789;
-    private static Random random = new Random(seed);
-    public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
+        private boolean onSetting(double x, double y) {
+            return x >= 0 && x < SETTING_WIDTH
+                    && y >= settingY - (double) SETTING_HEIGHT / 2 && y < settingY + SETTING_HEIGHT;
+        }
 
-    private int roomNum;
-    private ArrayList<Room> majorRooms = new ArrayList<>();
-    private ArrayList<Room> fullFillRooms = new ArrayList<>();
-    private HallwayCarver carver;
+
+        private void drawSetting() {
+            java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
+            System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
+            StdDraw.picture(settingX, settingY, settingImage);
+            StdDraw.show();
+        }
+    }
+
 
     private enum PlayState { RUNNING, PAUSED }
     private PlayState playState = PlayState.RUNNING;
     private boolean escHeld = false;
     private boolean mouseHeld = false;
+    private TERenderer ter = new TERenderer();
+    private int gameTime = GAME_TIME_IN_SEC;
+    private long gameStartTimeMs;
 
-    private int settingX = SETTING_WIDTH / 2;
-    private int settingY = WINDOW_HEIGHT - SETTING_HEIGHT / 2;
-    private String settingImage = "src/resources/Icon/icons8-settings-50.png";
+    private int gameResult = LOSE;
+
+    private static long seed = 654326789;
+    private static Random random = new Random(seed);
+    public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
+
+    private Setting setting = new Setting();
+    private int roomNum;
+    private ArrayList<Room> majorRooms = new ArrayList<>();
+    private ArrayList<Room> fullFillRooms = new ArrayList<>();
+    private HallwayCarver carver;
+    private PacMan player;
 
 
     /** Using the default seed to generate the world */
@@ -56,6 +74,11 @@ public class World {
     }
 
 
+    private void playerSpawn() {
+
+    }
+
+
     /* Method that generate the room purely randomly, not using cells */
     private void generateRoom() {
         int maxAttempt = 10000, currentAttempt = 0;
@@ -68,19 +91,6 @@ public class World {
         }
     }
 
-
-    /* Find the closest room for u to connect */
-    private MainRoom nearestOf(MainRoom u, List<Room> connected) {
-        MainRoom best = null; int bestD2 = Integer.MAX_VALUE;
-        for (Room r : connected) {
-            MainRoom v = (MainRoom) r;
-            int distanceX = v.getLocation().x - u.getLocation().x;
-            int distanceY = v.getLocation().y - u.getLocation().y;
-            int absoluteDistance = distanceX*distanceX + distanceY*distanceY;
-            if (absoluteDistance < bestD2) { bestD2 = absoluteDistance; best = v; }
-        }
-        return best;
-    }
 
     /* Generate hallway */
     private void generateHallway() {
@@ -159,6 +169,84 @@ public class World {
     }
 
 
+    private void renderPlayer() {
+
+    }
+
+
+    private boolean pauseRequest() {
+        boolean escNow = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
+        if (escNow && !escHeld) {
+            escHeld = true;
+            return true;
+        }
+
+        if (!escNow) escHeld = false;
+
+        boolean clicking = StdDraw.isMousePressed();
+        if (clicking && !mouseHeld) {
+            double x = StdDraw.mouseX(), y = StdDraw.mouseY();
+            // If the mouse is clicking on the setting icon, return true
+            if (setting.onSetting(x, y)) {
+                System.out.println("Currently on setting icon");
+                mouseHeld = true;
+                return true;
+            }
+        }
+
+        mouseHeld = clicking;
+        return false;
+    }
+
+
+    private void drawTimer(int remainingSeconds) {
+        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
+        String text = "Time: " + remainingSeconds + "s";
+        StdDraw.textRight(WINDOW_WIDTH, WINDOW_HEIGHT - 1, text);
+        StdDraw.show();
+    }
+
+
+    private void updateTimer() {
+        long currentTime = System.currentTimeMillis();
+        int elapsedSeconds = (int) ((currentTime - gameStartTimeMs) / 1000);
+        int remainingSeconds = gameTime - elapsedSeconds;
+        if (remainingSeconds < 0) remainingSeconds = 0;
+        drawTimer(remainingSeconds);
+
+        ter.renderFrameNoShow(world);
+        ter.resetFont();
+        setting.drawSetting();
+
+    }
+
+
+    /** The game loop of the game */
+    public int gameLoop() {
+        while (playState == PlayState.RUNNING) {
+
+            if (gameResult == WIN) return WIN;
+            if (!player.isActive()) return LOSE;
+
+            if (pauseRequest()) {
+                playState = PlayState.PAUSED;
+                return PAUSE;
+            }
+
+            updateTimer();
+        }
+
+        return PAUSE;
+    }
+
+
+    /** Return to gaming */
+    public void continueGame() {
+        playState = PlayState.RUNNING;
+    }
+
+
     /** Draw the world and generate the whole picture of the world */
     public void renderWorld() {
         ter.initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -201,91 +289,6 @@ public class World {
 
         // start game timer
         gameStartTimeMs = System.currentTimeMillis();
-    }
-
-
-
-    private boolean pauseRequest() {
-        boolean escNow = StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE);
-        if (escNow && !escHeld) {
-            escHeld = true;
-            return true;
-        }
-
-        if (!escNow) escHeld = false;
-
-        boolean clicking = StdDraw.isMousePressed();
-        if (clicking && !mouseHeld) {
-            double x = StdDraw.mouseX(), y = StdDraw.mouseY();
-            // If the mouse is clicking on the setting icon, return true
-            if (onSetting(x, y)) {
-                System.out.println("Currently on setting icon");
-                mouseHeld = true;
-                return true;
-            }
-        }
-
-        mouseHeld = clicking;
-        return false;
-    }
-
-
-    private boolean onSetting(double x, double y) {
-        return x >= 0 && x < SETTING_WIDTH
-                && y >= settingY - (double) SETTING_HEIGHT / 2 && y < settingY + SETTING_HEIGHT;
-    }
-
-
-    private void drawSetting() {
-//        java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
-//        System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
-        StdDraw.picture(settingX, settingY, settingImage);
-        StdDraw.show();
-    }
-
-    private void drawTimer(int remainingSeconds) {
-        StdDraw.setPenColor(StdDraw.WHITE);
-        StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
-        String text = "Time: " + remainingSeconds + "s";
-        StdDraw.textRight(WINDOW_WIDTH, WINDOW_HEIGHT - 1, text);
-        StdDraw.show();
-    }
-
-    private void update() {
-        long currentTime = System.currentTimeMillis();
-        int elapsedSeconds = (int) ((currentTime - gameStartTimeMs) / 1000);
-        int remainingSeconds = gameTime - elapsedSeconds;
-        if (remainingSeconds < 0) remainingSeconds = 0;
-        drawTimer(remainingSeconds);
-
-        ter.renderFrameNoShow(world);
-        ter.resetFont();
-        drawSetting();
-
-    }
-
-
-
-
-    /** The game loop of the game */
-    public boolean gameLoop() {
-        while (playState == PlayState.RUNNING) {
-
-            if (pauseRequest()) {
-                playState = PlayState.PAUSED;
-                return true;
-            }
-
-            update();
-        }
-
-        return true;
-    }
-
-
-    /** Return to gaming */
-    public void continueGame() {
-        playState = PlayState.RUNNING;
     }
 }
 
