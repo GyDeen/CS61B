@@ -43,6 +43,7 @@ public class World {
     private TERenderer ter = new TERenderer();
     private int gameTime = GAME_TIME_IN_SEC;
     private long gameStartTimeMs;
+    private int remainTime = GAME_TIME_IN_SEC;
 
     private int gameResult = LOSE;
 
@@ -211,15 +212,18 @@ public class World {
     private void updateTimer() {
         long currentTime = System.currentTimeMillis();
         int elapsedSeconds = (int) ((currentTime - gameStartTimeMs) / 1000);
-        int remainingSeconds = gameTime - elapsedSeconds;
-        if (remainingSeconds < 0) remainingSeconds = 0;
-        drawTimer(remainingSeconds);
+        remainTime = gameTime - elapsedSeconds;
+        if (remainTime < 0) remainTime = 0;
+        drawTimer(remainTime);
 
         ter.renderFrameNoShow(world);
         ter.resetFont();
         setting.drawSetting();
-
     }
+
+
+    /** Set game result to win */
+    public void playerWin() {gameResult = WIN;}
 
 
     /** The game loop of the game */
