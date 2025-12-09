@@ -2,6 +2,8 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 
+import static core.Config.PAUSE;
+
 public class Main {
     private enum GameState {INIT_MENU, ENTER_SEED, PLAYING, LOADING, QUIT, PAUSE, SAVE}
     private static GameState state = GameState.INIT_MENU;
@@ -75,8 +77,8 @@ public class Main {
             }
 
             if (state == GameState.PLAYING) {
-                boolean paused = world.gameLoop();
-                if (paused) state = GameState.PAUSE;
+                int paused = world.gameLoop();
+                if (paused == PAUSE) state = GameState.PAUSE;
             }
         }
     }
