@@ -66,6 +66,8 @@ public class Config {
 
 
     // Loot Box type
-    public static final int FINAL_BOX = 1;
-    public static final int MYSTERY_BOX = 0;
+    public static final long FADE_INTERVAL_MS = 300;
+    public static final int NOT_FADING = 0;
+    public static final int FADING = 1;
+    public static final int FINISHED = 2;
 }
