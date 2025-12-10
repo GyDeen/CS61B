@@ -594,7 +594,7 @@ public class HallwayCarver {
     }
 
 
-    /* Simple connection for a constant failing connection */
+    /** Simple connection for a constant failing connection */
     public boolean connectSimpleL(MainRoom a, MainRoom b) {
         DoorPair dp = pickDoorPairByEdges(a, b);
         Point drA = dp.drA, drB = dp.drB;
