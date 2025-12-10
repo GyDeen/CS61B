@@ -52,8 +52,8 @@ public class World {
 
     private Setting setting = new Setting();
     private int roomNum;
-    private ArrayList<Room> majorRooms = new ArrayList<>();
-    private ArrayList<Room> fullFillRooms = new ArrayList<>();
+    private ArrayList<MainRoom> majorRooms = new ArrayList<>();
+    private ArrayList<MainRoom> fullFillRooms = new ArrayList<>();
     private HallwayCarver carver;
     private PacMan player;
 
@@ -96,19 +96,24 @@ public class World {
     private void generateHallway() {
         int attempts = 0;
         carver = new HallwayCarver(world, random);
-        ArrayList<Room> connected = new ArrayList<>();
-        ArrayList<Room> unconnected = new ArrayList<>(majorRooms);
+        ArrayList<MainRoom> connected = new ArrayList<>();
+        ArrayList<MainRoom> unconnected = new ArrayList<>(majorRooms);
 
         connected.add(unconnected.removeFirst());
 
         while (!unconnected.isEmpty()) {
-            MainRoom u = (MainRoom) unconnected.getFirst();
+            MainRoom u = unconnected.getFirst();
             boolean linked = false;
 
-            for (Room vR : connected) {
+            for (MainRoom vR : connected) {
+                // If we cannot connect with more turn, we will just connect two room using straight forward
                 if (attempts >= ALLOCATE_FAIL_CAP) {
-                    if (carver.connectSimpleL((MainRoom) vR, u)) {
+                    if (carver.connectSimpleL(vR, u)) {
+                        // Add connection to both room
+                        vR.addConnectedMainRoom(u);
+                        u.addConnectedMainRoom(vR);
                         connected.add(u);
+                        // Remove the room u from unconnected since it successfully connect with room vR
                         unconnected.removeFirst();
                         linked = true;
                         attempts = 0;
@@ -117,8 +122,12 @@ public class World {
                         attempts = 0;
                     }
                 }
-                if (carver.connect((MainRoom) vR, u)) {
+                if (carver.connect(vR, u)) {
+                    // Add connection to both room
+                    vR.addConnectedMainRoom(u);
+                    u.addConnectedMainRoom(vR);
                     connected.add(u);
+                    // Remove the room u from unconnected since it successfully connect with room vR
                     unconnected.removeFirst();
                     linked = true;
                     attempts = 0;
@@ -137,8 +146,8 @@ public class World {
             if (majorRooms.size() < 2) break;
 
             // pick two distinct random main rooms
-            MainRoom a = (MainRoom) majorRooms.get(random.nextInt(majorRooms.size()));
-            MainRoom b = (MainRoom) majorRooms.get(random.nextInt(majorRooms.size()));
+            MainRoom a = majorRooms.get(random.nextInt(majorRooms.size()));
+            MainRoom b = majorRooms.get(random.nextInt(majorRooms.size()));
             if (a == b) {
                 i--;
                 continue;
@@ -146,6 +155,8 @@ public class World {
 
             if (!carver.connect(a, b)) {
                 carver.connectSimpleL(a, b);
+                a.addConnectedMainRoom(b);
+                b.addConnectedMainRoom(a);
             }
         }
     }
@@ -169,9 +180,6 @@ public class World {
     }
 
 
-    private void renderPlayer() {
-
-    }
 
 
     private boolean pauseRequest() {
