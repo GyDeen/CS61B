@@ -37,12 +37,19 @@ public class PacMan extends GameObject{
     public PacMan generatePacMan(MainRoom initialRoom, Random rand, TETile[][] world) {
         int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
 
-        for (int i = 0; i < maxAttempt; i++) {
-            int minX = initialRoom.getLeft();
-            int minY = initialRoom.getBottom();
-            int maxX = initialRoom.getRight();
-            int maxY = initialRoom.getTop();
+        int minX = initialRoom.getLeft();
+        int minY = initialRoom.getBottom();
+        int maxX = initialRoom.getRight();
+        int maxY = initialRoom.getTop();
 
+        for (SubRoom s : initialRoom.getSubRooms()) {
+            minX = Math.min(minX, s.getLeft());
+            maxX = Math.max(maxX, s.getRight());
+            minY = Math.min(minY, s.getBottom());
+            maxY = Math.max(maxY, s.getTop());
+        }
+
+        for (int i = 0; i < maxAttempt; i++) {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
 
