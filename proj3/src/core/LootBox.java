@@ -5,8 +5,6 @@ import tileengine.TileType;
 
 import javax.swing.*;
 
-import static core.Config.FINAL_BOX;
-import static core.Config.MYSTERY_BOX;
 
 public abstract class LootBox extends GameObject {
     private MainRoom belongsTo;
@@ -27,6 +25,6 @@ public abstract class LootBox extends GameObject {
     }
 
 
-    public abstract void disappear(World w);
+    public abstract int update(World w);
 }
 
