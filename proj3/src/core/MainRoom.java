@@ -16,21 +16,12 @@ import static java.lang.Math.clamp;
 public class MainRoom extends Room {
     // Only initialise when there is a subroom attach to this room
     private ArrayList<SubRoom> subRooms;
-    private ArrayList<MainRoom> directlyConnectedTo;
 
 
 
     private MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
         super(height, width, x, y, thicknessOfWall, isCornered);
     }
-
-
-    /** Add direct connected main room */
-    public void addConnectedMainRoom(MainRoom mainRoom) {directlyConnectedTo.add(mainRoom);}
-
-
-    /** Return the neighbour rooms */
-    public ArrayList<MainRoom> getNeighbours() {return directlyConnectedTo;}
 
 
     /** Factory: generate a main room */
@@ -271,5 +262,11 @@ public class MainRoom extends Room {
             }
         }
         return true;
+    }
+
+
+    /** Return the distance between two rooms */
+    public static double distanceBetween(MainRoom a, MainRoom b) {
+        return Math.sqrt(Math.pow(Math.abs(a.getLocation().x - b.getLocation().x), 2) + Math.pow(Math.abs(a.getLocation().y - b.getLocation().y), 2));
     }
 }
