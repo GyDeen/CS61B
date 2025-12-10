@@ -79,6 +79,11 @@ public class World {
     }
 
 
+    private void placeFinalBox() {
+
+    }
+
+
     /* Method that generate the room purely randomly, not using cells */
     private void generateRoom() {
         int maxAttempt = 10000, currentAttempt = 0;
@@ -181,17 +186,10 @@ public class World {
         playerSpawnAndFinalBoxRoom[1] = bestB;
 
         // Remove from major rooms to avoid initial connection
-        for (MainRoom room : majorRooms) {
-            if (room.equals(bestA)) majorRooms.remove(room);
-            if (room.equals(bestB)) majorRooms.remove(room);
-        }
-
-
-        // Remove from fullFillRooms to avoid initial connection
-        for (MainRoom room : fullFillRooms) {
-            if (room.equals(bestA)) fullFillRooms.remove(room);
-            if (room.equals(bestB)) fullFillRooms.remove(room);
-        }
+        majorRooms.remove(bestA);
+        majorRooms.remove(bestB);
+        fullFillRooms.remove(bestA);
+        fullFillRooms.remove(bestB);
     }
 
 
@@ -319,6 +317,8 @@ public class World {
         }
 
         majorRooms.addAll(fullFillRooms);
+        findMostDistanceRoom();
+
         generateHallway();
 
         TETile[][] carved = carver.getWorld();

@@ -269,4 +269,15 @@ public class MainRoom extends Room {
     public static double distanceBetween(MainRoom a, MainRoom b) {
         return Math.sqrt(Math.pow(Math.abs(a.getLocation().x - b.getLocation().x), 2) + Math.pow(Math.abs(a.getLocation().y - b.getLocation().y), 2));
     }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MainRoom) {
+            MainRoom room = (MainRoom) obj;
+            return room.getLocation().equals(this.getLocation());
+        }
+
+        return false;
+    }
 }
