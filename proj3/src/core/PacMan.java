@@ -6,6 +6,7 @@ import tileengine.TileType;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Random;
 
 import static core.Config.IMAGE_SWITCHING_PERIOD;
 
@@ -27,9 +28,45 @@ public class PacMan extends GameObject{
 
     private long nextSwitchTimeMs = 0;
 
-    public PacMan(int x, int y, int width, int height) {
+    private PacMan(int x, int y, int width, int height) {
         super(x, y, width, height);
         setImagePath("resources/pac man/pac man & life counter & death");
+    }
+
+
+    public PacMan generatePacMan(MainRoom initialRoom, Random rand, TETile[][] world) {
+        int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
+
+        for (int i = 0; i < maxAttempt; i++) {
+            int minX = initialRoom.getLeft();
+            int minY = initialRoom.getBottom();
+            int maxX = initialRoom.getRight();
+            int maxY = initialRoom.getTop();
+
+            int x = rand.nextInt(minX, maxX);
+            int y = rand.nextInt(minY, maxY);
+
+            if (initialRoom.isInRoom(x, y) && TileType.toType(world[x][y]).isPassable()) return new PacMan(x, y, 1, 1);
+        }
+
+        int x = initialRoom.getLocation().x;
+        int y = initialRoom.getLocation().y;
+        int[] directions = {1, -1};
+
+        // Starting from the center of the initial room to different direction to find the first available spot
+        while (initialRoom.isInRoom(x, y) && !TileType.toType(world[x][y]).isPassable()) {
+            for (Integer direction : directions) {
+                if (TileType.toType(world[x + direction][y]).isPassable()) {
+                    return new PacMan(x + direction, y, 1, 1);
+                }
+
+                if (TileType.toType(world[x ][y + direction]).isPassable()) {
+                    return new PacMan(x, y + direction, 1, 1);
+                }
+            }
+        }
+
+        return new PacMan(x, y, 1, 1);
     }
 
 
