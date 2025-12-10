@@ -35,7 +35,6 @@ public class World {
         }
     }
 
-
     private enum PlayState { RUNNING, PAUSED }
     private PlayState playState = PlayState.RUNNING;
     private boolean escHeld = false;
@@ -54,6 +53,7 @@ public class World {
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private ArrayList<MainRoom> fullFillRooms = new ArrayList<>();
+    private MainRoom[] playerSpawnAndFinalBoxRoom = new MainRoom[2];
     private HallwayCarver carver;
     private PacMan player;
 
@@ -109,9 +109,6 @@ public class World {
                 // If we cannot connect with more turn, we will just connect two room using straight forward
                 if (attempts >= ALLOCATE_FAIL_CAP) {
                     if (carver.connectSimpleL(vR, u)) {
-                        // Add connection to both room
-                        vR.addConnectedMainRoom(u);
-                        u.addConnectedMainRoom(vR);
                         connected.add(u);
                         // Remove the room u from unconnected since it successfully connect with room vR
                         unconnected.removeFirst();
@@ -123,9 +120,6 @@ public class World {
                     }
                 }
                 if (carver.connect(vR, u)) {
-                    // Add connection to both room
-                    vR.addConnectedMainRoom(u);
-                    u.addConnectedMainRoom(vR);
                     connected.add(u);
                     // Remove the room u from unconnected since it successfully connect with room vR
                     unconnected.removeFirst();
@@ -155,9 +149,48 @@ public class World {
 
             if (!carver.connect(a, b)) {
                 carver.connectSimpleL(a, b);
-                a.addConnectedMainRoom(b);
-                b.addConnectedMainRoom(a);
             }
+        }
+    }
+
+
+    /* Finding the most distance room pair. Remove them from those ArrayList to avoid initial connection */
+    private void findMostDistanceRoom() {
+        MainRoom bestA = null;
+        MainRoom bestB = null;
+        double greatestDistance = -1.0;
+
+        ArrayList<MainRoom> rooms = new ArrayList<>(majorRooms);
+        rooms.addAll(fullFillRooms);
+
+        int n = rooms.size();
+        for (int i = 0; i < n; i++) {
+            MainRoom a = rooms.get(i);
+            for (int j = i + 1; j < n; j++) {
+                MainRoom b = rooms.get(j);
+                double curDistance = MainRoom.distanceBetween(a, b);
+                if (curDistance > greatestDistance) {
+                    bestA = a;
+                    bestB = b;
+                    greatestDistance = curDistance;
+                }
+            }
+        }
+
+        playerSpawnAndFinalBoxRoom[0] = bestA;
+        playerSpawnAndFinalBoxRoom[1] = bestB;
+
+        // Remove from major rooms to avoid initial connection
+        for (MainRoom room : majorRooms) {
+            if (room.equals(bestA)) majorRooms.remove(room);
+            if (room.equals(bestB)) majorRooms.remove(room);
+        }
+
+
+        // Remove from fullFillRooms to avoid initial connection
+        for (MainRoom room : fullFillRooms) {
+            if (room.equals(bestA)) fullFillRooms.remove(room);
+            if (room.equals(bestB)) fullFillRooms.remove(room);
         }
     }
 
