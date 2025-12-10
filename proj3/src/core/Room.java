@@ -109,7 +109,7 @@ public abstract class Room {
 
 
     /** Testing whether input room is a valid room (no overlaps and within bounds) */
-    public static boolean validRoom(Room room, ArrayList<Room> rooms, MainRoom allowedOverlap) {
+    public static boolean validRoom(Room room, ArrayList<MainRoom> rooms, MainRoom allowedOverlap) {
         if (!withinBounds(room.getLocation().x, room.getLocation().y, room.getWidth(), room.getHeight())) {
             return false;
         }
