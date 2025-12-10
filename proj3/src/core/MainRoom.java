@@ -64,14 +64,14 @@ public class MainRoom extends Room {
 
         if (subRooms != null) {
             for (SubRoom subRoom : subRooms) {
-                int sx = subRoom.getLeft();
-                int sy = subRoom.getBottom();
-                int ex = sx + subRoom.getWidth();
-                int ey = sy + subRoom.getHeight();
-                int st = subRoom.getThicknessOfWall();
+                int subLeft = subRoom.getLeft();
+                int subBottom = subRoom.getBottom();
+                int subRight = subLeft + subRoom.getWidth();
+                int subTop = subBottom + subRoom.getHeight();
+                int subThicknessOfWall = subRoom.getThicknessOfWall();
 
-                if (x >= sx + st && x < ex - st
-                        && y >= sy + st && y < ey - st) {
+                if (x >= subLeft + subThicknessOfWall && x < subRight - subThicknessOfWall
+                        && y >= subBottom + subThicknessOfWall && y < subTop - subThicknessOfWall) {
                     return true;
                 }
             }
