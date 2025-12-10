@@ -16,12 +16,21 @@ import static java.lang.Math.clamp;
 public class MainRoom extends Room {
     // Only initialise when there is a subroom attach to this room
     private ArrayList<SubRoom> subRooms;
+    private ArrayList<MainRoom> directlyConnectedTo;
 
 
 
-    public MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
+    private MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
         super(height, width, x, y, thicknessOfWall, isCornered);
     }
+
+
+    /** Add direct connected main room */
+    public void addConnectedMainRoom(MainRoom mainRoom) {directlyConnectedTo.add(mainRoom);}
+
+
+    /** Return the neighbour rooms */
+    public ArrayList<MainRoom> getNeighbours() {return directlyConnectedTo;}
 
 
     /** Factory: generate a main room */
@@ -155,7 +164,7 @@ public class MainRoom extends Room {
     }
 
 
-    private static Room generateFullFIllRoom(TETile[][] world, int minX, int minY, int maxX, int maxY, int minW, int minH, int maxW, int maxH, Random random) {
+    private static MainRoom generateFullFIllRoom(TETile[][] world, int minX, int minY, int maxX, int maxY, int minW, int minH, int maxW, int maxH, Random random) {
         int w = RandomUtils.uniform(random, minW, maxW + 1);
         int h = RandomUtils.uniform(random, minH, maxH + 1);
         int halfW = w / 2, rightHalf = w - halfW;
@@ -177,7 +186,7 @@ public class MainRoom extends Room {
     }
 
 
-    public static void fullFillRooms(TETile[][] world, ArrayList<Room> fullFillRooms, ArrayList<Room> majorRooms, Random random) {
+    public static void fullFillRooms(TETile[][] world, ArrayList<MainRoom> fullFillRooms, ArrayList<MainRoom> majorRooms, Random random) {
         int width = world.length, height = world[0].length;
         boolean[][] visited =  new boolean[width][height];
         for (int x = 0; x < width; x++) {
@@ -235,7 +244,7 @@ public class MainRoom extends Room {
                     if (roomMinW > roomMaxW || roomMinH > roomMaxH) continue;
 
                     while (placedRoom < numberOfRoom && maxAttempt -- > 0) {
-                        Room fullFillRoom = generateFullFIllRoom(world, minX, minY, maxX, maxY, roomMinW, roomMinH, roomMaxW, roomMaxH, random);
+                        MainRoom fullFillRoom = generateFullFIllRoom(world, minX, minY, maxX, maxY, roomMinW, roomMinH, roomMaxW, roomMaxH, random);
                         if (fullFillRoom == null) continue;
                         if (!Room.validRoom(fullFillRoom, majorRooms, null)) continue;
                         if (!Room.validRoom(fullFillRoom, fullFillRooms, null)) continue;
