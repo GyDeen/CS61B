@@ -34,46 +34,9 @@ public class PacMan extends GameObject{
     }
 
 
-    public PacMan generatePacMan(MainRoom initialRoom, Random rand, TETile[][] world) {
-        int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
-
-        int minX = initialRoom.getLeft();
-        int minY = initialRoom.getBottom();
-        int maxX = initialRoom.getRight();
-        int maxY = initialRoom.getTop();
-
-        for (SubRoom s : initialRoom.getSubRooms()) {
-            minX = Math.min(minX, s.getLeft());
-            maxX = Math.max(maxX, s.getRight());
-            minY = Math.min(minY, s.getBottom());
-            maxY = Math.max(maxY, s.getTop());
-        }
-
-        for (int i = 0; i < maxAttempt; i++) {
-            int x = rand.nextInt(minX, maxX);
-            int y = rand.nextInt(minY, maxY);
-
-            if (initialRoom.isInRoom(x, y) && TileType.toType(world[x][y]).isPassable()) return new PacMan(x, y, 1, 1);
-        }
-
-        int x = initialRoom.getLocation().x;
-        int y = initialRoom.getLocation().y;
-        int[] directions = {1, -1};
-
-        // Starting from the center of the initial room to different direction to find the first available spot
-        while (initialRoom.isInRoom(x, y) && !TileType.toType(world[x][y]).isPassable()) {
-            for (Integer direction : directions) {
-                if (TileType.toType(world[x + direction][y]).isPassable()) {
-                    return new PacMan(x + direction, y, 1, 1);
-                }
-
-                if (TileType.toType(world[x ][y + direction]).isPassable()) {
-                    return new PacMan(x, y + direction, 1, 1);
-                }
-            }
-        }
-
-        return new PacMan(x, y, 1, 1);
+    public static PacMan generatePacMan(MainRoom initialRoom, Random rand, TETile[][] world) {
+        Point p = findSpawnLocation(initialRoom, rand, world);
+        return new PacMan(p.x, p.y, 1, 1);
     }
 
 

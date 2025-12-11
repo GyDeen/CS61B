@@ -1,8 +1,11 @@
 package core;
 
 import edu.princeton.cs.algs4.StdDraw;
+import tileengine.TETile;
+import tileengine.TileType;
 
 import java.awt.*;
+import java.util.Random;
 
 public abstract class GameObject {
     private Point position;
@@ -79,5 +82,41 @@ public abstract class GameObject {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+
+    public static Point findSpawnLocation(MainRoom room, Random rand, TETile[][] world) {
+        int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
+
+        int minX = room.getLeft();
+        int minY = room.getBottom();
+        int maxX = room.getRight();
+        int maxY = room.getTop();
+
+        for (SubRoom s : room.getSubRooms()) {
+            minX = Math.min(minX, s.getLeft());
+            maxX = Math.max(maxX, s.getRight());
+            minY = Math.min(minY, s.getBottom());
+            maxY = Math.max(maxY, s.getTop());
+        }
+
+        for (int i = 0; i < maxAttempt; i++) {
+            int x = rand.nextInt(minX, maxX);
+            int y = rand.nextInt(minY, maxY);
+
+            if (room.isInRoom(x, y) && TileType.toType(world[x][y]).isPassable()) {
+                return new Point(x, y);
+            }
+        }
+
+        for (int x = minX; x < maxX; x++) {
+            for (int y = minY; y < maxY; y++) {
+                if (room.isInRoom(x, y) && TileType.toType(world[x][y]).isPassable()) {
+                    return new Point(x, y);
+                }
+            }
+        }
+
+        return new Point(room.getLocation().x, room.getLocation().y);
     }
 }
