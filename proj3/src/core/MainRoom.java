@@ -273,8 +273,7 @@ public class MainRoom extends Room {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof MainRoom) {
-            MainRoom room = (MainRoom) obj;
+        if (obj instanceof MainRoom room) {
             return room.getLocation().equals(this.getLocation());
         }
 
