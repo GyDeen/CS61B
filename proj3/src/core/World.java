@@ -31,7 +31,7 @@ public class World {
 
         private void drawSetting() {
             java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
-            System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
+            // System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
             StdDraw.picture(settingX, settingY, settingImage);
             StdDraw.show();
         }
@@ -81,6 +81,7 @@ public class World {
     private void initialPlayerAndFinalBox() {
         int playerBelongsTo = random.nextInt(0, 2);
         player = generatePacMan(playerSpawnAndFinalBoxRoom[playerBelongsTo], random, world);
+        majorRooms.add(playerSpawnAndFinalBoxRoom[playerBelongsTo]);
         int finalBoxBelongsTo = 1 - playerBelongsTo;
         finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[finalBoxBelongsTo], random, world);
     }
@@ -259,7 +260,6 @@ public class World {
 
         ter.renderFrameNoShow(world);
         ter.resetFont();
-        setting.drawSetting();
     }
 
 
@@ -276,6 +276,9 @@ public class World {
             }
 
             updateTimer();
+            player.update(elapsedTimeMs, world);
+            player.drawImage();
+            setting.drawSetting();
         }
 
         return PAUSE;
@@ -320,6 +323,7 @@ public class World {
 
         majorRooms.addAll(fullFillRooms);
         findMostDistanceRoom();
+        initialPlayerAndFinalBox();
 
         generateHallway();
 

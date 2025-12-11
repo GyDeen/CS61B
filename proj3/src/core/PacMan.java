@@ -11,16 +11,8 @@ import java.util.Random;
 import static core.Config.IMAGE_SWITCHING_PERIOD;
 
 public class PacMan extends GameObject{
-    private final String[] activeImage = {
-            getImagePath() + "pac man/pac_man_1.png",
-            getImagePath() + "pac man/pac_man_2.png"
-    };
-
-    private final String[] dyingImage = {
-            getImagePath() + "pac man death/spr_pacdeath_0.png",
-            getImagePath() + "pac man death/spr_pacdeath_1.png",
-            getImagePath() + "pac man death/spr_pacdeath_2.png",
-    };
+    private final String[] activeImage;
+    private final String[] dyingImage;
 
     private int frameIndex;
     private String currentImage;
@@ -30,7 +22,23 @@ public class PacMan extends GameObject{
 
     private PacMan(int x, int y, int width, int height) {
         super(x, y, width, height);
-        setImagePath("resources/pac man/pac man & life counter & death");
+        setImagePath("resources/pac man/pac man & life counter & death/");
+
+        activeImage = new String[] {
+                getImagePath() + "pac man/pac_man_0.png",
+                getImagePath() + "pac man/pac_man_1.png",
+                getImagePath() + "pac man/pac_man_2.png",
+                getImagePath() + "pac man/pac_man_3.png",
+                getImagePath() + "pac man/pac_man_4.png"
+        };
+        dyingImage = new String[] {
+                getImagePath() + "pac man death/spr_pacdeath_0.png",
+                getImagePath() + "pac man death/spr_pacdeath_1.png",
+                getImagePath() + "pac man death/spr_pacdeath_2.png"
+        };
+
+        currentImage = activeImage[0];
+        curDirection = Direction.RIGHT;
     }
 
 
@@ -54,7 +62,7 @@ public class PacMan extends GameObject{
 
 
         // time to toggle frame
-        frameIndex = 1 - frameIndex;
+        frameIndex = 4 - frameIndex;
         currentImage = activeImage[frameIndex];
 
         // Compute the next switch time
@@ -146,15 +154,14 @@ public class PacMan extends GameObject{
                 angle = -90;
                 break;
             case LEFT:
-                angle = 0;
-                scaledX = -1;
+                angle = 180;
                 break;
             default:
                 angle = 0;
                 break;
         }
 
-        StdDraw.picture(getPosition().x, getPosition().y, currentImage, scaledX, scaledY, angle);
+        StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, currentImage, 1, 1, angle);
     }
 
 
@@ -163,6 +170,5 @@ public class PacMan extends GameObject{
     public void update(long worldTime, TETile[][] world) {
         updateImageBasedOnTime(worldTime);
         handleInput(world);
-        drawImage();
     }
 }
