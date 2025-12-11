@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static core.Config.*;
+import static core.FinalBox.*;
 import static core.MainRoom.fullFillRooms;
+import static core.PacMan.*;
 import static core.UI.*;
 
 
@@ -56,6 +58,7 @@ public class World {
     private MainRoom[] playerSpawnAndFinalBoxRoom = new MainRoom[2];
     private HallwayCarver carver;
     private PacMan player;
+    private FinalBox finalBox;
 
 
     /** Using the default seed to generate the world */
@@ -74,13 +77,12 @@ public class World {
     }
 
 
-    private void playerSpawn() {
-
-    }
-
-
-    private void placeFinalBox() {
-
+    /* Place final box and player into the most distance room pair */
+    private void initialPlayerAndFinalBox() {
+        int playerBelongsTo = random.nextInt(0, 2);
+        player = generatePacMan(playerSpawnAndFinalBoxRoom[playerBelongsTo], random, world);
+        int finalBoxBelongsTo = 1 - playerBelongsTo;
+        finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[finalBoxBelongsTo], random, world);
     }
 
 
