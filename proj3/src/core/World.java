@@ -53,7 +53,7 @@ public class World {
     private Setting setting = new Setting();
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
-    private ArrayList<MainRoom> fullFillRooms = new ArrayList<>();
+    // private ArrayList<MainRoom> fullFillRooms = new ArrayList<>();
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -80,11 +80,10 @@ public class World {
         MainRoom[] playerSpawnAndFinalBoxRoom;
         playerSpawnAndFinalBoxRoom = findMostDistanceRoom();
 
-        int playerBelongsTo = random.nextInt(0, 2);
-        player = generatePacMan(playerSpawnAndFinalBoxRoom[playerBelongsTo], random, world);
-        majorRooms.add(playerSpawnAndFinalBoxRoom[playerBelongsTo]);
-        int finalBoxBelongsTo = 1 - playerBelongsTo;
-        finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[finalBoxBelongsTo], random, world);
+        player = generatePacMan(playerSpawnAndFinalBoxRoom[0], random, world);
+//        majorRooms.add(playerSpawnAndFinalBoxRoom[0]);
+//        int finalBoxBelongsTo = 1 - playerBelongsTo;
+        finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[1], random, world);
     }
 
 
@@ -169,7 +168,7 @@ public class World {
         double greatestDistance = -1.0;
 
         ArrayList<MainRoom> rooms = new ArrayList<>(majorRooms);
-        rooms.addAll(fullFillRooms);
+        // rooms.addAll(fullFillRooms);
 
         int n = rooms.size();
         for (int i = 0; i < n; i++) {
@@ -185,19 +184,23 @@ public class World {
             }
         }
 
-        // If we successfully remove the idx 0, try remove idx 1
-        if (majorRooms.remove(bestPair[0])) {
-            // We successfully remove the pair, now return the pair
-            boolean removed0 = majorRooms.remove(bestPair[0])
-                    || fullFillRooms.remove(bestPair[0]);
 
-            boolean removed1 = majorRooms.remove(bestPair[1])
-                    || fullFillRooms.remove(bestPair[1]);
-
-            if (!removed0 || !removed1) {
-                throw new IllegalStateException("Room not found in either list");
-            }
-        }
+//        majorRooms.remove(bestPair[0]);
+//        majorRooms.remove(bestPair[1]);
+//        fullFillRooms.remove(bestPair[0]);
+//        fullFillRooms.remove(bestPair[1]);
+//        if (majorRooms.remove(bestPair[0])) {
+//            // We successfully remove the pair, now return the pair
+//            boolean removed0 = majorRooms.remove(bestPair[0])
+//                    || fullFillRooms.remove(bestPair[0]);
+//
+//            boolean removed1 = majorRooms.remove(bestPair[1])
+//                    || fullFillRooms.remove(bestPair[1]);
+//
+//            if (!removed0 || !removed1) {
+//                throw new IllegalStateException("Room not found in either list");
+//            }
+//        }
 
             return bestPair;
     }
@@ -310,6 +313,7 @@ public class World {
 
 
         generateRoom();
+        fullFillRooms(world, majorRooms, majorRooms, random);
         for (Room room : majorRooms) {
             attachSubRoom((MainRoom) room, MIN_SUB_ROOM_FOR_MAIN_WIDTH, MAX_SUB_ROOM_FOR_MAIN_WIDTH,
                     MIN_SUB_ROOM_FOR_MAIN_HEIGHT, MAX_SUB_ROOM_FOR_MAIN_HEIGHT);
@@ -319,17 +323,16 @@ public class World {
             room.allocateRoom(world);
         }
 
-        fullFillRooms(world, fullFillRooms, majorRooms, random);
-        for (Room room : fullFillRooms) {
-            attachSubRoom((MainRoom) room, MIN_SUB_ROOM_WIDTH_FOR_FILL, room.getWidth(),
-                    MIN_SUB_ROOM_HEIGHT_FOR_FILL, room.getHeight());
-        }
 
-        for (Room room : fullFillRooms) {
-            room.allocateRoom(world);
-        }
+//        for (Room room : fullFillRooms) {
+//            attachSubRoom((MainRoom) room, MIN_SUB_ROOM_WIDTH_FOR_FILL, room.getWidth(),
+//                    MIN_SUB_ROOM_HEIGHT_FOR_FILL, room.getHeight());
+//        }
+//
+//        for (Room room : fullFillRooms) {
+//            room.allocateRoom(world);
+//        }
 
-        majorRooms.addAll(fullFillRooms);
         findMostDistanceRoom();
         initialPlayerAndFinalBox();
 
