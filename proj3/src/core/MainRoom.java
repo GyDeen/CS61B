@@ -274,8 +274,7 @@ public class MainRoom extends Room {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MainRoom room) {
-            return room.getLocation().equals(this.getLocation()) && room.getWidth() == this.getWidth() && room.getHeight() == this.getHeight()
-                    && room.getSubRooms().equals(this.getSubRooms());
+            return room.getLocation().equals(this.getLocation()) && room.getWidth() == this.getWidth() && room.getHeight() == this.getHeight();
         }
 
         return false;
