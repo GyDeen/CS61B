@@ -54,7 +54,6 @@ public class World {
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private ArrayList<MainRoom> fullFillRooms = new ArrayList<>();
-    private MainRoom[] playerSpawnAndFinalBoxRoom = new MainRoom[2];
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -78,6 +77,9 @@ public class World {
 
     /* Place final box and player into the most distance room pair */
     private void initialPlayerAndFinalBox() {
+        MainRoom[] playerSpawnAndFinalBoxRoom;
+        playerSpawnAndFinalBoxRoom = findMostDistanceRoom();
+
         int playerBelongsTo = random.nextInt(0, 2);
         player = generatePacMan(playerSpawnAndFinalBoxRoom[playerBelongsTo], random, world);
         majorRooms.add(playerSpawnAndFinalBoxRoom[playerBelongsTo]);
@@ -162,9 +164,8 @@ public class World {
 
 
     /* Finding the most distance room pair. Remove them from those ArrayList to avoid initial connection */
-    private void findMostDistanceRoom() {
-        MainRoom bestA = null;
-        MainRoom bestB = null;
+    private MainRoom[] findMostDistanceRoom() {
+        MainRoom[] bestPair = new MainRoom[2] ;
         double greatestDistance = -1.0;
 
         ArrayList<MainRoom> rooms = new ArrayList<>(majorRooms);
@@ -177,21 +178,20 @@ public class World {
                 MainRoom b = rooms.get(j);
                 double curDistance = MainRoom.distanceBetween(a, b);
                 if (curDistance > greatestDistance) {
-                    bestA = a;
-                    bestB = b;
+                    bestPair[0] = a;
+                    bestPair[1] = b;
                     greatestDistance = curDistance;
                 }
             }
         }
 
-        playerSpawnAndFinalBoxRoom[0] = bestA;
-        playerSpawnAndFinalBoxRoom[1] = bestB;
-
         // Remove from major rooms to avoid initial connection
-        majorRooms.remove(bestA);
-        majorRooms.remove(bestB);
-        fullFillRooms.remove(bestA);
-        fullFillRooms.remove(bestB);
+        majorRooms.remove(bestPair[0]);
+        majorRooms.remove(bestPair[1]);
+        fullFillRooms.remove(bestPair[0]);
+        fullFillRooms.remove(bestPair[1]);
+
+        return bestPair;
     }
 
 
