@@ -185,13 +185,21 @@ public class World {
             }
         }
 
-        // Remove from major rooms to avoid initial connection
-        majorRooms.remove(bestPair[0]);
-        majorRooms.remove(bestPair[1]);
-        fullFillRooms.remove(bestPair[0]);
-        fullFillRooms.remove(bestPair[1]);
+        // If we successfully remove the idx 0, try remove idx 1
+        if (majorRooms.remove(bestPair[0])) {
+            // We successfully remove the pair, now return the pair
+            boolean removed0 = majorRooms.remove(bestPair[0])
+                    || fullFillRooms.remove(bestPair[0]);
 
-        return bestPair;
+            boolean removed1 = majorRooms.remove(bestPair[1])
+                    || fullFillRooms.remove(bestPair[1]);
+
+            if (!removed0 || !removed1) {
+                throw new IllegalStateException("Room not found in either list");
+            }
+        }
+
+            return bestPair;
     }
 
 
