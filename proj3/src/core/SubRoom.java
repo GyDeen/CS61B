@@ -160,4 +160,13 @@ public class SubRoom extends Room {
         return false;
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SubRoom) {
+            return getLocation().equals(((SubRoom) obj).getLocation()) && mainRoom.equals(((SubRoom) obj).mainRoom);
+        }
+
+        return false;
+    }
 }
