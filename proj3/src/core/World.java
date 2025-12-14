@@ -81,8 +81,7 @@ public class World {
         playerSpawnAndFinalBoxRoom = findMostDistanceRoom();
 
         player = generatePacMan(playerSpawnAndFinalBoxRoom[0], random, world);
-//        majorRooms.add(playerSpawnAndFinalBoxRoom[0]);
-//        int finalBoxBelongsTo = 1 - playerBelongsTo;
+        majorRooms.add(playerSpawnAndFinalBoxRoom[0]);
         finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[1], random, world);
     }
 
@@ -187,7 +186,9 @@ public class World {
 
         // Remove the best pair from the major rooms list to avoid connection at first
         majorRooms.remove(bestPair[0]);
+        System.out.println("Remove room@" + bestPair[0].getLocation());
         majorRooms.remove(bestPair[1]);
+        System.out.println("Remove room@" + bestPair[1].getLocation());
 
         return bestPair;
     }
