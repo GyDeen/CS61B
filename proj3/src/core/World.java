@@ -14,27 +14,10 @@ import static core.Config.*;
 import static core.FinalBox.*;
 import static core.MainRoom.fullFillRooms;
 import static core.PacMan.*;
-import static core.UI.*;
 
 
 public class World {
-    private class Setting {
-        private int settingX = SETTING_WIDTH / 2;
-        private int settingY = WINDOW_HEIGHT - SETTING_HEIGHT / 2;
-        private String settingImage = "src/resources/Icon/icons8-settings-50.png";
 
-        private boolean onSetting(double x, double y) {
-            return x >= 0 && x < SETTING_WIDTH
-                    && y >= settingY - (double) SETTING_HEIGHT / 2 && y < settingY + SETTING_HEIGHT;
-        }
-
-
-        private void drawSetting() {
-            java.io.File f = new java.io.File("src/resources/Icon/icons8-settings-50.png");
-            // System.out.println("settings.png exists = " + f.getAbsolutePath() + " -> " + f.exists());
-            StdDraw.picture(settingX, settingY, settingImage);
-        }
-    }
 
     private enum PlayState { RUNNING, PAUSED }
     private PlayState playState = PlayState.RUNNING;
@@ -50,10 +33,9 @@ public class World {
     private static Random random = new Random(seed);
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
-    private Setting setting = new Setting();
+    private UI.Setting setting = new UI.Setting();
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
-    // private ArrayList<MainRoom> fullFillRooms = new ArrayList<>();
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -81,7 +63,6 @@ public class World {
         playerSpawnAndFinalBoxRoom = findMostDistanceRoom();
 
         player = generatePacMan(playerSpawnAndFinalBoxRoom[0], random, world);
-        majorRooms.add(playerSpawnAndFinalBoxRoom[0]);
         finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[1], random, world);
     }
 
@@ -185,8 +166,6 @@ public class World {
 
 
         // Remove the best pair from the major rooms list to avoid connection at first
-        majorRooms.remove(bestPair[0]);
-        System.out.println("Remove room@" + bestPair[0].getLocation());
         majorRooms.remove(bestPair[1]);
         System.out.println("Remove room@" + bestPair[1].getLocation());
 
@@ -278,6 +257,7 @@ public class World {
             player.drawImage();
             setting.drawSetting();
             updateTimer();
+            UI.drawUIBackground();
         }
 
         return PAUSE;
@@ -299,27 +279,16 @@ public class World {
             }
         }
 
-
         generateRoom();
         fullFillRooms(world, majorRooms, majorRooms, random);
-        for (Room room : majorRooms) {
-            attachSubRoom((MainRoom) room, MIN_SUB_ROOM_FOR_MAIN_WIDTH, MAX_SUB_ROOM_FOR_MAIN_WIDTH,
+        for (MainRoom room : majorRooms) {
+            attachSubRoom(room, MIN_SUB_ROOM_FOR_MAIN_WIDTH, MAX_SUB_ROOM_FOR_MAIN_WIDTH,
                     MIN_SUB_ROOM_FOR_MAIN_HEIGHT, MAX_SUB_ROOM_FOR_MAIN_HEIGHT);
         }
 
         for (Room room : majorRooms) {
             room.allocateRoom(world);
         }
-
-
-//        for (Room room : fullFillRooms) {
-//            attachSubRoom((MainRoom) room, MIN_SUB_ROOM_WIDTH_FOR_FILL, room.getWidth(),
-//                    MIN_SUB_ROOM_HEIGHT_FOR_FILL, room.getHeight());
-//        }
-//
-//        for (Room room : fullFillRooms) {
-//            room.allocateRoom(world);
-//        }
 
         initialPlayerAndFinalBox();
 

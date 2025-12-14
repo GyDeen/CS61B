@@ -13,7 +13,7 @@ public class Config {
     // Window setting
     public static final int WINDOW_HEIGHT = 50;
     public static final int WINDOW_WIDTH = 90;
-    public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.BOTTOM_UI - UI.TOP_UI;
+    public static final int WORLD_HEIGHT = WINDOW_HEIGHT - UI.TOP_UI;
 
     // Main room setting
     public static final int MIN_MAIN_ROOM_WIDTH = 14;
