@@ -185,24 +185,11 @@ public class World {
         }
 
 
-//        majorRooms.remove(bestPair[0]);
-//        majorRooms.remove(bestPair[1]);
-//        fullFillRooms.remove(bestPair[0]);
-//        fullFillRooms.remove(bestPair[1]);
-//        if (majorRooms.remove(bestPair[0])) {
-//            // We successfully remove the pair, now return the pair
-//            boolean removed0 = majorRooms.remove(bestPair[0])
-//                    || fullFillRooms.remove(bestPair[0]);
-//
-//            boolean removed1 = majorRooms.remove(bestPair[1])
-//                    || fullFillRooms.remove(bestPair[1]);
-//
-//            if (!removed0 || !removed1) {
-//                throw new IllegalStateException("Room not found in either list");
-//            }
-//        }
+        // Remove the best pair from the major rooms list to avoid connection at first
+        majorRooms.remove(bestPair[0]);
+        majorRooms.remove(bestPair[1]);
 
-            return bestPair;
+        return bestPair;
     }
 
 
@@ -333,7 +320,6 @@ public class World {
 //            room.allocateRoom(world);
 //        }
 
-        findMostDistanceRoom();
         initialPlayerAndFinalBox();
 
         generateHallway();
