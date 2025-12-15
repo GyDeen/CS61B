@@ -2,6 +2,7 @@ package core;
 
 import tileengine.TETile;
 import tileengine.TileType;
+import tileengine.Tileset;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -29,6 +30,21 @@ public class HallwayCarver {
     }
 
 
+    /* Store the information for allocating two rooms connection */
+    private static final class ConnectionPlan {
+        private final MainRoom a, b;
+        private final DoorPair dp;
+        private final ArrayList<Point> floors = new ArrayList<>();
+        private final ArrayList<Point> doors  = new ArrayList<>();
+        private ArrayList<WallPoint> walls;
+
+        private ConnectionPlan(MainRoom a, MainRoom b, DoorPair doorP) {
+            this.a = a; this.b = b;
+            dp = doorP;
+        }
+    }
+
+
     private static TETile[][] world;
     Random random;
 
@@ -49,13 +65,37 @@ public class HallwayCarver {
     public TETile[][] getWorld() { return world; }
 
 
-    /** Connect two room without given Door*/
-    public boolean connectNoLock(MainRoom a, MainRoom b) {
-        return connectNoLock(a, null, b, null);
+
+    /** Connecting given rooms with given type */
+    public boolean connect(MainRoom a, MainRoom b, boolean isLocked) {
+        ConnectionPlan connectPlan = planConnection(a, b);
+        if (connectPlan == null) return false;
+
+        for (Point p : connectPlan.floors) { world[p.x][p.y] = Tileset.FLOOR;}
+        for (Point p: connectPlan.walls)  {
+            if (TileType.toType(world[p.x][p.y]).isPassable()) continue;
+            world[p.x][p.y] = Tileset.WALL;
+        }
+        for (Point p : connectPlan.doors) {
+            if (!p.equals(connectPlan.dp.drA) ||  !p.equals(connectPlan.dp.drB)) {
+                world[p.x][p.y] = Tileset.FLOOR;
+                continue;
+            }
+
+            if (isLocked) world[p.x][p.y] = Tileset.LOCKED_DOOR;
+            else world[p.x][p.y] = Tileset.UNLOCKED_DOOR;
+        }
+
+        return true;
     }
 
-    /** Connect two room with given Door */
-    public boolean connectNoLock(MainRoom a, Point doorA, MainRoom b, Point doorB) {
+    /* Connect two room without given Door*/
+    private ConnectionPlan planConnection(MainRoom a, MainRoom b) {
+        return planConnection(a, null, b, null);
+    }
+
+    /* Connect two room with given Door */
+    private ConnectionPlan planConnection(MainRoom a, Point doorA, MainRoom b, Point doorB) {
         Direction direc = null;
         Point drA, drB;
         if (doorA == null && doorB == null) {
@@ -85,6 +125,9 @@ public class HallwayCarver {
         else if (drA.x == drB.x || drA.y == drB.y) pivotCount = 1;
         else pivotCount = 2;
 
+
+        ConnectionPlan plan = new ConnectionPlan(a, b, pickDoorPairByEdges(a, b));
+
         // Randomly add more pivot for long distance hallway
         // if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
 
@@ -109,7 +152,7 @@ public class HallwayCarver {
 
             // Not the last pivot and has no valid pivot allocation, fail fast
             if (pivot.equals(currentPos)) {
-                if (++attempts > MAX_ATTEMPT_PIVOT) return false;
+                if (++attempts > MAX_ATTEMPT_PIVOT) return null;
                 continue;
             }
 
@@ -117,7 +160,7 @@ public class HallwayCarver {
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
             if (!allocateHallwayNoLock(currentPos, pivot, floors, doors, stageStartDoor)) {
-                if (++attempts > MAX_ATTEMPT_PIVOT) return false;
+                if (++attempts > MAX_ATTEMPT_PIVOT) return null;
                 continue;
             }
 
@@ -126,24 +169,13 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallwayNoLock(currentPos, drB, floors, doors, false)) return false;
+        if (!allocateHallwayNoLock(currentPos, drB, floors, doors, false)) return null;
 
         ArrayList<WallPoint> walls = collectWalls(floors, doors);
-        // Commit staged changes to world
-        for (Point p : floors) {
-            world[p.x][p.y] = tileengine.Tileset.FLOOR;
-        }
+        if (walls == null) return null;
 
-        assert walls != null;
-        for (Point p: walls) {
-            world[p.x][p.y] = tileengine.Tileset.WALL;
-        }
-
-
-        for (Point p : doors) {
-            world[p.x][p.y] = tileengine.Tileset.FLOOR;
-        }
-        return true;
+        plan.walls = walls;
+        return plan;
     }
 
 
@@ -616,7 +648,8 @@ public class HallwayCarver {
         int hallwayNumToFinalRoom = random.nextInt(majorRooms.size() % random.nextInt(majorRooms.size()));
 
         for (int i = hallwayNumToFinalRoom; i > 0;) {
-            MainRoom room = majorRooms.get(random.nextInt(majorRooms.size()));
+            planConnection(finalRoom, majorRooms.get(i));
+            i--;
         }
 
         return true;
