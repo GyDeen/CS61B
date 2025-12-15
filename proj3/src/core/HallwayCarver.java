@@ -50,12 +50,12 @@ public class HallwayCarver {
 
 
     /** Connect two room without given Door*/
-    public boolean connect(MainRoom a, MainRoom b) {
-        return connect(a, null, b, null);
+    public boolean connectNoLock(MainRoom a, MainRoom b) {
+        return connectNoLock(a, null, b, null);
     }
 
     /** Connect two room with given Door */
-    public boolean connect(MainRoom a, Point doorA, MainRoom b, Point doorB) {
+    public boolean connectNoLock(MainRoom a, Point doorA, MainRoom b, Point doorB) {
         Direction direc = null;
         Point drA, drB;
         if (doorA == null && doorB == null) {
@@ -116,7 +116,7 @@ public class HallwayCarver {
 
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallway(currentPos, pivot, floors, doors, stageStartDoor)) {
+            if (!allocateHallwayNoLock(currentPos, pivot, floors, doors, stageStartDoor)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return false;
                 continue;
             }
@@ -126,7 +126,7 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallway(currentPos, drB, floors, doors, false)) return false;
+        if (!allocateHallwayNoLock(currentPos, drB, floors, doors, false)) return false;
 
         ArrayList<WallPoint> walls = collectWalls(floors, doors);
         // Commit staged changes to world
@@ -331,21 +331,6 @@ public class HallwayCarver {
     }
 
 
-    private boolean shouldConnectHorizontally(MainRoom A, MainRoom B) {
-        int gx = (A.getRight() < B.getLeft())  ? B.getLeft()  - A.getRight()
-                : (B.getRight() < A.getLeft())  ? A.getLeft()  - B.getRight()
-                : 0;
-        int gy = (A.getTop() < B.getBottom()) ? B.getBottom() - A.getTop()
-                : (B.getTop() < A.getBottom()) ? A.getBottom() - B.getTop()
-                : 0;
-
-        if (gx==0 && gy>0) return false;
-        if (gy==0 && gx>0) return true;
-        if (gx != gy) return gx < gy;
-        return true;
-    }
-
-
 
     /* It will generate a pivot based on given direction, current position, and destination */
     private Point generatePivot(Point current, Direction direction, Point destination, int pivotCount) {
@@ -505,7 +490,7 @@ public class HallwayCarver {
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
      */
-    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
+    private boolean allocateHallwayNoLock(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot: " + nextPivot.toString() + "with current Position: " + currentPos.toString());
         }
@@ -574,11 +559,6 @@ public class HallwayCarver {
     /* Get the type of Tile at given position */
     private TileType typeAt(int x, int y) { return TileType.toType(world[x][y]); }
 
-    /* Return the distance between given two point */
-    private static double distancePoint(int x1, int y1, int x2, int y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
-
     /* Get the distance between A and B horizontally */
     private int gapX(MainRoom A, MainRoom B) {
         if (A.getRight() < B.getLeft())  return B.getLeft() - A.getRight();
@@ -603,13 +583,13 @@ public class HallwayCarver {
 
         // straight case
         if (drA.x == drB.x || drA.y == drB.y) {
-            if (!allocateHallway(drA, drB, floors, doors, true)) return false;
+            if (!allocateHallwayNoLock(drA, drB, floors, doors, true)) return false;
         } else {
             Point p1 = new Point(drB.x, drA.y);
-            if (!(allocateHallway(drA, p1, floors, doors, true) && allocateHallway(p1, drB, floors, doors, false))) {
+            if (!(allocateHallwayNoLock(drA, p1, floors, doors, true) && allocateHallwayNoLock(p1, drB, floors, doors, false))) {
                 floors.clear(); doors.clear();
                 Point p2 = new Point(drA.x, drB.y);
-                if (!(allocateHallway(drA, p2, floors, doors, true) && allocateHallway(p2, drB, floors, doors, false))) {
+                if (!(allocateHallwayNoLock(drA, p2, floors, doors, true) && allocateHallwayNoLock(p2, drB, floors, doors, false))) {
                     return false;
                 }
             }
@@ -628,6 +608,17 @@ public class HallwayCarver {
         for (Point f : floors) world[f.x][f.y] = tileengine.Tileset.FLOOR;
         for (WallPoint w : walls)  world[w.x][w.y] = w.tile.toTETile();
         for (Point d : doors)  world[d.x][d.y] = tileengine.Tileset.FLOOR;
+        return true;
+    }
+
+
+    public boolean connectFinalRoom(MainRoom finalRoom, ArrayList<MainRoom> majorRooms) {
+        int hallwayNumToFinalRoom = random.nextInt(majorRooms.size() % random.nextInt(majorRooms.size()));
+
+        for (int i = hallwayNumToFinalRoom; i > 0;) {
+            MainRoom room = majorRooms.get(random.nextInt(majorRooms.size()));
+        }
+
         return true;
     }
 }

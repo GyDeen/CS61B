@@ -34,6 +34,7 @@ public class World {
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
     private UI.Setting setting = new UI.Setting();
+    int currentRoomID = 0;
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private HallwayCarver carver;
@@ -74,7 +75,7 @@ public class World {
 
         while (majorRooms.size() < roomNum &&  currentAttempt++ < maxAttempt) {
             // Generate a main room
-            MainRoom newRoom = MainRoom.generate(idealSize, random);
+            MainRoom newRoom = MainRoom.generate(idealSize, random, currentRoomID++);
             if (Room.validRoom(newRoom, majorRooms, null)) majorRooms.add(newRoom);
         }
     }
@@ -98,6 +99,8 @@ public class World {
                 if (attempts >= ALLOCATE_FAIL_CAP) {
                     if (carver.connectSimpleL(vR, u)) {
                         connected.add(u);
+                        u.addDirectlyConnected(vR);
+                        vR.addDirectlyConnected(u);
                         // Remove the room u from unconnected since it successfully connect with room vR
                         unconnected.removeFirst();
                         linked = true;
@@ -107,8 +110,10 @@ public class World {
                         attempts = 0;
                     }
                 }
-                if (carver.connect(vR, u)) {
+                if (carver.connectNoLock(vR, u)) {
                     connected.add(u);
+                    u.addDirectlyConnected(vR);
+                    vR.addDirectlyConnected(u);
                     // Remove the room u from unconnected since it successfully connect with room vR
                     unconnected.removeFirst();
                     linked = true;
@@ -135,7 +140,7 @@ public class World {
                 continue;
             }
 
-            if (!carver.connect(a, b)) {
+            if (!carver.connectNoLock(a, b)) {
                 carver.connectSimpleL(a, b);
             }
         }
@@ -148,7 +153,6 @@ public class World {
         double greatestDistance = -1.0;
 
         ArrayList<MainRoom> rooms = new ArrayList<>(majorRooms);
-        // rooms.addAll(fullFillRooms);
 
         int n = rooms.size();
         for (int i = 0; i < n; i++) {
@@ -280,7 +284,7 @@ public class World {
         }
 
         generateRoom();
-        fullFillRooms(world, majorRooms, majorRooms, random);
+        fullFillRooms(world, majorRooms, majorRooms, random, currentRoomID++);
         for (MainRoom room : majorRooms) {
             attachSubRoom(room, MIN_SUB_ROOM_FOR_MAIN_WIDTH, MAX_SUB_ROOM_FOR_MAIN_WIDTH,
                     MIN_SUB_ROOM_FOR_MAIN_HEIGHT, MAX_SUB_ROOM_FOR_MAIN_HEIGHT);

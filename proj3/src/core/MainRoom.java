@@ -16,16 +16,20 @@ import static java.lang.Math.clamp;
 public class MainRoom extends Room {
     // Only initialise when there is a subroom attach to this room
     private ArrayList<SubRoom> subRooms;
+    private ArrayList<MainRoom> neighbours;
+    private int id;
 
 
 
-    private MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
+    private MainRoom(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered, int id) {
         super(height, width, x, y, thicknessOfWall, isCornered);
+        this.id = id;
+        neighbours = new ArrayList<>();
     }
 
 
     /** Factory: generate a main room */
-    public static MainRoom generate(int idealSize, Random random) {
+    public static MainRoom generate(int idealSize, Random random, int id) {
         double aspectRatio = random.nextDouble(0.8, 1.3);
         int width  = (int) Math.sqrt(idealSize * aspectRatio);
         int height = (int) (idealSize / (double) width);
@@ -42,7 +46,7 @@ public class MainRoom extends Room {
         int wallThickness = (random.nextDouble() < WALL_THICKNESS_1_PROBABILITY) ? BLOCK_WIDTH1 : BLOCK_WIDTH2;
         boolean isCornered = random.nextInt(100) % 4 != 0;
 
-        MainRoom room = new MainRoom(height, width, x, y, wallThickness, isCornered);
+        MainRoom room = new MainRoom(height, width, x, y, wallThickness, isCornered, id);
         room.getRandomPassable(random);
         room.getRandomImpassable(random);
         return room;
@@ -155,7 +159,7 @@ public class MainRoom extends Room {
     }
 
 
-    private static MainRoom generateFullFIllRoom(TETile[][] world, int minX, int minY, int maxX, int maxY, int minW, int minH, int maxW, int maxH, Random random) {
+    private static MainRoom generateFullFIllRoom(TETile[][] world, int minX, int minY, int maxX, int maxY, int minW, int minH, int maxW, int maxH, Random random, int id) {
         int w = RandomUtils.uniform(random, minW, maxW + 1);
         int h = RandomUtils.uniform(random, minH, maxH + 1);
         int halfW = w / 2, rightHalf = w - halfW;
@@ -170,14 +174,14 @@ public class MainRoom extends Room {
         int bottom = roomY - halfH;
         if (!rectIsNothing(left, bottom, w, h, world)) return null;
         boolean isCornered = random.nextBoolean();
-        MainRoom filler = new MainRoom(h, w, roomX, roomY, 1, isCornered);
+        MainRoom filler = new MainRoom(h, w, roomX, roomY, 1, isCornered, id);
         filler.getRandomPassable(random);
         filler.getRandomImpassable(random);
         return filler;
     }
 
 
-    public static void fullFillRooms(TETile[][] world, ArrayList<MainRoom> fullFillRooms, ArrayList<MainRoom> majorRooms, Random random) {
+    public static void fullFillRooms(TETile[][] world, ArrayList<MainRoom> fullFillRooms, ArrayList<MainRoom> majorRooms, Random random, int roomID) {
         int width = world.length, height = world[0].length;
         boolean[][] visited =  new boolean[width][height];
         for (int x = 0; x < width; x++) {
@@ -235,7 +239,7 @@ public class MainRoom extends Room {
                     if (roomMinW > roomMaxW || roomMinH > roomMaxH) continue;
 
                     while (placedRoom < numberOfRoom && maxAttempt -- > 0) {
-                        MainRoom fullFillRoom = generateFullFIllRoom(world, minX, minY, maxX, maxY, roomMinW, roomMinH, roomMaxW, roomMaxH, random);
+                        MainRoom fullFillRoom = generateFullFIllRoom(world, minX, minY, maxX, maxY, roomMinW, roomMinH, roomMaxW, roomMaxH, random, roomID);
                         if (fullFillRoom == null) continue;
                         if (!Room.validRoom(fullFillRoom, majorRooms, null)) continue;
                         if (!Room.validRoom(fullFillRoom, fullFillRooms, null)) continue;
@@ -279,4 +283,12 @@ public class MainRoom extends Room {
 
         return false;
     }
+
+
+    /** Add directly connected room for future graph search */
+    public void addDirectlyConnected(MainRoom connectWith) {neighbours.add(connectWith);}
+
+
+    /** Return the list of neighbours */
+    public ArrayList<MainRoom> getNeighbours() {return new ArrayList<>(neighbours);}
 }
