@@ -71,13 +71,19 @@ public class HallwayCarver {
         ConnectionPlan connectPlan = planConnection(a, b);
         if (connectPlan == null) return false;
 
+
+        System.out.println("CONNECT " + a.getID() + "->" + b.getID()
+                + " floors=" + connectPlan.floors.size()
+                + " doors=" + connectPlan.doors.size());
         for (Point p : connectPlan.floors) { world[p.x][p.y] = Tileset.FLOOR;}
         for (Point p: connectPlan.walls)  {
             if (TileType.toType(world[p.x][p.y]).isPassable()) continue;
             world[p.x][p.y] = Tileset.WALL;
         }
         for (Point p : connectPlan.doors) {
-            if (!p.equals(connectPlan.dp.drA) ||  !p.equals(connectPlan.dp.drB)) {
+            // If it is not final room's door or starting room's door, it is a door on pathway room, which should not
+            // be blocked
+            if (!p.equals(connectPlan.dp.drA) && !p.equals(connectPlan.dp.drB)) {
                 world[p.x][p.y] = Tileset.FLOOR;
                 continue;
             }
@@ -134,9 +140,6 @@ public class HallwayCarver {
 //        System.out.println("drA: " + drA.toString());
 //        System.out.println("drB: " + drB.toString());
 
-        ArrayList<Point> doors = new ArrayList<>();
-        ArrayList<Point> floors = new ArrayList<>();
-
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
         while (pivotCount > 0) {
@@ -159,7 +162,7 @@ public class HallwayCarver {
 
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallwayNoLock(currentPos, pivot, floors, doors, stageStartDoor)) {
+            if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return null;
                 continue;
             }
@@ -169,9 +172,9 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallwayNoLock(currentPos, drB, floors, doors, false)) return null;
+        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false)) return null;
 
-        ArrayList<WallPoint> walls = collectWalls(floors, doors);
+        ArrayList<WallPoint> walls = collectWalls(plan.floors, plan.doors);
         if (walls == null) return null;
 
         plan.walls = walls;
@@ -522,7 +525,7 @@ public class HallwayCarver {
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
      */
-    private boolean allocateHallwayNoLock(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
+    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot: " + nextPivot.toString() + "with current Position: " + currentPos.toString());
         }
@@ -615,13 +618,13 @@ public class HallwayCarver {
 
         // straight case
         if (drA.x == drB.x || drA.y == drB.y) {
-            if (!allocateHallwayNoLock(drA, drB, floors, doors, true)) return false;
+            if (!allocateHallway(drA, drB, floors, doors, true)) return false;
         } else {
             Point p1 = new Point(drB.x, drA.y);
-            if (!(allocateHallwayNoLock(drA, p1, floors, doors, true) && allocateHallwayNoLock(p1, drB, floors, doors, false))) {
+            if (!(allocateHallway(drA, p1, floors, doors, true) && allocateHallway(p1, drB, floors, doors, false))) {
                 floors.clear(); doors.clear();
                 Point p2 = new Point(drA.x, drB.y);
-                if (!(allocateHallwayNoLock(drA, p2, floors, doors, true) && allocateHallwayNoLock(p2, drB, floors, doors, false))) {
+                if (!(allocateHallway(drA, p2, floors, doors, true) && allocateHallway(p2, drB, floors, doors, false))) {
                     return false;
                 }
             }
