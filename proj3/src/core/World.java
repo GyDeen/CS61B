@@ -63,6 +63,10 @@ public class World {
         MainRoom[] playerSpawnAndFinalBoxRoom;
         playerSpawnAndFinalBoxRoom = findMostDistanceRoom();
 
+        for (MainRoom room : playerSpawnAndFinalBoxRoom) {
+            System.out.println("Best room pair @" + room.getLocation());
+        }
+
         player = generatePacMan(playerSpawnAndFinalBoxRoom[0], random, world);
         finalBox = generateFinalBox(playerSpawnAndFinalBoxRoom[1], random, world);
     }
@@ -145,6 +149,7 @@ public class World {
             }
         }
 
+        System.out.println("FinalBox position: " + finalBox.getPosition());
         // Finally, connect the final room with the major rooms graph
         carver.connectFinalRoom(finalBox.getRoom(), majorRooms);
     }
