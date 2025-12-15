@@ -291,4 +291,7 @@ public class MainRoom extends Room {
 
     /** Return the list of neighbours */
     public ArrayList<MainRoom> getNeighbours() {return new ArrayList<>(neighbours);}
+
+
+    public int getID() {return id;}
 }
