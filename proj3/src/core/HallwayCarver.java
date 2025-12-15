@@ -66,15 +66,15 @@ public class HallwayCarver {
 
 
 
-    /** Connecting given rooms with given type */
+    /** Connecting given rooms with given type. If isLocked is true, it will place a locked door at the entry of room b */
     public boolean connect(MainRoom a, MainRoom b, boolean isLocked) {
         ConnectionPlan connectPlan = planConnection(a, b);
         if (connectPlan == null) return false;
 
 
-        System.out.println("CONNECT " + a.getID() + "->" + b.getID()
-                + " floors=" + connectPlan.floors.size()
-                + " doors=" + connectPlan.doors.size());
+//        System.out.println("CONNECT " + a.getID() + "->" + b.getID()
+//                + " floors=" + connectPlan.floors.size()
+//                + " doors=" + connectPlan.doors.size());
         for (Point p : connectPlan.floors) { world[p.x][p.y] = Tileset.FLOOR;}
         for (Point p: connectPlan.walls)  {
             if (TileType.toType(world[p.x][p.y]).isPassable()) continue;
@@ -83,7 +83,7 @@ public class HallwayCarver {
         for (Point p : connectPlan.doors) {
             // If it is not final room's door or starting room's door, it is a door on pathway room, which should not
             // be blocked
-            if (!p.equals(connectPlan.dp.drA) && !p.equals(connectPlan.dp.drB)) {
+            if (!p.equals(connectPlan.dp.drB)) {
                 world[p.x][p.y] = Tileset.FLOOR;
                 continue;
             }
@@ -649,7 +649,7 @@ public class HallwayCarver {
 
     public boolean connectFinalRoom(MainRoom finalRoom, ArrayList<MainRoom> majorRooms) {
         for (int i = FINAL_ROOM_HALLWAY_NUM; i > 0;) {
-            connect(finalRoom, majorRooms.get(random.nextInt(majorRooms.size())), true);
+            connect( majorRooms.get(random.nextInt(majorRooms.size())), finalRoom,true);
             i--;
         }
 
