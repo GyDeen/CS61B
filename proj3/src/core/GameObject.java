@@ -17,14 +17,19 @@ public abstract class GameObject {
 
 
     /** Constructor for object that doesn't move */
-    public GameObject(int x, int y, String imagePath, int imageWidth, int imageHeight) {
+    public GameObject(int x, int y, int imageWidth, int imageHeight, MainRoom belongsTo) {
         position = new Point(x, y);
-        this.imagePath = imagePath;
+        this.imageWidth = imageWidth;
+        this.imageHeight = imageHeight;
+        this.belongsTo = belongsTo;
     }
 
-    public GameObject(Point position, String imagePath, int imageWidth, int imageHeight) {
+    public GameObject(Point position, String imagePath, int imageWidth, int imageHeight, MainRoom belongsTo) {
         this.position = new Point(position);
         this.imagePath = imagePath;
+        this.imageWidth = imageWidth;
+        this.imageHeight = imageHeight;
+        this.belongsTo = belongsTo;
     }
 
 
@@ -33,6 +38,14 @@ public abstract class GameObject {
         position = new Point(x, y);
         this.imageWidth = width;
         this.imageHeight = height;
+    }
+
+    public GameObject(int x, int y, String imagePath, int imageWidth, int imageHeight, MainRoom belongsTo) {
+        position = new Point(x, y);
+        this.imagePath = imagePath;
+        this.imageWidth = imageWidth;
+        this.imageHeight = imageHeight;
+        this.belongsTo = belongsTo;
     }
 
     public Point getPosition() {

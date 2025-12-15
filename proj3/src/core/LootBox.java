@@ -7,12 +7,10 @@ import javax.swing.*;
 
 
 public abstract class LootBox extends GameObject {
-    private MainRoom belongsTo;
 
     /** Loot Box take up 2 x 2 tiles. Therefore, it stores its top-left tile as the position */
     public LootBox(MainRoom room, int x, int y,int width, int height) {
-        super(x, y, width, height);
-        belongsTo = room;
+        super(x, y, width, height, room);
     }
 
 
