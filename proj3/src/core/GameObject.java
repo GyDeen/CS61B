@@ -70,7 +70,7 @@ public abstract class GameObject {
         this.belongsTo = belongsTo;
     }
 
-    public Room getRoom() {
+    public MainRoom getRoom() {
         return belongsTo;
     }
 

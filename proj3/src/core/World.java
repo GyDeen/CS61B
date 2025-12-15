@@ -110,7 +110,7 @@ public class World {
                         attempts = 0;
                     }
                 }
-                if (carver.connectNoLock(vR, u)) {
+                if (carver.connect(vR, u, false)) {
                     connected.add(u);
                     u.addDirectlyConnected(vR);
                     vR.addDirectlyConnected(u);
@@ -140,10 +140,13 @@ public class World {
                 continue;
             }
 
-            if (!carver.connectNoLock(a, b)) {
+            if (!carver.connect(a, b, false)) {
                 carver.connectSimpleL(a, b);
             }
         }
+
+        // Finally, connect the final room with the major rooms graph
+        carver.connectFinalRoom(finalBox.getRoom(), majorRooms);
     }
 
 

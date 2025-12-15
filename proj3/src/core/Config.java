@@ -39,8 +39,6 @@ public class Config {
     public static final int MIN_FILL_ROOM_HEIGHT = 6;
     public static final int MAX_FILL_ROOM_HEIGHT = 20;
 
-    public static final int MIN_SUB_ROOM_WIDTH_FOR_FILL = 3;
-    public static final int MIN_SUB_ROOM_HEIGHT_FOR_FILL = 3;
 
     // Render world setting
     public static final int DOOR_BUFF = 1;
@@ -48,6 +46,7 @@ public class Config {
     public static final int FUTURE_BUFFER = 1;
     public static final int SMALL_ADVANCE = 1;
     public static final int MAX_WALL_IN_A_ROW = 2;
+    public static final int FINAL_ROOM_HALLWAY_NUM = 2;
     public static final int MAX_ATTEMPT_PIVOT = 50;
     public static final int ALLOCATE_FAIL_CAP = 200;
     public static final int PAUSE = 0;

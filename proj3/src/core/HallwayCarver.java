@@ -648,10 +648,8 @@ public class HallwayCarver {
 
 
     public boolean connectFinalRoom(MainRoom finalRoom, ArrayList<MainRoom> majorRooms) {
-        int hallwayNumToFinalRoom = random.nextInt(majorRooms.size() % random.nextInt(majorRooms.size()));
-
-        for (int i = hallwayNumToFinalRoom; i > 0;) {
-            planConnection(finalRoom, majorRooms.get(i));
+        for (int i = FINAL_ROOM_HALLWAY_NUM; i > 0;) {
+            connect(finalRoom, majorRooms.get(random.nextInt(majorRooms.size())), true);
             i--;
         }
 
