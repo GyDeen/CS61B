@@ -135,7 +135,7 @@ public class HallwayCarver {
         ConnectionPlan plan = new ConnectionPlan(a, b, pickDoorPairByEdges(a, b));
 
         // Randomly add more pivot for long distance hallway
-        // if (HallwayCarver.distancePoint(drA.x, drA.y, drB.x, drB.y) > 30 && random.nextBoolean()) pivotCount += 2;
+         if (Math.pow(drA.x, 2) + Math.pow(drA.y, 2) - (Math.pow(drB.x, 2) + Math.pow(drB.y, 2)) > 30 && random.nextBoolean()) pivotCount += 2;
 
 //        System.out.println("drA: " + drA.toString());
 //        System.out.println("drB: " + drB.toString());
@@ -143,7 +143,7 @@ public class HallwayCarver {
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
         while (pivotCount > 0) {
-            Point pivot = generatePivot(currentPos, direc, drB, pivotCount);
+            Point pivot = generatePivot(currentPos, direc, drB, pivotCount, b);
 
             // Current position is the only possible allocation for next pivot and it is the last pivot
             // Just turn towards the door
@@ -366,9 +366,15 @@ public class HallwayCarver {
     }
 
 
+    /* Return true if given point doesn't belong to destination room*/
+    private boolean isValidPivot(Point p, MainRoom destinationRoom) {
+        return !destinationRoom.isInRoom(p.x, p.y);
+    }
 
-    /* It will generate a pivot based on given direction, current position, and destination */
-    private Point generatePivot(Point current, Direction direction, Point destination, int pivotCount) {
+
+    /* It will generate a pivot based on given direction, current position, and destination. The pivot point cannot
+    * inside the destination room since it will open another door accidentally. */
+    private Point generatePivot(Point current, Direction direction, Point destination, int pivotCount, MainRoom destinationRoom) {
         if (pivotCount <= 0) throw new IllegalArgumentException("Invalid pivot count");
 
         final int minX = 1, maxX = world.length - 2;
@@ -394,7 +400,14 @@ public class HallwayCarver {
                     }
                     if (yStart > yEnd) return new Point(current.x, Math.min(current.y + 1, maxY));
                     int py = (yStart == yEnd) ? yStart : random.nextInt(yStart, yEnd + 1);
-                    return new Point(current.x, py);
+                    Point p = new Point(current.x, py);
+                    // If current generated pivot is inside the destination point, it means it will go inwards the destination
+                    // room, which will open another door except the given door
+                    if (!isValidPivot(p, destinationRoom)) {
+                        int safeY = Math.min(current.y + 1, maxY);
+                        return new Point(current.x, safeY);
+                    }
+                    return p;
                 }
             }
 
@@ -417,7 +430,11 @@ public class HallwayCarver {
                     if (yEnd > yStart) return new Point(current.x, Math.max(current.y - 1, minY));
                     int py = (yEnd == yStart) ? yStart : random.nextInt(yEnd, yStart + 1);
                     if (py >= current.y) py = current.y - 1;    // ensure we actually move down
-                    return new Point(current.x, Math.max(py, minY));
+                    Point p = new Point(current.x, Math.max(py, minY));
+                    if (!isValidPivot(p, destinationRoom)) {
+                        int safeY = Math.max(current.y - 1, minY);
+                    }
+                    return p;
                 }
             }
 
@@ -438,7 +455,12 @@ public class HallwayCarver {
                     }
                     if (xStart > xEnd) return new Point(Math.min(current.x + 1, maxX), current.y);
                     int px = (xStart == xEnd) ? xStart : random.nextInt(xStart, xEnd + 1);
-                    return new Point(px, current.y);
+                    Point p = new Point(px, current.y);
+                    if (!isValidPivot(p, destinationRoom)) {
+                        int safeX = Math.min(current.x + 1, maxX);
+                        return new Point(safeX, current.y);
+                    }
+                    return p;
                 }
             }
 
@@ -461,7 +483,12 @@ public class HallwayCarver {
                     if (xEnd > xStart) return new Point(Math.max(current.x - 1, minX), current.y);
                     int px = (xEnd == xStart) ? xStart : random.nextInt(xEnd, xStart + 1);
                     if (px >= current.x) px = current.x - 1;
-                    return new Point(Math.max(px, minX), current.y);
+                    Point p = new Point(Math.max(px, minX), current.y);
+                    if (!isValidPivot(p, destinationRoom)) {
+                        int safeX = Math.max(current.x - 1, minX);
+                        return new Point(safeX, current.y);
+                    }
+                    return p;
                 }
             }
 
