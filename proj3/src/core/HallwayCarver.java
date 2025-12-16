@@ -14,8 +14,8 @@ import static core.Config.*;
 public class HallwayCarver {
 
     private static final class DoorPair {
-        final Point drA, drB;
-        final Direction outA, outB;
+        private final Point drA, drB;
+        private final Direction outA, outB;
         DoorPair(Point a, Point b, Direction da, Direction db) {
             drA = a; drB = b; outA = da; outB = db;
         }
@@ -162,7 +162,7 @@ public class HallwayCarver {
 
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor)) {
+            if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor, b)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return null;
                 continue;
             }
@@ -172,7 +172,7 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false)) return null;
+        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false, b)) return null;
 
         ArrayList<WallPoint> walls = collectWalls(plan.floors, plan.doors);
         if (walls == null) return null;
@@ -552,7 +552,7 @@ public class HallwayCarver {
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
      */
-    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor) {
+    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor, MainRoom destination) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot: " + nextPivot.toString() + "with current Position: " + currentPos.toString());
         }
@@ -597,6 +597,7 @@ public class HallwayCarver {
                 stageFloors.add(new Point(nx, ny));
                 wallRun = 0;
             } else {
+                if (destination.isInRoom(nx, ny)) return false;
                 stageDoors.add(new Point(nx, ny));
                 if (++wallRun > MAX_WALL_IN_A_ROW) return false;
             }
@@ -645,13 +646,13 @@ public class HallwayCarver {
 
         // straight case
         if (drA.x == drB.x || drA.y == drB.y) {
-            if (!allocateHallway(drA, drB, floors, doors, true)) return false;
+            if (!allocateHallway(drA, drB, floors, doors, true, b)) return false;
         } else {
             Point p1 = new Point(drB.x, drA.y);
-            if (!(allocateHallway(drA, p1, floors, doors, true) && allocateHallway(p1, drB, floors, doors, false))) {
+            if (!(allocateHallway(drA, p1, floors, doors, true, b) && allocateHallway(p1, drB, floors, doors, false, b))) {
                 floors.clear(); doors.clear();
                 Point p2 = new Point(drA.x, drB.y);
-                if (!(allocateHallway(drA, p2, floors, doors, true) && allocateHallway(p2, drB, floors, doors, false))) {
+                if (!(allocateHallway(drA, p2, floors, doors, true, b) && allocateHallway(p2, drB, floors, doors, false, b))) {
                     return false;
                 }
             }
