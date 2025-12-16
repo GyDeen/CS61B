@@ -88,7 +88,7 @@ public class World {
     /* Generate hallway */
     private void generateHallway() {
         int attempts = 0;
-        carver = new HallwayCarver(world, random);
+        carver = new HallwayCarver(world, random, finalBox.getRoom());
         ArrayList<MainRoom> connected = new ArrayList<>();
         ArrayList<MainRoom> unconnected = new ArrayList<>(majorRooms);
 
@@ -101,7 +101,7 @@ public class World {
             for (MainRoom vR : connected) {
                 // If we cannot connect with more turn, we will just connect two room using straight forward
                 if (attempts >= ALLOCATE_FAIL_CAP) {
-                    if (carver.connectSimpleL(vR, u)) {
+                    if (carver.connectSimpleL(vR, u, false)) {
                         connected.add(u);
                         u.addDirectlyConnected(vR);
                         vR.addDirectlyConnected(u);
@@ -145,7 +145,7 @@ public class World {
             }
 
             if (!carver.connect(a, b, false)) {
-                carver.connectSimpleL(a, b);
+                carver.connectSimpleL(a, b, true);
             }
         }
 

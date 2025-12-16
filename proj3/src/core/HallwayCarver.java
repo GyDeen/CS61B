@@ -47,14 +47,17 @@ public class HallwayCarver {
 
     private static TETile[][] world;
     Random random;
+    private static MainRoom finalBoxRoom;
 
-    public HallwayCarver(TETile[][] world, Random rand) {
+    public HallwayCarver(TETile[][] world, Random rand, MainRoom finalBoxRoom) {
         random = rand;
 
         HallwayCarver.world = new TETile[world.length][];
         for (int i = 0; i < world.length; i++) {
             HallwayCarver.world[i] = Arrays.copyOf(world[i], world[i].length);
         }
+
+        this.finalBoxRoom = finalBoxRoom;
     }
 
 
@@ -68,7 +71,7 @@ public class HallwayCarver {
 
     /** Connecting given rooms with given type. If isLocked is true, it will place a locked door at the entry of room b */
     public boolean connect(MainRoom a, MainRoom b, boolean isLocked) {
-        ConnectionPlan connectPlan = planConnection(a, b);
+        ConnectionPlan connectPlan = planConnection(a, b, isLocked);
         if (connectPlan == null) return false;
 
 
@@ -96,12 +99,12 @@ public class HallwayCarver {
     }
 
     /* Connect two room without given Door*/
-    private ConnectionPlan planConnection(MainRoom a, MainRoom b) {
-        return planConnection(a, null, b, null);
+    private ConnectionPlan planConnection(MainRoom a, MainRoom b, boolean isFinalRoomConnection) {
+        return planConnection(a, null, b, null, isFinalRoomConnection);
     }
 
     /* Connect two room with given Door */
-    private ConnectionPlan planConnection(MainRoom a, Point doorA, MainRoom b, Point doorB) {
+    private ConnectionPlan planConnection(MainRoom a, Point doorA, MainRoom b, Point doorB, boolean isFinalRoomConnection) {
         Direction direc = null;
         Point drA, drB;
         if (doorA == null && doorB == null) {
@@ -162,7 +165,7 @@ public class HallwayCarver {
 
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
-            if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor, b)) {
+            if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor, b, isFinalRoomConnection)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) return null;
                 continue;
             }
@@ -172,7 +175,7 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false, b)) return null;
+        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false, b, isFinalRoomConnection)) return null;
 
         ArrayList<WallPoint> walls = collectWalls(plan.floors, plan.doors);
         if (walls == null) return null;
@@ -552,7 +555,7 @@ public class HallwayCarver {
      * - PASSABLE: walk over
      * - WALL: stage door, keep counting; if run exceeds limit return false.
      */
-    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor, MainRoom destination) {
+    private boolean allocateHallway(Point currentPos, Point nextPivot, ArrayList<Point> floors, ArrayList<Point> doors, boolean stageStartDoor, MainRoom destination, boolean connectFinalRoom) {
         if (!(currentPos.x == nextPivot.x || currentPos.y == nextPivot.y)) {
             throw new IllegalArgumentException("Invalid pivot: " + nextPivot.toString() + "with current Position: " + currentPos.toString());
         }
@@ -580,6 +583,7 @@ public class HallwayCarver {
         while (x != nextPivot.x || y != nextPivot.y) {
             int nx = x + dx, ny = y + dy;
             if (!inBounds(nx, ny)) return false;
+            if (!connectFinalRoom) if (finalBoxRoom.isInRoom(nx, ny)) return false;
 
             // Treat already-staged cells as passable while planning
             boolean stagedPassable =
@@ -638,7 +642,7 @@ public class HallwayCarver {
 
 
     /** Simple connection for a constant failing connection */
-    public boolean connectSimpleL(MainRoom a, MainRoom b) {
+    public boolean connectSimpleL(MainRoom a, MainRoom b, boolean connectFinalRoom) {
         DoorPair dp = pickDoorPairByEdges(a, b);
         Point drA = dp.drA, drB = dp.drB;
 
@@ -646,13 +650,13 @@ public class HallwayCarver {
 
         // straight case
         if (drA.x == drB.x || drA.y == drB.y) {
-            if (!allocateHallway(drA, drB, floors, doors, true, b)) return false;
+            if (!allocateHallway(drA, drB, floors, doors, true, b, connectFinalRoom)) return false;
         } else {
             Point p1 = new Point(drB.x, drA.y);
-            if (!(allocateHallway(drA, p1, floors, doors, true, b) && allocateHallway(p1, drB, floors, doors, false, b))) {
+            if (!(allocateHallway(drA, p1, floors, doors, true, b, connectFinalRoom) && allocateHallway(p1, drB, floors, doors, false, b, connectFinalRoom))) {
                 floors.clear(); doors.clear();
                 Point p2 = new Point(drA.x, drB.y);
-                if (!(allocateHallway(drA, p2, floors, doors, true, b) && allocateHallway(p2, drB, floors, doors, false, b))) {
+                if (!(allocateHallway(drA, p2, floors, doors, true, b, connectFinalRoom) && allocateHallway(p2, drB, floors, doors, false, b, connectFinalRoom))) {
                     return false;
                 }
             }
