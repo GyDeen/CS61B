@@ -681,8 +681,7 @@ public class HallwayCarver {
 
     public boolean connectFinalRoom(MainRoom finalRoom, ArrayList<MainRoom> majorRooms) {
         for (int i = FINAL_ROOM_HALLWAY_NUM; i > 0;) {
-            connect( majorRooms.get(random.nextInt(majorRooms.size())), finalRoom,true);
-            i--;
+            if (connect(majorRooms.get(random.nextInt(majorRooms.size())), finalRoom,true)) i--;
         }
 
         return true;
