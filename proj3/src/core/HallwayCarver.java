@@ -72,9 +72,12 @@ public class HallwayCarver {
     /** Connecting given rooms with given type. If isLocked is true, it will place a locked door at the entry of room b */
     public boolean connect(MainRoom a, MainRoom b, boolean isLocked) {
         ConnectionPlan connectPlan = planConnection(a, b, isLocked);
-        if (connectPlan == null) return false;
+        if (connectPlan == null) {
+            System.out.println("Failed at connecting room" + a.getLocation() + "and room" + b.getLocation());
+            return false;
+        }
 
-
+        if (isLocked) System.out.println("The final room door at " + connectPlan.dp.drB);
 //        System.out.println("CONNECT " + a.getID() + "->" + b.getID()
 //                + " floors=" + connectPlan.floors.size()
 //                + " doors=" + connectPlan.doors.size());
@@ -91,8 +94,8 @@ public class HallwayCarver {
                 continue;
             }
 
-            if (isLocked) world[p.x][p.y] = Tileset.LOCKED_DOOR;
-            else world[p.x][p.y] = Tileset.UNLOCKED_DOOR;
+            if (isLocked) {world[p.x][p.y] = Tileset.LOCKED_DOOR; System.out.println("The final locked door at @" + p.x + ", " + p.y);}
+            else world[p.x][p.y] = Tileset.FLOOR;
         }
 
         return true;
@@ -106,15 +109,13 @@ public class HallwayCarver {
     /* Connect two room with given Door */
     private ConnectionPlan planConnection(MainRoom a, Point doorA, MainRoom b, Point doorB, boolean isFinalRoomConnection) {
         Direction direc = null;
-        Point drA, drB;
-        if (doorA == null && doorB == null) {
-            DoorPair dp = pickDoorPairByEdges(a, b);
-            drA = dp.drA; drB = dp.drB;
-            direc = dp.outA;
-        } else {
-            drA = doorA == null ? pickDoorOnPerimeter(a, b) : doorA;
-            drB = doorB == null ? pickDoorOnPerimeter(b, a) : doorB;
-        }
+        Point drA = doorA, drB = doorB;
+        DoorPair dp  = (doorA == null && doorB == null)
+                ? pickDoorPairByEdges(a, b)
+                : new DoorPair(drA, drB, direc, null);
+
+
+        drA = dp.drA; drB = dp.drB;
 
         int t = a.getThicknessOfWall();
         int off = Math.max(0, t - 1);
@@ -135,10 +136,13 @@ public class HallwayCarver {
         else pivotCount = 2;
 
 
-        ConnectionPlan plan = new ConnectionPlan(a, b, pickDoorPairByEdges(a, b));
+        ConnectionPlan plan = new ConnectionPlan(a, b, dp);
 
         // Randomly add more pivot for long distance hallway
-         if (Math.pow(drA.x, 2) + Math.pow(drA.y, 2) - (Math.pow(drB.x, 2) + Math.pow(drB.y, 2)) > 30 && random.nextBoolean()) pivotCount += 2;
+        int dx = drA.x - drB.x;
+        int dy = drA.y - drB.y;
+        int dist2 = dx*dx + dy*dy;
+        if (dist2 > 30*30 && random.nextBoolean()) pivotCount += 2;
 
 //        System.out.println("drA: " + drA.toString());
 //        System.out.println("drB: " + drB.toString());
@@ -158,7 +162,10 @@ public class HallwayCarver {
 
             // Not the last pivot and has no valid pivot allocation, fail fast
             if (pivot.equals(currentPos)) {
-                if (++attempts > MAX_ATTEMPT_PIVOT) return null;
+                if (++attempts > MAX_ATTEMPT_PIVOT) {
+                    System.out.println("Failed due to exceed attempts when placing pivot");
+                    return null;
+                }
                 continue;
             }
 
@@ -166,7 +173,10 @@ public class HallwayCarver {
             boolean stageStartDoor = currentPos.equals(drA);
             // Try to allocate a pivot more than 50 times, this connection failed
             if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor, b, isFinalRoomConnection)) {
-                if (++attempts > MAX_ATTEMPT_PIVOT) return null;
+                if (++attempts > MAX_ATTEMPT_PIVOT) {
+                    System.out.println("Failed due to exceed attempts when placing pivot");
+                    return null;
+                }
                 continue;
             }
 
@@ -175,13 +185,31 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false, b, isFinalRoomConnection)) return null;
+        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false, b, isFinalRoomConnection)) {
+            System.out.println("Failed due to unable to allocate tiles");
+            return null;
+        }
 
         ArrayList<WallPoint> walls = collectWalls(plan.floors, plan.doors);
-        if (walls == null) return null;
+        if (walls == null) {
+            System.out.println("Failed due to unable to collect walls for connection");
+            return null;
+        }
 
         plan.walls = walls;
         return plan;
+    }
+
+
+    /** Generate a preDoor for destination point to avoid early entry to the destination room, and the wrong axis of the
+     * destination room that leads to invalid hallway allocation */
+    private Point step(Point p, Direction d) {
+        return switch (d) {
+            case LEFT -> new Point(p.x - 1, p.y);
+            case RIGHT -> new Point(p.x + 1, p.y);
+            case UP -> new Point(p.x, p.y + 1);
+            case DOWN -> new Point(p.x, p.y - 1);
+        };
     }
 
 
@@ -323,9 +351,10 @@ public class HallwayCarver {
             int bLx = B.getEdgeOn(yB, Direction.LEFT),  bRx = B.getEdgeOn(yB, Direction.RIGHT);
 
             Direction outA, outB;
+            flag
             if (aRx <= bLx) { outA = Direction.RIGHT; outB = Direction.LEFT; }
             else if (bRx <= aLx) { outA = Direction.LEFT; outB = Direction.RIGHT; }
-            else { // projections overlap at these rows (possible with notches) → tie-break by centers
+            else { // projections overlap at these rows (possible with notches)  tie-break by centers
                 outA = (A.getLocation().x <= B.getLocation().x) ? Direction.RIGHT : Direction.LEFT;
                 outB = (outA == Direction.RIGHT) ? Direction.LEFT : Direction.RIGHT;
             }
