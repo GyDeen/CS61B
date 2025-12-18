@@ -201,6 +201,49 @@ public class HallwayCarver {
     }
 
 
+    /* Based on direction and axis alignment to compute the minimum pivot count */
+    private int minPivots(Point drA, Direction outA, Point preDoorB, Direction outB) {
+        boolean startH = isHorizontal(outA);
+        boolean endH = isHorizontal(outB);
+
+        // 0 pivots: straight shot from drA to preDoorB, AND direction matches outA
+        if (drA.x == preDoorB.x && !startH) {
+            // vertical straight
+            if ((outA == Direction.UP && preDoorB.y > drA.y) ||
+                    (outA == Direction.DOWN && preDoorB.y < drA.y)) {
+                return 0;
+            }
+        }
+        if (drA.y == preDoorB.y && startH) {
+            // horizontal straight
+            if ((outA == Direction.RIGHT && preDoorB.x > drA.x) ||
+                    (outA == Direction.LEFT  && preDoorB.x < drA.x)) {
+                return 0;
+            }
+        }
+
+        // 1 pivot possible only if startAxis != endAxis and the L-pivot respects the outward constraint
+        if (startH != endH) {
+            Point pivot = startH
+                    ? new Point(preDoorB.x, drA.y)   // horiz then vert
+                    : new Point(drA.x, preDoorB.y);  // vert then horiz
+
+            // outward constraint: pivot must be reachable by moving along outA from drA
+            boolean outwardOk = switch (outA) {
+                case RIGHT -> pivot.x > drA.x && pivot.y == drA.y;
+                case LEFT -> pivot.x < drA.x && pivot.y == drA.y;
+                case UP -> pivot.y > drA.y && pivot.x == drA.x;
+                case DOWN -> pivot.y < drA.y && pivot.x == drA.x;
+            };
+
+            if (outwardOk) return 1;
+        }
+
+        // otherwise need 2 pivots minimum
+        return 2;
+    }
+
+
     /** Generate a preDoor for destination point to avoid early entry to the destination room, and the wrong axis of the
      * destination room that leads to invalid hallway allocation */
     private Point step(Point p, Direction d) {
