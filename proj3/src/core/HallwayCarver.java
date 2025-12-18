@@ -116,6 +116,8 @@ public class HallwayCarver {
 
 
         drA = dp.drA; drB = dp.drB;
+        Direction outA = dp.outA, outB = dp.outB;
+        Point preDoorB = step(drB, outB);
 
         int t = a.getThicknessOfWall();
         int off = Math.max(0, t - 1);
@@ -128,21 +130,10 @@ public class HallwayCarver {
         else if (drA.y == a.getEdgeOn(drA.x, Direction.UP) - off) direc = Direction.UP;
         else if (drA.y == a.getEdgeOn(drA.x, Direction.DOWN) + off) direc = Direction.DOWN;
 
-        // Find how many pivot we need. If it has no alignment for both doors, it needs 2. If it has either x or y align,
-        // it needs 1. If both align, it needs 0
-        int pivotCount;
-        if (drA.x == drB.x && drA.y == drB.y) pivotCount = 0;
-        else if (drA.x == drB.x || drA.y == drB.y) pivotCount = 1;
-        else pivotCount = 2;
-
+        int pivotCount = minPivots(drA, outA, preDoorB, outB);
+        if (random.nextBoolean() && manhattan(drA, preDoorB) > 30) pivotCount += 2;
 
         ConnectionPlan plan = new ConnectionPlan(a, b, dp);
-
-        // Randomly add more pivot for long distance hallway
-        int dx = drA.x - drB.x;
-        int dy = drA.y - drB.y;
-        int dist2 = dx*dx + dy*dy;
-        if (dist2 > 30*30 && random.nextBoolean()) pivotCount += 2;
 
 //        System.out.println("drA: " + drA.toString());
 //        System.out.println("drB: " + drB.toString());
@@ -150,13 +141,13 @@ public class HallwayCarver {
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
         while (pivotCount > 0) {
-            Point pivot = generatePivot(currentPos, direc, drB, pivotCount, b);
+            Point pivot = generatePivot(currentPos, direc, preDoorB, pivotCount, b);
 
             // Current position is the only possible allocation for next pivot and it is the last pivot
             // Just turn towards the door
             if (pivotCount == 1 && pivot.equals(currentPos)) {
                 pivotCount--;
-                direc = nextDirection(direc, currentPos, drB, pivotCount);
+                direc = nextDirection(direc, currentPos, preDoorB, pivotCount);
                 continue;
             }
 
@@ -185,8 +176,13 @@ public class HallwayCarver {
             direc = nextDirection(direc, currentPos, drB, pivotCount);
         }
 
-        if (!allocateHallway(currentPos, drB, plan.floors, plan.doors, false, b, isFinalRoomConnection)) {
-            System.out.println("Failed due to unable to allocate tiles");
+        if (!allocateHallway(currentPos, preDoorB, plan.floors, plan.doors, false, b, isFinalRoomConnection)) {
+            System.out.println("Failed due to unable to reach the preDoorB");
+            return null;
+        }
+
+        if (!allocateHallway(preDoorB, drB, plan.floors, plan.doors, false, b, false)) {
+            System.out.println("Failed due to unable to allocate final door");
             return null;
         }
 
@@ -255,6 +251,11 @@ public class HallwayCarver {
         };
     }
 
+
+    /** Manhattan distance formula */
+    private int manhattan(Point a, Point b) {
+        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
 
     /* Generate all the wall tiles that we need to allocate */
     private ArrayList<WallPoint> collectWalls(ArrayList<Point> floors, ArrayList<Point> doors) {
@@ -394,7 +395,6 @@ public class HallwayCarver {
             int bLx = B.getEdgeOn(yB, Direction.LEFT),  bRx = B.getEdgeOn(yB, Direction.RIGHT);
 
             Direction outA, outB;
-            flag
             if (aRx <= bLx) { outA = Direction.RIGHT; outB = Direction.LEFT; }
             else if (bRx <= aLx) { outA = Direction.LEFT; outB = Direction.RIGHT; }
             else { // projections overlap at these rows (possible with notches)  tie-break by centers
