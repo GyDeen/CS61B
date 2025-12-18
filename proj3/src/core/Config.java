@@ -42,11 +42,11 @@ public class Config {
 
     // Render world setting
     public static final int DOOR_BUFF = 1;
-    public static final int MAX_OVERSHOOT = 5;
+    public static final int MAX_OVERSHOOT = 0;
     public static final int FUTURE_BUFFER = 1;
     public static final int SMALL_ADVANCE = 1;
     public static final int MAX_WALL_IN_A_ROW = 2;
-    public static final int FINAL_ROOM_HALLWAY_NUM = 2;
+    public static final int FINAL_ROOM_HALLWAY_NUM = 1;
     public static final int MAX_ATTEMPT_PIVOT = 50;
     public static final int ALLOCATE_FAIL_CAP = 200;
     public static final int PAUSE = 0;
