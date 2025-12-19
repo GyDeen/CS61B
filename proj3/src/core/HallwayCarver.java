@@ -73,14 +73,10 @@ public class HallwayCarver {
     public boolean connect(MainRoom a, MainRoom b, boolean isLocked) {
         ConnectionPlan connectPlan = planConnection(a, b, isLocked);
         if (connectPlan == null) {
-            System.out.println("Failed at connecting room" + a.getLocation() + "and room" + b.getLocation());
+            // System.out.println("Failed at connecting room" + a.getLocation() + "and room" + b.getLocation());
             return false;
         }
 
-        if (isLocked) System.out.println("The final room door at " + connectPlan.dp.drB);
-//        System.out.println("CONNECT " + a.getID() + "->" + b.getID()
-//                + " floors=" + connectPlan.floors.size()
-//                + " doors=" + connectPlan.doors.size());
         for (Point p : connectPlan.floors) { world[p.x][p.y] = Tileset.FLOOR;}
         for (Point p: connectPlan.walls)  {
             if (TileType.toType(world[p.x][p.y]).isPassable()) continue;
@@ -94,9 +90,11 @@ public class HallwayCarver {
                 continue;
             }
 
-            if (isLocked) {world[p.x][p.y] = Tileset.LOCKED_DOOR; System.out.println("The final locked door at @" + p.x + ", " + p.y);}
+            if (isLocked) world[p.x][p.y] = Tileset.LOCKED_DOOR;
             else world[p.x][p.y] = Tileset.FLOOR;
         }
+
+
 
         return true;
     }
@@ -119,6 +117,12 @@ public class HallwayCarver {
         Direction outA = dp.outA, outB = dp.outB;
         Point preDoorB = step(drB, outB);
 
+        // Predoor is out of bound
+        if (!inBounds(preDoorB.x, preDoorB.y)) {
+            System.out.println("Invalid preDoorB out of bounds: drB=" + drB + " outB=" + outB + " pre=" + preDoorB);
+            return null;
+        }
+
         int t = a.getThicknessOfWall();
         int off = Math.max(0, t - 1);
 
@@ -135,11 +139,9 @@ public class HallwayCarver {
 
         ConnectionPlan plan = new ConnectionPlan(a, b, dp);
 
-//        System.out.println("drA: " + drA.toString());
-//        System.out.println("drB: " + drB.toString());
-
         Point currentPos = new Point(drA.x, drA.y);
         int attempts = 0;
+        // Connect with predoor first to avoid early step into destination room
         while (pivotCount > 0) {
             Point pivot = generatePivot(currentPos, direc, preDoorB, pivotCount, b);
 
@@ -154,7 +156,7 @@ public class HallwayCarver {
             // Not the last pivot and has no valid pivot allocation, fail fast
             if (pivot.equals(currentPos)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) {
-                    System.out.println("Failed due to exceed attempts when placing pivot");
+                   //  System.out.println("Failed due to exceed attempts when placing pivot");
                     return null;
                 }
                 continue;
@@ -165,7 +167,7 @@ public class HallwayCarver {
             // Try to allocate a pivot more than 50 times, this connection failed
             if (!allocateHallway(currentPos, pivot, plan.floors, plan.doors, stageStartDoor, b, isFinalRoomConnection)) {
                 if (++attempts > MAX_ATTEMPT_PIVOT) {
-                    System.out.println("Failed due to exceed attempts when placing pivot");
+                    // System.out.println("Failed due to exceed attempts when placing pivot");
                     return null;
                 }
                 continue;
@@ -173,22 +175,26 @@ public class HallwayCarver {
 
             pivotCount--;
             currentPos = pivot;
-            direc = nextDirection(direc, currentPos, drB, pivotCount);
+            direc = nextDirection(direc, currentPos, preDoorB, pivotCount);
         }
 
+        // Allocating hallway connect with pre door
         if (!allocateHallway(currentPos, preDoorB, plan.floors, plan.doors, false, b, isFinalRoomConnection)) {
-            System.out.println("Failed due to unable to reach the preDoorB");
+            // System.out.println("Failed due to unable to reach the preDoorB");
             return null;
         }
 
+        // Then allocate floors and doors from preDoor to destination point
         if (!allocateHallway(preDoorB, drB, plan.floors, plan.doors, false, b, false)) {
-            System.out.println("Failed due to unable to allocate final door");
+            // System.out.println("Failed due to unable to allocate final door");
             return null;
         }
 
+        plan.doors.add(dp.drB);
+        plan.doors.add(dp.drA);
         ArrayList<WallPoint> walls = collectWalls(plan.floors, plan.doors);
         if (walls == null) {
-            System.out.println("Failed due to unable to collect walls for connection");
+            //System.out.println("Failed due to unable to collect walls for connection");
             return null;
         }
 
@@ -368,7 +374,7 @@ public class HallwayCarver {
     private DoorPair pickDoorPairByEdges(MainRoom A, MainRoom B) {
         // legal (non-corner) bands for door coordinates
         int aXL = A.getLeft()+1, aXR = A.getRight()-1;
-        int aYB = A.getBottom()+1, aYT = A.getTop()-1;
+        int aYB = A.getBottom()+1, aYT = A. getTop()-1;
         int bXL = B.getLeft()+1, bXR = B.getRight()-1;
         int bYB = B.getBottom()+1, bYT = B.getTop()-1;
 
@@ -387,8 +393,10 @@ public class HallwayCarver {
         if (horizontal) {
             // pick independent rows near the middle, clamped to each room
             int yMid = (A.getLocation().y + B.getLocation().y) / 2;
+            // Avoid always picking the same door
+            yMid += random.nextInt(-2, 3);
             int yA = clamp(yMid, aYB + A.getThicknessOfWall(), aYT - A.getThicknessOfWall());
-            int yB = clamp(yMid, bYB + A.getThicknessOfWall(), bYT - A.getThicknessOfWall());
+            int yB = clamp(yMid, bYB + B.getThicknessOfWall(), bYT - B.getThicknessOfWall());
 
             // edge intervals at those rows
             int aLx = A.getEdgeOn(yA, Direction.LEFT),  aRx = A.getEdgeOn(yA, Direction.RIGHT);
@@ -414,8 +422,10 @@ public class HallwayCarver {
         } else {
             // vertical: pick independent columns near the middle, clamped to each room
             int xMid = (A.getLocation().x + B.getLocation().x) / 2;
+            // Avoid always picking the same door
+            xMid += random.nextInt(-2, 3);
             int xA = clamp(xMid, aXL + A.getThicknessOfWall(), aXR - A.getThicknessOfWall());
-            int xB = clamp(xMid, bXL + A.getThicknessOfWall(), bXR - A.getThicknessOfWall());
+            int xB = clamp(xMid, bXL + B.getThicknessOfWall(), bXR - B.getThicknessOfWall());
 
             // edge intervals at those columns
             int aBy = A.getEdgeOn(xA, Direction.DOWN), aUy = A.getEdgeOn(xA, Direction.UP);
@@ -436,7 +446,10 @@ public class HallwayCarver {
                     ? B.getEdgeOn(xB, Direction.UP)   - offB
                     : B.getEdgeOn(xB, Direction.DOWN) + offB;
 
-            return new DoorPair(new Point(xA, ay), new Point(xB, by), outA, outB);
+            Point drA = new Point(xA, ay), drB = new Point(xB, by);
+            if (!A.isInRoom(drA.x, drA.y)) return null;
+            if (!B.isInRoom(drB.x, drB.y)) return null;
+            return new DoorPair(drA, drB, outA, outB);
         }
     }
 
@@ -655,7 +668,7 @@ public class HallwayCarver {
         while (x != nextPivot.x || y != nextPivot.y) {
             int nx = x + dx, ny = y + dy;
             if (!inBounds(nx, ny)) return false;
-            if (!connectFinalRoom) if (finalBoxRoom.isInRoom(nx, ny)) return false;
+            if (connectFinalRoom) if (finalBoxRoom.isInRoom(nx, ny)) return false;
 
             // Treat already-staged cells as passable while planning
             boolean stagedPassable =
@@ -673,7 +686,7 @@ public class HallwayCarver {
                 stageFloors.add(new Point(nx, ny));
                 wallRun = 0;
             } else {
-                if (destination.isInRoom(nx, ny)) return false;
+                if (destination.isInRoom(nx, ny) && (nx != nextPivot.x || ny != nextPivot.y)) return false;
                 stageDoors.add(new Point(nx, ny));
                 if (++wallRun > MAX_WALL_IN_A_ROW) return false;
             }
@@ -692,6 +705,7 @@ public class HallwayCarver {
         // Only add to input floors or doors when it is a valid pivot
         floors.addAll(stageFloors);
         doors.addAll(stageDoors);
+        doors.add(nextPivot);
         return true;
     }
 
@@ -716,6 +730,7 @@ public class HallwayCarver {
     /** Simple connection for a constant failing connection */
     public boolean connectSimpleL(MainRoom a, MainRoom b, boolean connectFinalRoom) {
         DoorPair dp = pickDoorPairByEdges(a, b);
+        if (dp == null) dp = pickDoorPairByEdges(a, b);
         Point drA = dp.drA, drB = dp.drB;
 
         ArrayList<Point> floors = new ArrayList<>(), doors = new ArrayList<>();
