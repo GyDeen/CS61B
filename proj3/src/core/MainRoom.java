@@ -61,8 +61,8 @@ public class MainRoom extends Room {
         int endY = startY + getHeight();
         int t = getThicknessOfWall();
 
-        if (x >= startX + t && x < endX - t
-                && y >= startY + t && y < endY - t) {
+        if (x >= startX && x < endX
+                && y >= startY && y < endY) {
             return true;
         }
 
@@ -74,8 +74,8 @@ public class MainRoom extends Room {
                 int subTop = subBottom + subRoom.getHeight();
                 int subThicknessOfWall = subRoom.getThicknessOfWall();
 
-                if (x >= subLeft + subThicknessOfWall && x < subRight - subThicknessOfWall
-                        && y >= subBottom + subThicknessOfWall && y < subTop - subThicknessOfWall) {
+                if (x >= subLeft && x < subRight
+                        && y >= subBottom && y < subTop) {
                     return true;
                 }
             }
