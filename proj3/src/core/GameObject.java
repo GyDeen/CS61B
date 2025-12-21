@@ -107,10 +107,10 @@ public abstract class GameObject {
         int maxY = room.getTop();
 
         for (SubRoom s : room.getSubRooms()) {
-            minX = Math.min(minX, s.getLeft());
-            maxX = Math.max(maxX, s.getRight());
-            minY = Math.min(minY, s.getBottom());
-            maxY = Math.max(maxY, s.getTop());
+            minX = Math.min(minX, s.getLeft() + 1);
+            maxX = Math.max(maxX, s.getRight() - 1);
+            minY = Math.min(minY, s.getBottom() + 1);
+            maxY = Math.max(maxY, s.getTop() - 1);
         }
 
         for (int i = 0; i < maxAttempt; i++) {

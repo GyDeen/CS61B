@@ -37,9 +37,11 @@ public class World {
     int currentRoomID = 0;
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
+    private ArrayList<MysteryBox>  mysteryBoxes = new ArrayList<>();
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
+
 
 
     /** Using the default seed to generate the world */
@@ -230,6 +232,16 @@ public class World {
     }
 
 
+    private void generateMysteryBoxes() {
+        int mysteryBoxNum = majorRooms.size() * 4 / 3;
+
+        while (mysteryBoxes.size() < mysteryBoxNum) {
+            MainRoom belongsTo = majorRooms.get(random.nextInt(majorRooms.size()));
+            MysteryBox box = MysteryBox.generateMysteryBox(belongsTo, world, random);
+            mysteryBoxes.add(box);
+        }
+    }
+
     private void drawTimer(int remainingSeconds) {
         StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
@@ -267,6 +279,9 @@ public class World {
 
             player.update(elapsedTimeMs, world);
             player.drawImage();
+            for (MysteryBox box : mysteryBoxes) {
+                box.update(this);
+            }
             setting.drawSetting();
             updateTimer();
             UI.drawUIBackground();
@@ -303,6 +318,7 @@ public class World {
         }
 
         initialPlayerAndFinalBox();
+        generateMysteryBoxes();
 
         generateHallway();
 
@@ -323,8 +339,13 @@ public class World {
     public void playerWin() {gameResult = WIN;}
 
 
+    public PacMan getPlayer() {return player;}
+
+
     /** Return the elapsed time for the game */
     public long getElapsedTimeMs() {return elapsedTimeMs;}
+
+
 }
 
 

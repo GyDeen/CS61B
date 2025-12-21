@@ -1,5 +1,6 @@
 package core;
 
+import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
 
 import java.awt.*;
@@ -8,12 +9,7 @@ import java.util.Random;
 import static core.Config.*;
 
 public class MysteryBox extends LootBox {
-    private String[] fadeMysteryPath = {
-            getImagePath() + "gift_box_alpha_100.png",
-            getImagePath() + "gift_box_alpha_70.png",
-            getImagePath() + "gift_box_alpha_40.png",
-            getImagePath() + "gift_box_alpha_15.png",
-    };
+    private String[] fadeMysteryPath;
 
     private boolean fading = false;
     private int fadeStep = 0;
@@ -24,6 +20,12 @@ public class MysteryBox extends LootBox {
     private MysteryBox(MainRoom belongsTo, int x, int y, int width, int height) {
         super(belongsTo, x, y, width, height);
         setImagePath("resources/loot box/mystery box/");
+        fadeMysteryPath = new String[]{
+                getImagePath() + "gift_box_alpha_100.jpg",
+                getImagePath() + "gift_box_alpha_70.jpg",
+                getImagePath() + "gift_box_alpha_40.jpg",
+                getImagePath() + "gift_box_alpha_15.jpg",
+        };
     }
 
 
@@ -35,7 +37,7 @@ public class MysteryBox extends LootBox {
 
     /** Handle fading */
     public int update(World world) {
-        if (!fading) return NOT_FADING;
+        if (!fading) {StdDraw.picture(getPosition().x, getPosition().y, fadeMysteryPath[fadeStep], 2, 2); return NOT_FADING;}
         if (world.getElapsedTimeMs() < nextFadeTimeMs) return FADING;
 
         if (fadeStep < fadeMysteryPath.length) {
@@ -46,7 +48,4 @@ public class MysteryBox extends LootBox {
 
         return FINISHED;
     }
-
-
-    public void startFading() {fading = true;}
 }
