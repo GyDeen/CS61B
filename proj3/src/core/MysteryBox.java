@@ -2,6 +2,7 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
+import tileengine.Tileset;
 
 import java.awt.*;
 import java.util.Random;
@@ -31,13 +32,14 @@ public class MysteryBox extends LootBox {
 
     public static MysteryBox generateMysteryBox(MainRoom belongsTo, TETile[][] world, Random rand) {
         Point p = findSpawnLocation(belongsTo, rand, world);
-        return new MysteryBox(belongsTo, p.x, p.y, 2, 2);
+        world[p.x][p.y] = Tileset.CELL;
+        return new MysteryBox(belongsTo, p.x, p.y, 1, 1);
     }
 
 
     /** Handle fading */
     public int update(World world) {
-        if (!fading) {StdDraw.picture(getPosition().x, getPosition().y, fadeMysteryPath[fadeStep], 2, 2); return NOT_FADING;}
+        if (!fading) {StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, fadeMysteryPath[fadeStep], 1, 1); return NOT_FADING;}
         if (world.getElapsedTimeMs() < nextFadeTimeMs) return FADING;
 
         if (fadeStep < fadeMysteryPath.length) {
