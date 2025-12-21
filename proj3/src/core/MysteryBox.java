@@ -1,5 +1,10 @@
 package core;
 
+import tileengine.TETile;
+
+import java.awt.*;
+import java.util.Random;
+
 import static core.Config.*;
 
 public class MysteryBox extends LootBox {
@@ -15,10 +20,16 @@ public class MysteryBox extends LootBox {
     private long nextFadeTimeMs = 0;
 
 
-    /** Using the top left tile as the position with 2 x 2 size */
-    public MysteryBox(MainRoom belongsTo, int x, int y, int width, int height) {
+    /* Using the top left tile as the position with 2 x 2 size */
+    private MysteryBox(MainRoom belongsTo, int x, int y, int width, int height) {
         super(belongsTo, x, y, width, height);
         setImagePath("resources/loot box/mystery box/");
+    }
+
+
+    public static MysteryBox generateMysteryBox(MainRoom belongsTo, TETile[][] world, Random rand) {
+        Point p = findSpawnLocation(belongsTo, rand, world);
+        return new MysteryBox(belongsTo, p.x, p.y, 2, 2);
     }
 
 
@@ -35,4 +46,7 @@ public class MysteryBox extends LootBox {
 
         return FINISHED;
     }
+
+
+    public void startFading() {fading = true;}
 }
