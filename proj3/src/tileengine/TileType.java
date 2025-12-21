@@ -11,6 +11,7 @@ public enum TileType {
     MOUNTAIN(false, Integer.MAX_VALUE),
     LOCKED_DOOR(false, Integer.MAX_VALUE),
     WALL(false, Integer.MAX_VALUE),
+    BOX(false, Integer.MAX_VALUE),
     NOTHING(false, Integer.MAX_VALUE);
 
 
@@ -34,6 +35,7 @@ public enum TileType {
             case MOUNTAIN -> Tileset.MOUNTAIN;
             case LOCKED_DOOR -> Tileset.LOCKED_DOOR;
             case WALL -> Tileset.WALL;
+            case BOX -> Tileset.CELL;
             default -> throw new IllegalArgumentException("Unrecognized tile type: " + this);
         };
     }
@@ -51,6 +53,7 @@ public enum TileType {
         if (tile == Tileset.MOUNTAIN) return MOUNTAIN;
         if (tile == Tileset.LOCKED_DOOR) return LOCKED_DOOR;
         if (tile == Tileset.WALL) return WALL;
+        if (tile == Tileset.CELL) return BOX;
         if (tile == Tileset.NOTHING) return NOTHING;
         throw new IllegalArgumentException("Unrecognized tile: " + tile);
     }
