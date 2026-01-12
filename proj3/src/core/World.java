@@ -19,7 +19,7 @@ import static core.PacMan.*;
 public class World {
 
 
-    private enum PlayState { RUNNING, PAUSED }
+    private enum PlayState { RUNNING, PAUSED, WIN, LOSE }
     private PlayState playState = PlayState.RUNNING;
     private boolean escHeld = false;
     private boolean mouseHeld = false;
@@ -256,7 +256,10 @@ public class World {
         elapsedTimeMs = currentTime - gameStartTimeMs;
         int elapsedSeconds = (int) (elapsedTimeMs / 1000);
         int remainingSeconds = gameTime - elapsedSeconds;
-        if (remainingSeconds < 0) remainingSeconds = 0;
+        if (remainingSeconds < 0) {
+            remainingSeconds = 0;
+            playState = PlayState.LOSE;
+        }
         drawTimer(remainingSeconds);
 
         ter.renderFrameNoShow(world);
@@ -320,12 +323,13 @@ public class World {
         initialPlayerAndFinalBox();
 
         generateHallway();
-        generateMysteryBoxes();
 
         TETile[][] carved = carver.getWorld();
         for (int x = 0; x < world.length; x++) {
             System.arraycopy(carved[x], 0, world[x], 0, world[0].length);
         }
+
+        generateMysteryBoxes();
 
         ter.renderFrame(world);
 
