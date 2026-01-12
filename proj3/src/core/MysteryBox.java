@@ -50,10 +50,10 @@ public class MysteryBox extends LootBox {
 
         // Draw all 4 quarters for the current alpha step
         // Indices: 0=TL, 1=TR, 2=BL, 3=BR
-        StdDraw.picture(posX + 0.5, posY + 0.5, fadeMysteryPath[fadeStep][0]);
-        StdDraw.picture(posX + 1.5, posY + 0.5, fadeMysteryPath[fadeStep][1]);
-        StdDraw.picture(posX + 0.5, posY - 0.5, fadeMysteryPath[fadeStep][2]);
-        StdDraw.picture(posX + 1.5, posY - 0.5, fadeMysteryPath[fadeStep][3]);
+        StdDraw.picture(posX + 0.5, posY + 0.5, fadeMysteryPath[fadeStep][0], 1, 1);
+        StdDraw.picture(posX + 1.5, posY + 0.5, fadeMysteryPath[fadeStep][1], 1, 1);
+        StdDraw.picture(posX + 0.5, posY - 0.5, fadeMysteryPath[fadeStep][2], 1, 1);
+        StdDraw.picture(posX + 1.5, posY - 0.5, fadeMysteryPath[fadeStep][3], 1, 1);
 
         if (!fading) return NOT_FADING;
 
