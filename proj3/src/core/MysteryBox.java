@@ -45,15 +45,27 @@ public class MysteryBox extends LootBox {
 
     /** Handle fading */
     public int update(World world) {
-        if (!fading) {StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, fadeMysteryPath[fadeStep], 2, 2); return NOT_FADING;}
-        if (world.getElapsedTimeMs() < nextFadeTimeMs) return FADING;
+        double posX = getPosition().x;
+        double posY = getPosition().y;
 
-        if (fadeStep < fadeMysteryPath.length) {
-            setImagePath(fadeMysteryPath[fadeStep++]);
-            nextFadeTimeMs = world.getElapsedTimeMs() + FADE_INTERVAL_MS;
-            return FADING;
+        // Draw all 4 quarters for the current alpha step
+        // Indices: 0=TL, 1=TR, 2=BL, 3=BR
+        StdDraw.picture(posX + 0.5, posY + 0.5, fadeMysteryPath[fadeStep][0]);
+        StdDraw.picture(posX + 1.5, posY + 0.5, fadeMysteryPath[fadeStep][1]);
+        StdDraw.picture(posX + 0.5, posY - 0.5, fadeMysteryPath[fadeStep][2]);
+        StdDraw.picture(posX + 1.5, posY - 0.5, fadeMysteryPath[fadeStep][3]);
+
+        if (!fading) return NOT_FADING;
+
+        // Handle time-based fading logic
+        if (world.getElapsedTimeMs() >= nextFadeTimeMs) {
+            if (fadeStep < 3) {
+                fadeStep++;
+                nextFadeTimeMs = world.getElapsedTimeMs() + FADE_INTERVAL_MS;
+                return FADING;
+            }
+            return FINISHED;
         }
-
-        return FINISHED;
+        return FADING;
     }
 }
