@@ -318,9 +318,9 @@ public class World {
         }
 
         initialPlayerAndFinalBox();
-        generateMysteryBoxes();
 
         generateHallway();
+        generateMysteryBoxes();
 
         TETile[][] carved = carver.getWorld();
         for (int x = 0; x < world.length; x++) {
