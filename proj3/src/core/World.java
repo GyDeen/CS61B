@@ -6,6 +6,7 @@ import tileengine.TETile;
 import tileengine.Tileset;
 import utils.RandomUtils;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
@@ -19,7 +20,7 @@ import static core.PacMan.*;
 public class World {
 
 
-    private enum PlayState { RUNNING, PAUSED, WIN, LOSE }
+    private enum PlayState { RUNNING, PAUSED }
     private PlayState playState = PlayState.RUNNING;
     private boolean escHeld = false;
     private boolean mouseHeld = false;
@@ -256,10 +257,7 @@ public class World {
         elapsedTimeMs = currentTime - gameStartTimeMs;
         int elapsedSeconds = (int) (elapsedTimeMs / 1000);
         int remainingSeconds = gameTime - elapsedSeconds;
-        if (remainingSeconds < 0) {
-            remainingSeconds = 0;
-            playState = PlayState.LOSE;
-        }
+        if (remainingSeconds < 0) remainingSeconds = 0;
         drawTimer(remainingSeconds);
 
         ter.renderFrameNoShow(world);
@@ -272,18 +270,45 @@ public class World {
         while (playState == PlayState.RUNNING) {
 
             if (gameResult == WIN) return WIN;
-            if (!player.isActive()) return LOSE;
+            if (!player.isActive() || gameTime - elapsedTimeMs / 1000 <= 0) return LOSE;
 
             if (pauseRequest()) {
                 playState = PlayState.PAUSED;
                 return PAUSE;
             }
 
+            char key = '\0';
+            if (StdDraw.hasNextKeyTyped()) {
+                key = Character.toLowerCase(StdDraw.nextKeyTyped());
+                if (key == 'f') {
+                    for (MysteryBox box : mysteryBoxes) {
+                        if (box.isActive() && box.canInteract(player)) {
+                            box.startFading();
+                        }
+                    }
+                }
+            }
 
-            player.update(elapsedTimeMs, world);
+
+            player.update(elapsedTimeMs, world, key);
             player.drawImage();
-            for (MysteryBox box : mysteryBoxes) {
-                box.update(this);
+            for (int i = 0; i < mysteryBoxes.size(); i++) {
+                MysteryBox box = mysteryBoxes.get(i);
+                int status = box.update(this);
+
+                // Finished fading
+                if (status == FINISHED) {
+                    TETile tile = box.getRoom().getFloorType().toTETile();
+                    Point p = box.getPosition();
+                    world[p.x][p.y] = tile;
+                    world[p.x + 1][p.y] = tile;
+                    world[p.x][p.y - 1] = tile;
+                    world[p.x + 1][p.y - 1] = tile;
+
+                    box.destroy();
+                    mysteryBoxes.remove(i);
+                    i--;
+                }
             }
             setting.drawSetting();
             updateTimer();

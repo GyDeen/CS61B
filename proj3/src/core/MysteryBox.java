@@ -68,4 +68,20 @@ public class MysteryBox extends LootBox {
         }
         return FADING;
     }
+
+
+    public void startFading() {fading = true;}
+
+
+    /** Check whether player is right close to the box*/
+    public boolean canInteract(PacMan player) {
+        Point pPos = player.getPosition();
+        Point bPos = this.getPosition();
+
+        // Check if player is within 1 tile of this 2x2 area
+        boolean xInRange = pPos.x >= bPos.x - 1 && pPos.x <= bPos.x + 2;
+        boolean yInRange = pPos.y >= bPos.y - 2 && pPos.y <= bPos.y + 1;
+
+        return xInRange && yInRange;
+    }
 }

@@ -119,20 +119,17 @@ public class PacMan extends GameObject{
 
 
     /* Based on the input update the PacMan position and direction */
-    private void handleInput(TETile[][] world) {
-        if (!isActive()) return;
-
-        if (!StdDraw.hasNextKeyTyped()) return;
+    private void handleInput(TETile[][] world, char nextInput) {
+        if (!isActive() || nextInput == '\0') return;
 
 
-        char key = StdDraw.nextKeyTyped();
         Direction dir = null;
 
-        switch (Character.toLowerCase(key)) {
-            case 'w', 'W' -> dir = Direction.UP;
-            case 's', 'S' -> dir = Direction.DOWN;
-            case 'a', 'A' -> dir = Direction.LEFT;
-            case 'd', 'D' -> dir = Direction.RIGHT;
+        switch (Character.toLowerCase(nextInput)) {
+            case 'w' -> dir = Direction.UP;
+            case 's' -> dir = Direction.DOWN;
+            case 'a' -> dir = Direction.LEFT;
+            case 'd' -> dir = Direction.RIGHT;
             default -> {return;}
         }
 
@@ -167,8 +164,8 @@ public class PacMan extends GameObject{
 
     /** Update the image first (switch image based on world time). Then handle the input to determine whether it could move
      * and adjust its facing. */
-    public void update(long worldTime, TETile[][] world) {
+    public void update(long worldTime, TETile[][] world, char nextInput) {
         updateImageBasedOnTime(worldTime);
-        handleInput(world);
+        handleInput(world, nextInput);
     }
 }
