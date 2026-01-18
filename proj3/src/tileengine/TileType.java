@@ -26,13 +26,14 @@ public enum TileType {
 
     public TETile toTETile() {
         return switch (this) {
-            case FLOOR, COIN -> Tileset.FLOOR;
+            case FLOOR -> Tileset.FLOOR;
             case UNLOCKED_DOOR -> Tileset.UNLOCKED_DOOR;
             case GRASS -> Tileset.GRASS;
             case FLOWER -> Tileset.FLOWER;
             case SAND -> Tileset.SAND;
             case TREE -> Tileset.TREE;
             case WATER -> Tileset.WATER;
+            case COIN -> Tileset.COIN;
             case MOUNTAIN -> Tileset.MOUNTAIN;
             case LOCKED_DOOR -> Tileset.LOCKED_DOOR;
             case WALL -> Tileset.WALL;
@@ -51,6 +52,7 @@ public enum TileType {
         if (tile == Tileset.SAND) return SAND;
         if (tile == Tileset.TREE) return TREE;
         if (tile == Tileset.WATER) return WATER;
+        if (tile == Tileset.COIN) return COIN;
         if (tile == Tileset.MOUNTAIN) return MOUNTAIN;
         if (tile == Tileset.LOCKED_DOOR) return LOCKED_DOOR;
         if (tile == Tileset.WALL) return WALL;
