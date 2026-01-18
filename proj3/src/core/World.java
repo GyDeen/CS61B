@@ -39,6 +39,7 @@ public class World {
     private int roomNum;
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private ArrayList<MysteryBox>  mysteryBoxes = new ArrayList<>();
+    private ArrayList<Gold> golds = new ArrayList<>();
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -234,14 +235,24 @@ public class World {
 
 
     private void generateMysteryBoxes() {
-        int mysteryBoxNum = majorRooms.size() * 4 / 3;
+        int mysteryBoxNum = majorRooms.size() * 4 / 5;
 
         while (mysteryBoxes.size() < mysteryBoxNum) {
-            MainRoom belongsTo = majorRooms.get(random.nextInt(majorRooms.size()));
-            MysteryBox box = MysteryBox.generateMysteryBox(belongsTo, world, random);
+            MysteryBox box = MysteryBox.generateMysteryBox(majorRooms, world, random);
+            if (box == null) continue;
             mysteryBoxes.add(box);
         }
     }
+
+    private void generateGold() {
+        int goldNum = majorRooms.size() * 3 / 2;
+        while (golds.size() < goldNum) {
+            Gold coin = Gold.goldGenerator(100, majorRooms, random, world);
+            if (coin == null) continue;
+            golds.add(coin);
+        }
+    }
+
 
     private void drawTimer(int remainingSeconds) {
         StdDraw.setPenColor(StdDraw.WHITE);
@@ -310,6 +321,11 @@ public class World {
                     i--;
                 }
             }
+
+            for (Gold gold : golds) {
+                gold.update();
+                gold.drawImage();
+            }
             setting.drawSetting();
             updateTimer();
             UI.drawUIBackground();
@@ -355,6 +371,7 @@ public class World {
         }
 
         generateMysteryBoxes();
+        generateGold();
 
         ter.renderFrame(world);
 

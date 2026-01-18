@@ -78,8 +78,6 @@ public abstract class GameObject {
         StdDraw.picture(position.x, position.y, imagePath, imageWidth, imageHeight);
     }
 
-
-
     public void setRoom(MainRoom belongsTo) {
         this.belongsTo = belongsTo;
     }

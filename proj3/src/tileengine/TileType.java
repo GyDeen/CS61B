@@ -8,7 +8,7 @@ public enum TileType {
     SAND(true, 2),
     TREE(true, 2),
     WATER(true, 1),
-    COIN(true, 1),
+    COIN(false, 1),
     MOUNTAIN(false, Integer.MAX_VALUE),
     LOCKED_DOOR(false, Integer.MAX_VALUE),
     WALL(false, Integer.MAX_VALUE),
