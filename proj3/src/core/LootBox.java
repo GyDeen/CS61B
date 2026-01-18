@@ -20,12 +20,23 @@ public abstract class LootBox extends GameObject {
     public static boolean validPos(int x, int y, TETile[][] world) {
         if (x < 0 || y < 0 || x >= world.length || y >= world[0].length) return false;
 
+
+        // Checking no other loot box nearby based on difficulty
+        for (int i = -2; i <= 3; i++) {
+            for (int j = -3; j <= 2; j++) {
+                if (x + i < 0 || y + j < 0 || x + i >= world.length || y + j >= world[0].length) return false;
+                if (TileType.toType(world[x + i][y + j]) == TileType.BOX) {
+                    return false;
+                }
+            }
+        }
+
         TETile[] area = { world[x][y], world[x + 1][y], world[x][y - 1], world[x + 1][y - 1] };
 
         for (TETile tile : area) {
             TileType type = TileType.toType(tile);
             // Only allow spawning if the tile is passable AND isn't already a BOX
-            if (!type.isPassable() || type == TileType.BOX) {
+            if (!type.isPassable()) {
                 return false;
             }
         }

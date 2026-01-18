@@ -2,7 +2,7 @@ package core;
 
 public class Config {
     // Game time
-    public static final int GAME_TIME_IN_SEC = 300;
+    public static final int GAME_TIME_IN_SEC = 120;
     // Could self define teh ratio of Floor type of room
     public static final double ROOM_FLOOR_POSS = 0.5;
     public static final int BLOCK_WIDTH1 = 1;
