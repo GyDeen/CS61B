@@ -99,7 +99,7 @@ public abstract class GameObject {
     }
 
 
-    public static Point findSpawnLocation(MainRoom room, Random rand, TETile[][] world) {
+    public static Point findSpawnLocation(MainRoom room, int objectSize ,Random rand, TETile[][] world) {
         int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
 
         int minX = room.getLeft();
@@ -118,24 +118,24 @@ public abstract class GameObject {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
 
-            if (room.isInRoom(x, y) && TileType.toType(world[x][y]).isPassable()) {
+            if (room.isInRoom(x, y) && validPos(x, y, objectSize,world)) {
                 return new Point(x, y);
             }
         }
 
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
-                if (room.isInRoom(x, y) && TileType.toType(world[x][y]).isPassable()) {
+                if (room.isInRoom(x, y) && validPos(x, y, objectSize, world)) {
                     return new Point(x, y);
                 }
             }
         }
 
-        return new Point(room.getLocation().x, room.getLocation().y);
+        return null;
     }
 
 
-    public static boolean validPos(int x, int y, TETile[][] world) {
+    public static boolean validPos(int x, int y, int size,TETile[][] world) {
         if (x < 0 || y < 0 || x >= world.length || y >= world[0].length) return false;
 
 
@@ -149,7 +149,10 @@ public abstract class GameObject {
             }
         }
 
-        TETile[] area = { world[x][y], world[x + 1][y], world[x][y - 1], world[x + 1][y - 1] };
+        TETile[] area;
+        if (size > 1) { area = new TETile[]{world[x][y], world[x + 1][y], world[x][y - 1], world[x + 1][y - 1]};}
+        else {area = new TETile[]{world[x][y]};}
+
 
         for (TETile tile : area) {
             TileType type = TileType.toType(tile);
