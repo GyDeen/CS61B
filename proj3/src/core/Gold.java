@@ -77,7 +77,10 @@ public class Gold extends GameObject{
         }
     }
 
-    public void update() {
 
+    public int getWorth() {return worth;}
+
+    public void update() {
+        if (isActive()) drawImage();
     }
 }

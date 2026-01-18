@@ -43,6 +43,7 @@ public class World {
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
+    private int money = 0;
 
 
 
@@ -254,6 +255,21 @@ public class World {
     }
 
 
+    private boolean nextToGold(Gold coin) {
+        Point pPos = player.getPosition();
+        Point cPos = coin.getPosition();
+
+        if (coin.getImageWidth() > 1) { // 2x2 case
+            boolean xNearby = pPos.x >= cPos.x - 1 && pPos.x <= cPos.x + 2;
+            boolean yNearby = pPos.y >= cPos.y - 2 && pPos.y <= cPos.y + 1;
+
+            return xNearby && yNearby;
+        } else { // 1x1 case
+            return Math.abs(pPos.x - cPos.x) <= 1 && Math.abs(pPos.y - cPos.y) <= 1;
+        }
+    }
+
+
     private void drawTimer(int remainingSeconds) {
         StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
@@ -273,6 +289,20 @@ public class World {
 
         ter.renderFrameNoShow(world);
         ter.resetFont();
+    }
+
+
+    public void removeCollected(GameObject obj) {
+        TETile tile = obj.getRoom().getFloorType().toTETile();
+        Point p = obj.getPosition();
+        if (obj.getImageWidth() > 1) {
+            world[p.x][p.y] = tile;
+            world[p.x + 1][p.y] = tile;
+            world[p.x][p.y - 1] = tile;
+            world[p.x + 1][p.y - 1] = tile;
+        } else {
+            world[p.x][p.y] = tile;
+        }
     }
 
 
@@ -309,13 +339,7 @@ public class World {
 
                 // Finished fading
                 if (status == FINISHED) {
-                    TETile tile = box.getRoom().getFloorType().toTETile();
-                    Point p = box.getPosition();
-                    world[p.x][p.y] = tile;
-                    world[p.x + 1][p.y] = tile;
-                    world[p.x][p.y - 1] = tile;
-                    world[p.x + 1][p.y - 1] = tile;
-
+                    removeCollected(box);
                     box.destroy();
                     mysteryBoxes.remove(i);
                     i--;
@@ -323,8 +347,12 @@ public class World {
             }
 
             for (Gold gold : golds) {
+                if (nextToGold(gold)) {
+                    money += gold.getWorth();
+                    removeCollected(gold);
+                    gold.destroy();
+                }
                 gold.update();
-                gold.drawImage();
             }
             setting.drawSetting();
             updateTimer();
