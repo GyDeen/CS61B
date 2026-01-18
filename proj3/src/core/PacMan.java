@@ -43,7 +43,7 @@ public class PacMan extends GameObject{
 
 
     public static PacMan generatePacMan(MainRoom initialRoom, Random rand, TETile[][] world) {
-        Point p = findSpawnLocation(initialRoom, rand, world);
+        Point p = findSpawnLocation(initialRoom,1, rand, world);
         return new PacMan(p.x, p.y, 1, 1);
     }
 

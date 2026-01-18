@@ -5,6 +5,7 @@ import tileengine.TETile;
 import tileengine.Tileset;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 import static core.Config.*;
@@ -33,13 +34,20 @@ public class MysteryBox extends LootBox {
     }
 
 
-    public static MysteryBox generateMysteryBox(MainRoom belongsTo, TETile[][] world, Random rand) {
-        Point p = findSpawnLocation(belongsTo, rand, world);
-        world[p.x][p.y] = Tileset.CELL;
-        world[p.x][p.y - 1] = Tileset.CELL;
-        world[p.x + 1][p.y] = Tileset.CELL;
-        world[p.x + 1][p.y - 1] = Tileset.CELL;
-        return new MysteryBox(belongsTo, p.x, p.y, 2, 2);
+    public static MysteryBox generateMysteryBox(ArrayList<MainRoom> mainRooms, TETile[][] world, Random rand) {
+        int maxAttempt = MAX_ATTEMPT_PIVOT;
+        while (maxAttempt-- > 0) {
+            MainRoom belongsTo = mainRooms.get(rand.nextInt(mainRooms.size()));
+            Point p = findSpawnLocation(belongsTo, rand, world);
+            if (p == null) continue;
+            world[p.x][p.y] = Tileset.CELL;
+            world[p.x][p.y - 1] = Tileset.CELL;
+            world[p.x + 1][p.y] = Tileset.CELL;
+            world[p.x + 1][p.y - 1] = Tileset.CELL;
+            return new MysteryBox(belongsTo, p.x, p.y, 2, 2);
+        }
+        
+        return null;
     }
 
 

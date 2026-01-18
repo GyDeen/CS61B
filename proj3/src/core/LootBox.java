@@ -20,20 +20,21 @@ public abstract class LootBox extends GameObject {
 
     /** Finding a valid position for a LootBox*/
     public static Point findSpawnLocation(MainRoom room, Random rand, TETile[][] world) {
-        int maxAttempts = 200;
+        int maxAttempts = 10;
 
         for (int i = 0; i < maxAttempts; i++) {
             // Get a random passable tile from the room
-            Point pos = GameObject.findSpawnLocation(room, rand, world);
+            Point pos = GameObject.findSpawnLocation(room,2, rand, world);
+            if  (pos == null) continue;
 
             // Check if this point can support a 2x2 box without overlapping
-            if (validPos(pos.x, pos.y, world)) {
+            if (validPos(pos.x, pos.y,2, world)) {
                 return pos;
             }
         }
 
-        // Fallback to room center if no valid spot found
-        return room.getLocation();
+        // Return null for other room allocation try
+        return null;
     }
 }
 
