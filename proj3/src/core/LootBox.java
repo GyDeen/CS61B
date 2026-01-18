@@ -20,7 +20,7 @@ public abstract class LootBox extends GameObject {
 
     /** Finding a valid position for a LootBox*/
     public static Point findSpawnLocation(MainRoom room, Random rand, TETile[][] world) {
-        int maxAttempts = 10;
+        int maxAttempts = 100;
 
         for (int i = 0; i < maxAttempts; i++) {
             // Get a random passable tile from the room
