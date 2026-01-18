@@ -8,6 +8,7 @@ public enum TileType {
     SAND(true, 2),
     TREE(true, 2),
     WATER(true, 1),
+    COIN(true, 1),
     MOUNTAIN(false, Integer.MAX_VALUE),
     LOCKED_DOOR(false, Integer.MAX_VALUE),
     WALL(false, Integer.MAX_VALUE),
@@ -25,7 +26,7 @@ public enum TileType {
 
     public TETile toTETile() {
         return switch (this) {
-            case FLOOR -> Tileset.FLOOR;
+            case FLOOR, COIN -> Tileset.FLOOR;
             case UNLOCKED_DOOR -> Tileset.UNLOCKED_DOOR;
             case GRASS -> Tileset.GRASS;
             case FLOWER -> Tileset.FLOWER;

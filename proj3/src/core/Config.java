@@ -69,4 +69,8 @@ public class Config {
     public static final int NOT_FADING = 0;
     public static final int FADING = 1;
     public static final int FINISHED = 2;
+
+
+    // Coins size
+    public static final int LARGE_COIN = 2;
 }
