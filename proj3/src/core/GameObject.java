@@ -7,6 +7,9 @@ import tileengine.TileType;
 import java.awt.*;
 import java.util.Random;
 
+import static tileengine.TileType.BOX;
+import static tileengine.TileType.COIN;
+
 public abstract class GameObject {
     private Point position;
     private String imagePath;
@@ -63,11 +66,12 @@ public abstract class GameObject {
     public int getImageWidth() {
         return imageWidth;
     }
-
+    public void setImageWidth(int imageWidth) {this.imageWidth = imageWidth;}
 
     public int getImageHeight() {
         return imageHeight;
     }
+    public void setImageHeight(int imageHeight) {this.imageHeight = imageHeight;}
 
 
     public void drawImage() {
@@ -75,9 +79,6 @@ public abstract class GameObject {
     }
 
 
-    public void update() {
-
-    }
 
     public void setRoom(MainRoom belongsTo) {
         this.belongsTo = belongsTo;
@@ -131,5 +132,33 @@ public abstract class GameObject {
         }
 
         return new Point(room.getLocation().x, room.getLocation().y);
+    }
+
+
+    public static boolean validPos(int x, int y, TETile[][] world) {
+        if (x < 0 || y < 0 || x >= world.length || y >= world[0].length) return false;
+
+
+        // Checking no other objects around current objects
+        for (int i = -2; i <= 3; i++) {
+            for (int j = -3; j <= 2; j++) {
+                if (x + i < 0 || y + j < 0 || x + i >= world.length || y + j >= world[0].length) return false;
+                if (TileType.toType(world[x + i][y + j]) == BOX || TileType.toType(world[x + i][y + j]) == COIN) {
+                    return false;
+                }
+            }
+        }
+
+        TETile[] area = { world[x][y], world[x + 1][y], world[x][y - 1], world[x + 1][y - 1] };
+
+        for (TETile tile : area) {
+            TileType type = TileType.toType(tile);
+            // Only allow spawning if the tile is passable AND isn't already a BOX
+            if (!type.isPassable()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
