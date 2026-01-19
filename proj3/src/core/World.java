@@ -324,7 +324,6 @@ public class World {
 
 
             player.update(elapsedTimeMs, world, key);
-            player.drawImage();
             for (int i = 0; i < mysteryBoxes.size(); i++) {
                 MysteryBox box = mysteryBoxes.get(i);
                 int status = box.update(this);

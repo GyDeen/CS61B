@@ -18,6 +18,7 @@ public class PacMan extends GameObject{
     private int frameIndex;
     private String currentImage;
     private Direction curDirection;
+    private Direction nextIntendedDir = null;
 
     private long nextSwitchTimeMs = 0;
     private long nextMoveTimeMs = 0;
@@ -93,6 +94,18 @@ public class PacMan extends GameObject{
     }
 
 
+    /* Update direction based on input. Even it is during the cooldown of the movement */
+    private Direction getDirectionFromKey(char key) {
+        return switch (Character.toLowerCase(key)) {
+            case 'w', 'W' -> Direction.UP;
+            case 's', 'S' -> Direction.DOWN;
+            case 'a', 'A' -> Direction.LEFT;
+            case 'd', 'D' -> Direction.RIGHT;
+            default -> null;
+        };
+    }
+
+
     /* Movement update based on input key */
     private void updateBasedInput(Direction direction, TETile[][] world) {
         int newX = getPosition().x, newY = getPosition().y;
@@ -122,19 +135,9 @@ public class PacMan extends GameObject{
 
     /* Based on the input update the PacMan position and direction */
     private void handleInput(TETile[][] world, char nextInput) {
-        if (!isActive() || nextInput == '\0') return;
-
-
-        Direction dir = null;
-
-        switch (Character.toLowerCase(nextInput)) {
-            case 'w' -> dir = Direction.UP;
-            case 's' -> dir = Direction.DOWN;
-            case 'a' -> dir = Direction.LEFT;
-            case 'd' -> dir = Direction.RIGHT;
-            default -> {return;}
-        }
-
+        if (!isActive()) return;
+        Direction dir = getDirectionFromKey(nextInput);
+        assert dir != null;
         updateBasedInput(dir, world);
     }
 
@@ -145,20 +148,12 @@ public class PacMan extends GameObject{
         double angle = 0d;
         int scaledX = 1, scaledY = 1;
 
-        switch (curDirection) {
-            case UP:
-                angle = 90;
-                break;
-            case DOWN:
-                angle = -90;
-                break;
-            case LEFT:
-                angle = 180;
-                break;
-            default:
-                angle = 0;
-                break;
-        }
+        angle = switch (curDirection) {
+            case UP -> 90;
+            case DOWN -> -90;
+            case LEFT -> 180;
+            default -> 0;
+        };
 
         StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, currentImage, 1, 1, angle);
     }
@@ -169,11 +164,24 @@ public class PacMan extends GameObject{
     public void update(long worldTime, TETile[][] world, char nextInput) {
         updateImageBasedOnTime(worldTime);
 
-        // Only process input if enough time has passed
-        if (worldTime >= nextMoveTimeMs && nextInput != '\0') {
-            handleInput(world, nextInput);
-            // Set the next allowed time
-            nextMoveTimeMs = worldTime + PAC_MAN_MOVE_COOLDOWN_DEFAULT;
+        if (nextInput != '\0') {
+            Direction inputDir = getDirectionFromKey(nextInput);
+            if (inputDir != null) {
+                this.nextIntendedDir = inputDir;
+            }
         }
+
+        // Only process input if enough time has passed
+        if (worldTime >= nextMoveTimeMs) {
+            // If there is an intended direction, change to the direction first
+            if (nextIntendedDir != null) {
+                this.curDirection = nextIntendedDir;
+                updateBasedInput(this.curDirection, world);
+                nextIntendedDir = null;
+                nextMoveTimeMs = worldTime + PAC_MAN_MOVE_COOLDOWN_DEFAULT;
+            }
+        }
+
+        drawImage();
     }
 }

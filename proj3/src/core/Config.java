@@ -75,8 +75,8 @@ public class Config {
     public static final int LARGE_COIN = 2;
 
 
-
     // Difficulty setting
-    public static long PAC_MAN_MOVE_COOLDOWN_DEFAULT = 50;
+    public static long PAC_MAN_MOVE_COOLDOWN_DEFAULT = 100;
+    public static long PAC_MAN_COOLDOWN_MEDIUM = 130;
 
 }
