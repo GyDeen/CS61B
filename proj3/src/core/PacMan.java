@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Random;
 
 import static core.Config.IMAGE_SWITCHING_PERIOD;
+import static core.Config.PAC_MAN_MOVE_COOLDOWN_DEFAULT;
 
 public class PacMan extends GameObject{
     private final String[] activeImage;
@@ -19,6 +20,7 @@ public class PacMan extends GameObject{
     private Direction curDirection;
 
     private long nextSwitchTimeMs = 0;
+    private long nextMoveTimeMs = 0;
 
     private PacMan(int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -166,6 +168,12 @@ public class PacMan extends GameObject{
      * and adjust its facing. */
     public void update(long worldTime, TETile[][] world, char nextInput) {
         updateImageBasedOnTime(worldTime);
-        handleInput(world, nextInput);
+
+        // Only process input if enough time has passed
+        if (worldTime >= nextMoveTimeMs && nextInput != '\0') {
+            handleInput(world, nextInput);
+            // Set the next allowed time
+            nextMoveTimeMs = worldTime + PAC_MAN_MOVE_COOLDOWN_DEFAULT;
+        }
     }
 }

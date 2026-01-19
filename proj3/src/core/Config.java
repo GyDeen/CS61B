@@ -73,4 +73,10 @@ public class Config {
 
     // Coins size
     public static final int LARGE_COIN = 2;
+
+
+
+    // Difficulty setting
+    public static long PAC_MAN_MOVE_COOLDOWN_DEFAULT = 50;
+
 }
