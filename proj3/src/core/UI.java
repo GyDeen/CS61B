@@ -15,6 +15,7 @@ public class UI {
         private int settingY = WINDOW_HEIGHT - SETTING_HEIGHT / 2;
         private String settingImage = "src/resources/Icon/icons8-settings-50.png";
 
+
         public boolean onSetting(double x, double y) {
             return x >= 0 && x < SETTING_WIDTH
                     && y >= settingY - (double) SETTING_HEIGHT / 2 && y < settingY + SETTING_HEIGHT;
@@ -74,6 +75,26 @@ public class UI {
 
         StdDraw.setPenColor(40, 40, 40);
         StdDraw.filledRectangle(centerX, centerY, WINDOW_WIDTH / 2.0, TOP_UI / 2.0);
+    }
+
+
+    /** Draw the amount of money player owns */
+    public static void drawMoney(int amount) {
+        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
+        String text = "Gold: $" + amount;
+        // Draw it on the UI background area
+        StdDraw.textLeft(3.5, WINDOW_HEIGHT - 1, text);
+    }
+
+
+    /** Draw timer based on given time */
+    public static void drawTimer(int remainingSeconds) {
+        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
+        String text = "Time: " + remainingSeconds + "s";
+        StdDraw.textRight(WINDOW_WIDTH, WINDOW_HEIGHT - 1, text);
+        StdDraw.show();
     }
 
 

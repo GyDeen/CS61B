@@ -9,7 +9,7 @@ import java.util.Random;
 
 import static core.Config.LARGE_COIN;
 import static tileengine.Tileset.COIN;
-import static tileengine.Tileset.FLOOR;
+
 
 public class Gold extends GameObject{
     private int worth;

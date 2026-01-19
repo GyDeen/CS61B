@@ -15,6 +15,7 @@ import static core.Config.*;
 import static core.FinalBox.*;
 import static core.MainRoom.fullFillRooms;
 import static core.PacMan.*;
+import static core.UI.drawTimer;
 
 
 public class World {
@@ -270,15 +271,6 @@ public class World {
     }
 
 
-    private void drawTimer(int remainingSeconds) {
-        StdDraw.setPenColor(StdDraw.WHITE);
-        StdDraw.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 18));
-        String text = "Time: " + remainingSeconds + "s";
-        StdDraw.textRight(WINDOW_WIDTH, WINDOW_HEIGHT - 1, text);
-        StdDraw.show();
-    }
-
-
     private void updateTimer() {
         long currentTime = System.currentTimeMillis();
         elapsedTimeMs = currentTime - gameStartTimeMs;
@@ -346,14 +338,25 @@ public class World {
                 }
             }
 
-            for (Gold gold : golds) {
+            for (int i = 0; i < golds.size(); i++) {
+                Gold gold = golds.get(i);
+
                 if (nextToGold(gold)) {
-                    money += gold.getWorth();
+                    this.money += gold.getWorth();
+
                     removeCollected(gold);
                     gold.destroy();
+
+                    golds.remove(i);
+                    // Adjust index because the list shifted left
+                    i--;
+                    continue;
                 }
-                gold.update();
+
+                gold.drawImage(); // Redraw remaining coins
             }
+
+            UI.drawMoney(money);
             setting.drawSetting();
             updateTimer();
             UI.drawUIBackground();
