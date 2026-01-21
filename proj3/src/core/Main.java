@@ -2,8 +2,7 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 
-import static core.Config.LOSE;
-import static core.Config.PAUSE;
+import static core.Config.*;
 import static core.GameEndPage.EXIT_GAME;
 
 public class Main {
@@ -13,7 +12,7 @@ public class Main {
     private static InitPage init;
     private static final SeedScreen seedScreen = new SeedScreen();
     private static final LoadingPage loading = new LoadingPage();
-    private static final int gameResult = LOSE;
+    private static int gameResult = LOSE;
 
 
     // Consume all the pending input
@@ -80,8 +79,13 @@ public class Main {
             }
 
             if (state == GameState.PLAYING) {
-                int paused = world.gameLoop();
-                if (paused == PAUSE) state = GameState.PAUSE;
+                int gameState = world.gameLoop();
+                if (gameState == PAUSE) state = GameState.PAUSE;
+                else if (gameState == WIN || gameState == LOSE) {
+                    gameResult = gameState;
+                    state = GameState.SUMMARY;
+                }
+
             }
 
             if (state == GameState.SUMMARY) {

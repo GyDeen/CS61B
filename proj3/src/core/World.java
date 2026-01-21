@@ -19,9 +19,7 @@ import static core.UI.drawTimer;
 
 
 public class World {
-
-
-    private enum PlayState { RUNNING, PAUSED }
+    private enum PlayState { RUNNING, PAUSED}
     private PlayState playState = PlayState.RUNNING;
     private boolean escHeld = false;
     private boolean mouseHeld = false;
@@ -33,6 +31,7 @@ public class World {
 
     private static long seed = 654326789;
     private static Random random = new Random(seed);
+    private static final double difficulty = DEFAULT_DIFFICULTY;
     public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
     private UI.Setting setting = new UI.Setting();
@@ -45,6 +44,7 @@ public class World {
     private PacMan player;
     private FinalBox finalBox;
     private int money = 0;
+    private int destroyedEnemies = 0;
 
 
 
@@ -422,6 +422,11 @@ public class World {
     public long getElapsedTimeMs() {return elapsedTimeMs;}
 
 
+    public int getMoney() {return money;}
+
+    public int destroyedEnemies() {return destroyedEnemies;}
+
+    public double getDifficulty() {return difficulty;}
 }
 
 
