@@ -4,17 +4,36 @@ package core;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 import static core.Config.*;
 
 /** Game result based on World returned result */
 public class GameEndPage extends NonGamingPage{
+    public static final int EXIT_GAME = 0;
+    public static final int BACK_INIT = 1;
+
     private int score = 0;
 
     /* Display the text with a Terminal style text writer */
-    private void typeWriterLine(String text, double x, double y, int delayMs) {
+    private void typeWriterLine(String text, double x, double y, int delayMs, boolean[] skip) {
+        if (skip[0]) {
+            StdDraw.setPenColor(Color.GREEN);
+            StdDraw.textLeft(x, y, text);
+            StdDraw.show();
+            return;
+        }
+
         for (int i = 0; i <= text.length(); i++) {
-            StdDraw.setPenColor(Color.WHITE);
+            if (StdDraw.hasNextKeyTyped()) {
+                skip[0] = true;
+                StdDraw.setPenColor(Color.GREEN);
+                StdDraw.textLeft(x, y, text);
+                StdDraw.show();
+                return;
+            }
+
+            StdDraw.setPenColor(Color.GREEN);
             StdDraw.textLeft(x, y, text.substring(0, i));
             StdDraw.show();
             StdDraw.pause(delayMs);
@@ -23,12 +42,25 @@ public class GameEndPage extends NonGamingPage{
 
 
     /* Accumulative update the score */
-    private void accumulateScore(int targetScore, double x, double y) {
+    private void accumulateScore(int targetScore, int finalScore,double x, double y, boolean[] skip) {
+        if (skip[0]) {
+            this.score = targetScore;
+            drawFinalScoreLine(x, y, finalScore);
+            return;
+        }
+
         int startScore = this.score;
         // Speed up the tally if the gap is large
         int step = Math.max(1, (targetScore - startScore) / 20);
 
         for (int i = startScore; i <= targetScore; i += step) {
+            if (StdDraw.hasNextKeyTyped()) {
+                skip[0] = true;
+                this.score = targetScore;
+                drawFinalScoreLine(x, y, finalScore);
+                return;
+            }
+
             // Ensure we don't exceed the target due to step size
             int displayValue = Math.min(i, targetScore);
 
@@ -46,7 +78,13 @@ public class GameEndPage extends NonGamingPage{
     }
 
 
-    private void run(int gameResult, int remainingMoney, long remainingTimeMs, int destroyedGhost, int difficulty) {
+    private void drawFinalScoreLine(double x, double y, double finalScore) {
+
+
+    }
+
+
+    private int run(int gameResult, int remainingMoney, long remainingTimeMs, int destroyedGhost, int difficulty) {
         double difficultyMultiplier = switch (difficulty) {
             case MEDIUM -> MEDIUM_DIFFICULTY_MULTIPLIER;
             case HARD -> HARD_DIFFICULTY_MULTIPLIER;
@@ -54,28 +92,41 @@ public class GameEndPage extends NonGamingPage{
         };
         StdDraw.clear(Color.BLACK);
         StdDraw.setFont(new Font("Monospaced", Font.BOLD, 20)); // Terminal font
+        boolean[] skip = {false};
 
         double startX = WINDOW_WIDTH * 0.2;
         double startY = WINDOW_HEIGHT * 0.70;
         double lineSpacing = 1.5;
         double scoreLineY = startY - (3 * lineSpacing);
-
-        typeWriterLine("INITIALIZING DATA RECOVERY...", startX, startY, 40);
-        typeWriterLine("------------------------------", startX, startY - lineSpacing, 40);
-        typeWriterLine("RESULT: " + (gameResult == WIN ? "SUCCESS" : "CRITICAL FAILURE"), startX, startY - (2 * lineSpacing), 40);
-
-        typeWriterLine("FINAL EVALUATION: " + score, startX, scoreLineY, 40);
-        typeWriterLine("GOLD REMAINED: $" + remainingMoney, startX, startY - (4 * lineSpacing), 40);
-        accumulateScore((int) (this.score + remainingMoney * MONEY_SCORE_MULTIPLIER* difficultyMultiplier), startX, scoreLineY);
-
         int seconds = (int) (remainingTimeMs / 1000);
-        typeWriterLine("TIME REMAINING: " + seconds + "s", startX, startY - (5 * lineSpacing), 40);
-        accumulateScore((int) (this.score + seconds * TIME_SCORE_MULTIPLIER * difficultyMultiplier), startX, scoreLineY);
+        int finalScore = (int) (score + remainingMoney * MONEY_SCORE_MULTIPLIER* difficultyMultiplier +
+                seconds * TIME_SCORE_MULTIPLIER * difficultyMultiplier +
+                destroyedGhost * DESTROY_GHOST_MULTIPLIER * difficultyMultiplier);
 
-        typeWriterLine("THREATS NEUTRALIZED: " + destroyedGhost, startX, startY - (6 * lineSpacing), 40);
-        accumulateScore((int) (this.score + destroyedGhost * DESTROY_GHOST_MULTIPLIER * difficultyMultiplier), startX, scoreLineY);
+        typeWriterLine("INITIALIZING DATA RECOVERY...", startX, startY, 40, skip);
+        typeWriterLine("------------------------------", startX, startY - lineSpacing, 40, skip);
+        typeWriterLine("RESULT: " + (gameResult == WIN ? "SUCCESS" : "CRITICAL FAILURE"), startX, startY - (2 * lineSpacing), 40, skip);
 
-        typeWriterLine("------------------------------", startX, startY - (7 * lineSpacing), 40);
-        typeWriterLine("PRESS ANY KEY TO EXIT_", startX, startY - (8 * lineSpacing), 40);
+        typeWriterLine("FINAL EVALUATION: " + score, startX, scoreLineY, 40, skip);
+        typeWriterLine("GOLD REMAINED: $" + remainingMoney, startX, startY - (4 * lineSpacing), 40, skip);
+        accumulateScore((int) (this.score + remainingMoney * MONEY_SCORE_MULTIPLIER* difficultyMultiplier), finalScore, startX, scoreLineY, skip);
+
+
+        typeWriterLine("TIME REMAINING: " + seconds + "s", startX, startY - (5 * lineSpacing), 40, skip);
+        accumulateScore((int) (this.score + seconds * TIME_SCORE_MULTIPLIER * difficultyMultiplier), finalScore, startX, scoreLineY, skip);
+
+        typeWriterLine("THREATS NEUTRALIZED: " + destroyedGhost, startX, startY - (6 * lineSpacing), 40, skip);
+        accumulateScore((int) (this.score + destroyedGhost * DESTROY_GHOST_MULTIPLIER * difficultyMultiplier), finalScore, startX, scoreLineY, skip);
+
+        typeWriterLine("------------------------------", startX, startY - (7 * lineSpacing), 40, skip);
+        typeWriterLine("PRESS ESC TO QUIT THE GAME. ANY OTHER KEYS BACK TO INITIAL_", startX, startY - (8 * lineSpacing), 40, skip);
+
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                if (StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE)) return EXIT_GAME;
+                else return BACK_INIT;
+            }
+            StdDraw.pause(20);
+        }
     }
 }
