@@ -2,15 +2,18 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 
+import static core.Config.LOSE;
 import static core.Config.PAUSE;
+import static core.GameEndPage.EXIT_GAME;
 
 public class Main {
-    private enum GameState {INIT_MENU, ENTER_SEED, PLAYING, LOADING, QUIT, PAUSE, SAVE}
+    private enum GameState {INIT_MENU, ENTER_SEED, PLAYING, LOADING, QUIT, PAUSE, SAVE, SUMMARY}
     private static GameState state = GameState.INIT_MENU;
     private static World world;
     private static InitPage init;
     private static final SeedScreen seedScreen = new SeedScreen();
     private static final LoadingPage loading = new LoadingPage();
+    private static final int gameResult = LOSE;
 
 
     // Consume all the pending input
@@ -79,6 +82,15 @@ public class Main {
             if (state == GameState.PLAYING) {
                 int paused = world.gameLoop();
                 if (paused == PAUSE) state = GameState.PAUSE;
+            }
+
+            if (state == GameState.SUMMARY) {
+                GameEndPage gameEnd = new GameEndPage();
+                if (gameEnd.run(gameResult, world.getMoney(), world.getElapsedTimeMs(), world.destroyedEnemies(), world.getDifficulty()) == EXIT_GAME) {
+                    state = GameState.QUIT;
+                } else {
+                    state = GameState.INIT_MENU;
+                }
             }
         }
     }

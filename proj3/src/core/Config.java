@@ -76,15 +76,12 @@ public class Config {
 
 
     // Difficulty setting
-    public static final int DEFAULT = 0;
-    public static final int MEDIUM = 1;
-    public static final int HARD = 2;
+    public static final double DEFAULT_DIFFICULTY = 1;
+    public static final double MEDIUM_DIFFICULTY = 1.3;
+    public static final double HARD_DIFFICULTY = 1.5;
     public static final long PAC_MAN_MOVE_COOLDOWN_DEFAULT = 100;
     public static final long PAC_MAN_COOLDOWN_MEDIUM = 130;
     public static final long PAC_MAN_COOLDOWN_HARD = 150;
-    public static final double DEFAULT_DIFFICULTY_MULTIPLIER = 1;
-    public static final double MEDIUM_DIFFICULTY_MULTIPLIER = 1.3;
-    public static final double HARD_DIFFICULTY_MULTIPLIER = 1.5;
     public static final int TIME_SCORE_MULTIPLIER = 100;
     public static final int MONEY_SCORE_MULTIPLIER = 50;
     public static final int DESTROY_GHOST_MULTIPLIER = 500;
