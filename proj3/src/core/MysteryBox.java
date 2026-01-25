@@ -65,10 +65,10 @@ public class MysteryBox extends LootBox {
         if (!fading) return NOT_FADING;
 
         // Handle time-based fading logic
-        if (world.getElapsedTimeMs() >= nextFadeTimeMs) {
+        if (world.getRemainTime() >= nextFadeTimeMs) {
             if (fadeStep < 3) {
                 fadeStep++;
-                nextFadeTimeMs = world.getElapsedTimeMs() + FADE_INTERVAL_MS;
+                nextFadeTimeMs = world.getRemainTime() + FADE_INTERVAL_MS;
                 return FADING;
             }
             return FINISHED;
