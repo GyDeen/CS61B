@@ -257,11 +257,11 @@ public class World {
     }
 
 
-    private boolean nextToGold(Gold coin) {
+    private boolean nextToGameObject(GameObject object) {
         Point pPos = player.getPosition();
-        Point cPos = coin.getPosition();
+        Point cPos = object.getPosition();
 
-        if (coin.getImageWidth() > 1) { // 2x2 case
+        if (object.getImageWidth() > 1) { // 2x2 case
             boolean xNearby = pPos.x >= cPos.x - 1 && pPos.x <= cPos.x + 2;
             boolean yNearby = pPos.y >= cPos.y - 2 && pPos.y <= cPos.y + 1;
 
@@ -325,6 +325,13 @@ public class World {
 
 
             player.update(elapsedTimeMs, world, key);
+            int finalBoxStatus = finalBox.update(this);
+            if (finalBoxStatus == FINISHED) { playerWin(); }
+            if (nextToGameObject(finalBox)) {
+                if (nextToGameObject(finalBox) && key == 'f') {
+                    finalBox.startOpening();
+                }
+            }
             for (int i = 0; i < mysteryBoxes.size(); i++) {
                 MysteryBox box = mysteryBoxes.get(i);
                 int status = box.update(this);
@@ -341,7 +348,7 @@ public class World {
             for (int i = 0; i < golds.size(); i++) {
                 Gold gold = golds.get(i);
 
-                if (nextToGold(gold)) {
+                if (nextToGameObject(gold)) {
                     this.money += gold.getWorth();
 
                     removeCollected(gold);
