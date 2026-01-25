@@ -66,7 +66,7 @@ public class GameEndPage extends NonGamingPage{
 
             // Only clear the score number
             StdDraw.setPenColor(Color.BLACK);
-            StdDraw.filledRectangle(x + 10, y, 7, 0.7);
+            StdDraw.filledRectangle(x + 10, y, 10, 0.7);
 
             StdDraw.setPenColor(Color.GREEN);
             StdDraw.textLeft(x, y, "FINAL EVALUATION: " + displayValue);
@@ -80,7 +80,7 @@ public class GameEndPage extends NonGamingPage{
 
     private void drawFinalScoreLine(double x, double y, int finalScore) {
         StdDraw.setPenColor(Color.BLACK);
-        StdDraw.filledRectangle(x + 10, y, 7, 0.7);
+        StdDraw.filledRectangle(x + 10, y, 10, 0.7);
 
         StdDraw.setPenColor(Color.GREEN);
         StdDraw.textLeft(x, y, "FINAL EVALUATION: " + finalScore);
@@ -90,7 +90,7 @@ public class GameEndPage extends NonGamingPage{
 
     public int run(int gameResult, int remainingMoney, long remainingTimeMs, int destroyedGhost, double difficulty) {
         StdDraw.clear(Color.BLACK);
-        StdDraw.setFont(new Font("Monospaced", Font.PLAIN, 24));
+        StdDraw.setFont(new Font("Monospaced", Font.PLAIN, 20));
         boolean[] skip = {false};
 
         double startX = WINDOW_WIDTH * 0.35;
@@ -118,7 +118,7 @@ public class GameEndPage extends NonGamingPage{
         accumulateScore((int) (this.score + destroyedGhost * DESTROY_GHOST_MULTIPLIER * difficulty), finalScore, startX, scoreLineY, skip);
 
         typeWriterLine("------------------------------", startX, startY - (7 * lineSpacing), 40, skip);
-        typeWriterLine("PRESS ESC TO QUIT THE GAME. ENTER TO BACK TO INITIAL_", startX, startY - (8 * lineSpacing), 40, skip);
+        typeWriterLine("PRESS ESC TO QUIT THE GAME. ENTER TO BACK TO INITIAL PAGE_", startX, startY - (8 * lineSpacing), 40, skip);
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
