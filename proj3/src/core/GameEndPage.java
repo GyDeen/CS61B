@@ -66,7 +66,7 @@ public class GameEndPage extends NonGamingPage{
 
             // Only clear the score number
             StdDraw.setPenColor(Color.BLACK);
-            StdDraw.filledRectangle(x + 10, y, 5, 0.7);
+            StdDraw.filledRectangle(x + 10, y, 7, 0.7);
 
             StdDraw.setPenColor(Color.GREEN);
             StdDraw.textLeft(x, y, "FINAL EVALUATION: " + displayValue);
@@ -78,20 +78,24 @@ public class GameEndPage extends NonGamingPage{
     }
 
 
-    private void drawFinalScoreLine(double x, double y, double finalScore) {
+    private void drawFinalScoreLine(double x, double y, int finalScore) {
+        StdDraw.setPenColor(Color.BLACK);
+        StdDraw.filledRectangle(x + 10, y, 7, 0.7);
 
-
+        StdDraw.setPenColor(Color.GREEN);
+        StdDraw.textLeft(x, y, "FINAL EVALUATION: " + finalScore);
+        StdDraw.show();
     }
 
 
     public int run(int gameResult, int remainingMoney, long remainingTimeMs, int destroyedGhost, double difficulty) {
         StdDraw.clear(Color.BLACK);
-        StdDraw.setFont(new Font("Monospaced", Font.BOLD, 20)); // Terminal font
+        StdDraw.setFont(new Font("Monospaced", Font.PLAIN, 24));
         boolean[] skip = {false};
 
-        double startX = WINDOW_WIDTH * 0.2;
+        double startX = WINDOW_WIDTH * 0.35;
         double startY = WINDOW_HEIGHT * 0.70;
-        double lineSpacing = 1.5;
+        double lineSpacing = 3;
         double scoreLineY = startY - (3 * lineSpacing);
         int seconds = (int) (remainingTimeMs / 1000);
         int finalScore = (int) (score + remainingMoney * MONEY_SCORE_MULTIPLIER* difficulty +
@@ -114,12 +118,19 @@ public class GameEndPage extends NonGamingPage{
         accumulateScore((int) (this.score + destroyedGhost * DESTROY_GHOST_MULTIPLIER * difficulty), finalScore, startX, scoreLineY, skip);
 
         typeWriterLine("------------------------------", startX, startY - (7 * lineSpacing), 40, skip);
-        typeWriterLine("PRESS ESC TO QUIT THE GAME. ANY OTHER KEYS BACK TO INITIAL_", startX, startY - (8 * lineSpacing), 40, skip);
+        typeWriterLine("PRESS ESC TO QUIT THE GAME. ENTER TO BACK TO INITIAL_", startX, startY - (8 * lineSpacing), 40, skip);
 
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
-                if (StdDraw.isKeyPressed(KeyEvent.VK_ESCAPE)) return EXIT_GAME;
-                else return BACK_INIT;
+                char key = StdDraw.nextKeyTyped();
+                // Press ESC
+                if (key == 27) {
+                    return EXIT_GAME;
+                }
+                // Press Enter
+                if (key == '\n') {
+                    return BACK_INIT;
+                }
             }
             StdDraw.pause(20);
         }

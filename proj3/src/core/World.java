@@ -27,6 +27,7 @@ public class World {
     private int gameTime = GAME_TIME_IN_SEC;
     private long gameStartTimeMs;
     private long elapsedTimeMs = 0;
+    private int remainTime = gameTime;
     private int gameResult = LOSE;
 
     private static long seed = 654326789;
@@ -275,9 +276,9 @@ public class World {
         long currentTime = System.currentTimeMillis();
         elapsedTimeMs = currentTime - gameStartTimeMs;
         int elapsedSeconds = (int) (elapsedTimeMs / 1000);
-        int remainingSeconds = gameTime - elapsedSeconds;
-        if (remainingSeconds < 0) remainingSeconds = 0;
-        drawTimer(remainingSeconds);
+        remainTime = gameTime - elapsedSeconds;
+        if (remainTime < 0) remainTime = 0;
+        drawTimer(remainTime);
 
         ter.renderFrameNoShow(world);
         ter.resetFont();
@@ -352,7 +353,7 @@ public class World {
                     continue;
                 }
 
-                gold.drawImage(); // Redraw remaining coins
+                gold.drawImage();
             }
 
             UI.drawMoney(money);
@@ -419,7 +420,7 @@ public class World {
 
 
     /** Return the elapsed time for the game */
-    public long getElapsedTimeMs() {return elapsedTimeMs;}
+    public long getRemainTime() {return remainTime;}
 
 
     public int getMoney() {return money;}

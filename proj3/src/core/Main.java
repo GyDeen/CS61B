@@ -90,8 +90,8 @@ public class Main {
 
             if (state == GameState.SUMMARY) {
                 GameEndPage gameEnd = new GameEndPage();
-                if (gameEnd.run(gameResult, world.getMoney(), world.getElapsedTimeMs(), world.destroyedEnemies(), world.getDifficulty()) == EXIT_GAME) {
-                    state = GameState.QUIT;
+                if (gameEnd.run(gameResult, world.getMoney(), world.getRemainTime(), world.destroyedEnemies(), world.getDifficulty()) == EXIT_GAME) {
+                    System.exit(0);
                 } else {
                     state = GameState.INIT_MENU;
                 }
