@@ -13,10 +13,6 @@ import static core.Config.*;
 public class MysteryBox extends LootBox {
     private String[][] fadeMysteryPath;
 
-    private boolean fading = false;
-    private int fadeStep = 0;
-    private long nextFadeTime = 0;
-
 
     /* Using the top left tile as the position with 2 x 2 size */
     private MysteryBox(MainRoom belongsTo, int x, int y, int width, int height) {
@@ -62,18 +58,7 @@ public class MysteryBox extends LootBox {
         StdDraw.picture(posX + 0.5, posY - 0.5, fadeMysteryPath[fadeStep][2], 1, 1);
         StdDraw.picture(posX + 1.5, posY - 0.5, fadeMysteryPath[fadeStep][3], 1, 1);
 
-        if (!fading) return NOT_FADING;
-
-        // Handle time-based fading logic
-        if (world.getElapsedTimeMs() >= nextFadeTime) {
-            if (fadeStep < 3) {
-                fadeStep++;
-                nextFadeTime = world.getElapsedTimeMs() + FADE_INTERVAL;
-                return FADING;
-            }
-            return FINISHED;
-        }
-        return FADING;
+        return fadingOrOpening(world.getElapsedTimeMs());
     }
 
 

@@ -1,22 +1,21 @@
 package core;
 
+import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
 import tileengine.TileType;
 
 import java.awt.*;
 import java.util.Random;
 
-import static core.Config.WIN;
+import static core.Config.*;
 
 public class FinalBox extends LootBox {
     private String[] openFinalBox;
-    private int openStep = 0;
-    private boolean opening = false;
 
     /* Using the top left tile as the position with 2 x 2 size */
     private FinalBox(MainRoom room, int x, int y, int width, int height) {
         super(room, x, y, width, height);
-        setImagePath("resources/loot box/Final Box");
+        setImagePath("resources/loot box/FinalBox/");
         openFinalBox = new String[4];
         for (int i = 0; i < openFinalBox.length; i++) {
             if (i == 0) openFinalBox[i] = getImagePath() + "RPG Chests.jpg";
@@ -35,8 +34,10 @@ public class FinalBox extends LootBox {
     public int update(World world) {
         Point p = getPosition();
 
+        StdDraw.picture(p.x + 0.5, p.y + 0.5, openFinalBox[fadeStep], 1, 1);
+        return fadingOrOpening(world.getElapsedTimeMs());
     }
 
 
-    public void startOpening() {opening = true;}
+    public void startOpening() {fading = true;}
 }
