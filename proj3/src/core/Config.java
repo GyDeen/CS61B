@@ -2,7 +2,7 @@ package core;
 
 public class Config {
     // Game time
-    public static final int GAME_TIME_IN_SEC = 10;
+    public static final int GAME_TIME_IN_SEC = 120;
     // Could self define teh ratio of Floor type of room
     public static final double ROOM_FLOOR_POSS = 0.5;
     public static final int BLOCK_WIDTH1 = 1;
@@ -65,7 +65,7 @@ public class Config {
 
 
     // Loot Box type
-    public static final long FADE_INTERVAL_MS = 300;
+    public static final long FADE_INTERVAL = 300;
     public static final int NOT_FADING = 0;
     public static final int FADING = 1;
     public static final int FINISHED = 2;

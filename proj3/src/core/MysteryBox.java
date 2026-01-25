@@ -15,7 +15,7 @@ public class MysteryBox extends LootBox {
 
     private boolean fading = false;
     private int fadeStep = 0;
-    private long nextFadeTimeMs = 0;
+    private long nextFadeTime = 0;
 
 
     /* Using the top left tile as the position with 2 x 2 size */
@@ -65,10 +65,10 @@ public class MysteryBox extends LootBox {
         if (!fading) return NOT_FADING;
 
         // Handle time-based fading logic
-        if (world.getRemainTime() >= nextFadeTimeMs) {
+        if (world.getElapsedTimeMs() >= nextFadeTime) {
             if (fadeStep < 3) {
                 fadeStep++;
-                nextFadeTimeMs = world.getRemainTime() + FADE_INTERVAL_MS;
+                nextFadeTime = world.getElapsedTimeMs() + FADE_INTERVAL;
                 return FADING;
             }
             return FINISHED;

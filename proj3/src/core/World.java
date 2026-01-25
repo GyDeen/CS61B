@@ -420,7 +420,10 @@ public class World {
 
 
     /** Return the elapsed time for the game */
-    public long getRemainTime() {return remainTime;}
+    public int getRemainTime() {return remainTime;}
+
+
+    public long getElapsedTimeMs() {return elapsedTimeMs;}
 
 
     public int getMoney() {return money;}
