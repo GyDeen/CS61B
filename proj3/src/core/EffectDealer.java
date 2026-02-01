@@ -1,5 +1,6 @@
 package core;
 
+import org.jaxen.util.PrecedingAxisIterator;
 import tileengine.TileType;
 
 import java.util.Random;
@@ -41,8 +42,20 @@ public class EffectDealer {
 
 
     public void applyEffect(EffectType effectType, World world) {
+        PacMan player = world.getPlayer();
+        Random rand = world.getRandom();
         switch (effectType) {
             case COINS:
+                int coinNum = rand.nextInt(-100, 100);
+                world.addMoney(coinNum);
+                break;
+            case SPEED_Up:
+                long currentMoveCoolDown = player.getMoveCoolDown();
+                player.setMoveCoolDown((long) (currentMoveCoolDown * 0.5));
+                break;
+            case GHOST_STun:
+                break;
+            case ADD_Time:
 
         }
     }

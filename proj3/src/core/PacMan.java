@@ -189,13 +189,12 @@ public class PacMan extends GameObject{
 
 
     /** Setter for buff/debuff*/
-    public void setMoveCoolDown(long moveCoolDown) {
-        this.moveCoolDown = moveCoolDown;
-    }
+    public void setMoveCoolDown(long moveCoolDown) {this.moveCoolDown = moveCoolDown;}
 
 
     /** Allow player to destroy Enemies */
-    public void setWeaponized(boolean weaponized) {
-        isWeaponized = weaponized;
-    }
+    public void setWeaponized(boolean weaponized) {isWeaponized = weaponized;}
+
+
+    public long getMoveCoolDown() {return moveCoolDown;}
 }

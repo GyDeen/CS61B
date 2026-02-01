@@ -443,6 +443,20 @@ public class World {
 
     /** Return current game difficulty */
     public double getDifficulty() {return difficulty;}
+
+
+    /** Add money */
+    public void addMoney(int amount) {
+        if (money + amount > 0) {
+            money += amount;
+        } else {
+            money = 0;
+        }
+    }
+
+
+    /** Get random */
+    public Random getRandom() {return random;}
 }
 
 
