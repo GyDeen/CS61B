@@ -5,6 +5,8 @@ import tileengine.TileType;
 
 import java.util.Random;
 
+import static core.Config.MODIFY_GAME_TIME_IN_SEC;
+
 public class EffectDealer {
     public enum EffectType {
         COINS(false),
@@ -56,6 +58,8 @@ public class EffectDealer {
             case GHOST_STun:
                 break;
             case ADD_Time:
+                world.addGameTime((int) (MODIFY_GAME_TIME_IN_SEC / world.getDifficulty()));
+                break;
 
         }
     }

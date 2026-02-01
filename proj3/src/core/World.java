@@ -431,6 +431,16 @@ public class World {
     public int getRemainTime() {return remainTime;}
 
 
+    /** Add game time with given amount. If it will make game time less than 0, set game time to 0 */
+    public void addGameTime(int modify) {
+        if (gameTime + modify > 0) {
+            gameTime += modify;
+        } else {
+            gameTime = 0;
+        }
+    }
+
+
     public long getElapsedTimeMs() {return elapsedTimeMs;}
 
 
