@@ -22,6 +22,8 @@ public class PacMan extends GameObject{
 
     private long nextSwitchTimeMs = 0;
     private long nextMoveTimeMs = 0;
+    private long moveCoolDown = PAC_MAN_MOVE_COOLDOWN_DEFAULT;
+    private boolean isWeaponized = false;
 
     private PacMan(int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -178,10 +180,22 @@ public class PacMan extends GameObject{
                 this.curDirection = nextIntendedDir;
                 updateBasedInput(this.curDirection, world);
                 nextIntendedDir = null;
-                nextMoveTimeMs = worldTime + PAC_MAN_MOVE_COOLDOWN_DEFAULT;
+                nextMoveTimeMs = worldTime + moveCoolDown;
             }
         }
 
         drawImage();
+    }
+
+
+    /** Setter for buff/debuff*/
+    public void setMoveCoolDown(long moveCoolDown) {
+        this.moveCoolDown = moveCoolDown;
+    }
+
+
+    /** Allow player to destroy Enemies */
+    public void setWeaponized(boolean weaponized) {
+        isWeaponized = weaponized;
     }
 }
