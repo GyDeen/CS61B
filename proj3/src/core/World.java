@@ -423,6 +423,7 @@ public class World {
     public void playerWin() {gameResult = WIN;}
 
 
+    /** Return current game player */
     public PacMan getPlayer() {return player;}
 
 
@@ -433,10 +434,14 @@ public class World {
     public long getElapsedTimeMs() {return elapsedTimeMs;}
 
 
+    /** Return current money count */
     public int getMoney() {return money;}
 
+    /** Return how many enemies player destroyed*/
     public int destroyedEnemies() {return destroyedEnemies;}
 
+
+    /** Return current game difficulty */
     public double getDifficulty() {return difficulty;}
 }
 
