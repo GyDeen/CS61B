@@ -8,10 +8,8 @@ import java.util.Random;
 import static core.Config.DEFAULT_GHOST_CHASE_DISTANCE;
 
 public abstract class Ghost extends GameObject{
-    private static TETile[][] world;
     private boolean chasePlayer = false;
     private Direction currentDir = null;
-
 
     private Ghost(int x, int y, int width, int height, Random rand) {
         super(x, y, width, height);
@@ -50,8 +48,6 @@ public abstract class Ghost extends GameObject{
 
 
     public void setChase(boolean chase) {chasePlayer = chase;}
-
-
 
     private double distance(Point p1) {
         return Math.abs(Math.sqrt(Math.pow(p1.x - getPosition().x, 2) + Math.pow(p1.y - getPosition().y, 2)));
