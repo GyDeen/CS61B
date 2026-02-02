@@ -60,7 +60,8 @@ public class EffectDealer {
             case ADD_Time:
                 world.addGameTime((int) (MODIFY_GAME_TIME_IN_SEC / world.getDifficulty()));
                 break;
-
+            case TIME_Froze:
+                world.startTimeFreeze();
         }
     }
 }

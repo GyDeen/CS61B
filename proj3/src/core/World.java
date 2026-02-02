@@ -24,11 +24,14 @@ public class World {
     private boolean escHeld = false;
     private boolean mouseHeld = false;
     private TERenderer ter = new TERenderer();
+
     private int gameTime = GAME_TIME_IN_SEC;
     private long gameStartTimeMs;
     private long elapsedTimeMs = 0;
     private int remainTime = gameTime;
     private int gameResult = LOSE;
+    private boolean isFrozen = false;
+    private long frozenFrom = 0;
 
     private static long seed = 654326789;
     private static Random random = new Random(seed);
@@ -41,6 +44,7 @@ public class World {
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private ArrayList<MysteryBox>  mysteryBoxes = new ArrayList<>();
     private ArrayList<Gold> golds = new ArrayList<>();
+    private Ghost[]  ghosts;
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -278,10 +282,6 @@ public class World {
         int elapsedSeconds = (int) (elapsedTimeMs / 1000);
         remainTime = gameTime - elapsedSeconds;
         if (remainTime < 0) remainTime = 0;
-        drawTimer(remainTime);
-
-        ter.renderFrameNoShow(world);
-        ter.resetFont();
     }
 
 
@@ -323,8 +323,8 @@ public class World {
                 }
             }
 
-
             player.update(elapsedTimeMs, world, key);
+
             int finalBoxStatus = finalBox.update(this);
             if (finalBoxStatus == FINISHED) { playerWin(); }
             if (nextToGameObject(finalBox)) {
@@ -332,6 +332,7 @@ public class World {
                     finalBox.startOpening();
                 }
             }
+
             for (int i = 0; i < mysteryBoxes.size(); i++) {
                 MysteryBox box = mysteryBoxes.get(i);
                 int status = box.update(this);
@@ -363,9 +364,20 @@ public class World {
                 gold.drawImage();
             }
 
+            if (!isFrozen) {
+                for (Ghost ghost : ghosts) {
+                    ghost.update();
+                }
+
+                updateTimer();
+            }
+
+            if (isFrozen && System.currentTimeMillis() >= frozenFrom + DEFAULT_FROZEN_DURATION) {
+                stopTimeFreeze();
+            }
+
             UI.drawMoney(money);
             setting.drawSetting();
-            updateTimer();
             UI.drawUIBackground();
         }
 
@@ -411,6 +423,10 @@ public class World {
         generateMysteryBoxes();
         generateGold();
 
+        drawTimer(remainTime);
+        ter.renderFrameNoShow(world);
+        ter.resetFont();
+
         ter.renderFrame(world);
 
         // start game timer
@@ -437,6 +453,26 @@ public class World {
             gameTime += modify;
         } else {
             gameTime = 0;
+        }
+    }
+
+
+    /** Record the time frozen starting point */
+    public void startTimeFreeze() {
+        if (!isFrozen) {
+            isFrozen = true;
+            frozenFrom = System.currentTimeMillis();
+        }
+    }
+
+
+    /** Stop the time frozen effect */
+    public void stopTimeFreeze() {
+        if (isFrozen) {
+            long freezeDuration = System.currentTimeMillis() - frozenFrom;
+            // Adjust the start time forward by the duration of the freeze
+            gameStartTimeMs += freezeDuration;
+            isFrozen = false;
         }
     }
 

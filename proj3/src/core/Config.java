@@ -87,6 +87,7 @@ public class Config {
     public static final long PAC_MAN_MOVE_COOLDOWN_DEFAULT = 100;
     public static final long PAC_MAN_COOLDOWN_MEDIUM = 130;
     public static final long PAC_MAN_COOLDOWN_HARD = 150;
+    public static final long DEFAULT_FROZEN_DURATION = 10000;
     public static final int TIME_SCORE_MULTIPLIER = 100;
     public static final int MONEY_SCORE_MULTIPLIER = 50;
     public static final int DESTROY_GHOST_MULTIPLIER = 500;
