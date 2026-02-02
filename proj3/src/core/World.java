@@ -33,7 +33,7 @@ public class World {
     private static long seed = 654326789;
     private static Random random = new Random(seed);
     private static final double difficulty = DEFAULT_DIFFICULTY;
-    public final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
+    private final TETile[][] world = new TETile[WINDOW_WIDTH][WORLD_HEIGHT];
 
     private UI.Setting setting = new UI.Setting();
     int currentRoomID = 0;
