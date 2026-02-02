@@ -36,7 +36,7 @@ public abstract class GameObject {
     }
 
 
-    /** Constructor for moving object such as PacMan and Ghost */
+    /** Constructor for moving object such as PacMan */
     public GameObject(int x, int y, int width, int height) {
         position = new Point(x, y);
         this.imageWidth = width;
