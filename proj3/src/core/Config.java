@@ -65,6 +65,10 @@ public class Config {
     public static final int IMAGE_SWITCHING_PERIOD = 500;
 
 
+    // Ghost config
+    public static final double DEFAULT_GHOST_CHASE_DISTANCE = 20;
+
+
     // Loot Box type
     public static final long FADE_INTERVAL = 300;
     public static final int NOT_FADING = 0;
