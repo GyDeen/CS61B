@@ -22,8 +22,8 @@ public abstract class Ghost extends GameObject{
     }
 
 
-    /** Chasing player */
-    public void chase(PacMan player) {
+    /* Chasing player */
+    private void chase(PacMan player) {
         if (!chasePlayer) return;
         Point playerPosition = player.getPosition();
 
@@ -85,4 +85,16 @@ public abstract class Ghost extends GameObject{
         }
     }
 
+
+    /** Update without given destination point for set route ghost*/
+    public void update() {
+    }
+
+
+    /** Update with given destination point */
+    public void update(Point destination) {}
+
+
+    /** Update when set to chase player */
+    public void update (PacMan player) {}
 }
