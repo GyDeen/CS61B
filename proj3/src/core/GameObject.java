@@ -97,6 +97,7 @@ public abstract class GameObject {
     }
 
 
+    /** Find spawn position for this object on given room */
     public static Point findSpawnLocation(MainRoom room, int objectSize ,Random rand, TETile[][] world) {
         int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
 
@@ -124,6 +125,40 @@ public abstract class GameObject {
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
                 if (room.isInRoom(x, y) && validPos(x, y, objectSize, world)) {
+                    return new Point(x, y);
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    /** Find the initial spawn location nearby the given closeTo object */
+    public static Point findSpawnLocation(int radius, int objectSize ,Random rand, TETile[][] world, GameObject closeTo) {
+        Point closeToP = closeTo.getPosition();
+        MainRoom targetRoom = closeTo.getRoom();
+        int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
+
+        int minX = Math.max(targetRoom.getLeft() + 1, closeToP.x - radius),
+                maxX = Math.min(targetRoom.getRight() - 1, closeToP.x + radius),
+                minY = Math.max(targetRoom.getBottom() + 1, closeToP.y - radius),
+                maxY = Math.min(targetRoom.getTop() - 1, closeToP.y + radius);
+
+        for (SubRoom s: targetRoom.getSubRooms()) {
+            minX = Math.max(minX, s.getLeft() + 1);
+            maxX = Math.min(maxX, s.getRight() - 1);
+            minY = Math.max(minY, s.getLeft() + 1);
+            maxY = Math.min(maxY, s.getRight() - 1);
+        }
+
+        for (int i = 0; i < maxAttempt; i++) {
+            int x = rand.nextInt(minX, maxX);
+            int y = rand.nextInt(minY, maxY);
+
+            if (targetRoom.isInRoom(x, y) && validPos(x, y, 1, world)) {
+                // Insure it is not right next to the given object
+                if (Math.abs(x - closeToP.x) > 1 || Math.abs(y - closeToP.y) > 1) {
                     return new Point(x, y);
                 }
             }
