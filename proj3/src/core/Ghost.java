@@ -57,31 +57,21 @@ public abstract class Ghost extends GameObject{
         return currentDir == Direction.LEFT || currentDir == Direction.RIGHT;
     }
 
-    private void moveToward(Point p1) {
-        if (getPosition().x != p1.x) {
-            if (isHorizontal()) {
-                if (currentDir == Direction.LEFT) {
-                    setPosition(getPosition().x - 1, getPosition().y);
-                } else {
-                    setPosition(getPosition().x + 1, getPosition().y);
-                }
-            } else {
-                if (currentDir == Direction.UP) {
-                    setPosition(getPosition().x, getPosition().y + 1);
-                } else {
-                    setPosition(getPosition().x, getPosition().y - 1);
-                }
-            }
 
-            return;
+    /** Moving only determine by the dx and dy between the p1 and current position not by the direction */
+    private void moveToward(Point p1, TETile[][] world) {
+        int dx = Integer.compare(p1.x, getPosition().x);
+        int dy = Integer.compare(p1.y, getPosition().y);
+
+        if (validPos(getPosition().x + dx, getPosition().y + dy, 1, world)) {
+            setPosition(getPosition().x + dx, getPosition().y + dy);
         }
 
-        if (getPosition().y - p1.y > 0) {
-            currentDir = Direction.DOWN;
-            setPosition(getPosition().x, getPosition().y - 1);
-        } else {
-            currentDir = Direction.UP;
-            setPosition(getPosition().x, getPosition().y +1);
+        // Update image facing
+        if (dx != 0) {
+            this.currentDir = (dx > 0) ? Direction.RIGHT : Direction.LEFT;
+        } else if (dy != 0) {
+            this.currentDir = (dy > 0) ? Direction.UP : Direction.DOWN;
         }
     }
 
