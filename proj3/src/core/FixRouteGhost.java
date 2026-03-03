@@ -25,15 +25,20 @@ public class FixRouteGhost extends Ghost{
         Point p = findSpawnLocation(rand.nextInt(3, 5), 1, rand, world, closeTo);
         if (p == null) return null;
 
+        FixRouteGhost currentGhost = new FixRouteGhost(p.x, p.y, 1, 1, rand);
+        currentGhost.generateRoute(rand, world, closeTo, p);
+        return currentGhost;
     }
 
 
     private void generateRoute(Random rand, TETile[][] world, GameObject closeTo, Point currentPos) {
         int shape = rand.nextInt(4);
         int xDistance = currentPos.x - closeTo.getPosition().x, yDistance = currentPos.y - closeTo.getPosition().y;
+        int radius = (int) Math.sqrt(Math.pow(currentPos.x - closeTo.getPosition().x, 2) +
+                Math.pow(currentPos.y - closeTo.getPosition().y, 2));
 
         switch (shape) {
-            case INF_SIGN:
+            case INF_SIGN: {
                 route = new Point[4];
                 route[0] = currentPos;
 
@@ -44,7 +49,8 @@ public class FixRouteGhost extends Ghost{
                 // Symmetry About the x-Axis
                 route[3] = new Point(currentPos.x, closeTo.getPosition().y - yDistance);
                 break;
-            case SQUARE:
+            }
+            case SQUARE: {
                 route = new Point[4];
                 route[0] = currentPos;
                 boolean horizontalFirst = rand.nextBoolean();
@@ -58,8 +64,8 @@ public class FixRouteGhost extends Ghost{
                     route[3] = new Point(currentPos.x, closeTo.getPosition().y - yDistance);
                 }
                 break;
-            case CIRCLE:
-                   int radius = (int) Math.sqrt(Math.pow(currentPos.x - closeTo.getPosition().x ,2) + Math.pow(currentPos.y - closeTo.getPosition().y, 2));
+            }
+            case CIRCLE: {
                 for (int i = 0; i < 8; i++) {
                     double angle = 2 * Math.PI * i / 8;
                     int x = (int) Math.round(closeTo.getPosition().x + radius * Math.cos(angle));
@@ -73,6 +79,31 @@ public class FixRouteGhost extends Ghost{
                         route[i] = closeTo.getPosition();
                     }
                 }
+                break;
+            }
+
+            case STAR: {
+                route = new Point[5];
+                Point[] vertices = new Point[5];
+
+                for (int i = 0; i < 5; i++) {
+                    double angle = (Math.PI / 2) + (2 * Math.PI * i / 5);
+                    int x = (int) Math.round(closeTo.getPosition().x + radius * Math.cos(angle));
+                    int y = (int) Math.round(closeTo.getPosition().y + radius * Math.sin(angle));
+                    vertices[i] = new Point(x, y);
+                }
+
+                route[0] = vertices[0];
+                route[1] = vertices[2];
+                route[2] = vertices[4];
+                route[3] = vertices[1];
+                route[4] = vertices[3];
+
+                break;
+            }
+
+            default:
+                throw new RuntimeException("Invalid shape " + shape);
         }
     }
 
