@@ -11,12 +11,12 @@ public abstract class Ghost extends GameObject{
     private boolean chasePlayer = false;
     private Direction currentDir = null;
 
-    private Ghost(int x, int y, int width, int height, Random rand) {
+    protected Ghost(int x, int y, int width, int height, Random rand) {
         super(x, y, width, height);
         setImagePath("resources/pac man/ghost");
     }
 
-    private Ghost(int x, int y, int width, int height, MainRoom belongsTo, Random rand) {
+    protected Ghost(int x, int y, int width, int height, MainRoom belongsTo, Random rand) {
         super(x, y, width, height,  belongsTo);
         setImagePath("resources/pac man/ghost");
     }
