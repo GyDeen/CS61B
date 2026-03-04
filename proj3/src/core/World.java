@@ -9,6 +9,7 @@ import utils.RandomUtils;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import static core.Config.*;
@@ -44,7 +45,7 @@ public class World {
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private ArrayList<MysteryBox>  mysteryBoxes = new ArrayList<>();
     private ArrayList<Gold> golds = new ArrayList<>();
-    private Ghost[]  ghosts;
+    private ArrayList<Ghost>  ghosts;
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -260,6 +261,22 @@ public class World {
         }
     }
 
+    private void generateGhost() {
+        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty);
+        ArrayList<GameObject> approachable = new ArrayList<>();
+        approachable.addAll(golds);
+        approachable.addAll(mysteryBoxes);
+        Collections.shuffle(approachable);
+
+
+        while (ghosts.size() < ghostNum) {
+            Ghost newGhost = FixRouteGhost.generateFixRouteGhost(random, world, approachable.get(random.nextInt(approachable.size())));
+            if (newGhost == null) continue;
+            ghosts.add(newGhost);
+            System.out.println("Successfully generate one ghost");
+        }
+    }
+
 
     private boolean nextToGameObject(GameObject object) {
         Point pPos = player.getPosition();
@@ -366,7 +383,7 @@ public class World {
 
             if (!isFrozen) {
                 for (Ghost ghost : ghosts) {
-                    ghost.update();
+                    ghost.update(world);
                 }
 
                 updateTimer();
