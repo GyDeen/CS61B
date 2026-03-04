@@ -135,15 +135,6 @@ public class PacMan extends GameObject{
     }
 
 
-    /* Based on the input update the PacMan position and direction */
-    private void handleInput(TETile[][] world, char nextInput) {
-        if (!isActive()) return;
-        Direction dir = getDirectionFromKey(nextInput);
-        assert dir != null;
-        updateBasedInput(dir, world);
-    }
-
-
     @Override
     /** Draw the image based on current facing. It should be able to switch the image based on the time */
     public void drawImage() {
