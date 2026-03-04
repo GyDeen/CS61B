@@ -117,14 +117,14 @@ public abstract class GameObject {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
 
-            if (room.isInRoom(x, y) && validPos(x, y, objectSize,world)) {
+            if (room.isInRoom(x, y) && validPos(x, y, objectSize, 6, world)) {
                 return new Point(x, y);
             }
         }
 
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
-                if (room.isInRoom(x, y) && validPos(x, y, objectSize, world)) {
+                if (room.isInRoom(x, y) && validPos(x, y, objectSize, 6, world)) {
                     return new Point(x, y);
                 }
             }
@@ -135,7 +135,7 @@ public abstract class GameObject {
 
 
     /** Find the initial spawn location nearby the given closeTo object */
-    public static Point findSpawnLocation(int radius, int objectSize ,Random rand, TETile[][] world, GameObject closeTo) {
+    public static Point findSpawnLocation(int radius,Random rand, TETile[][] world, GameObject closeTo) {
         Point closeToP = closeTo.getPosition();
         MainRoom targetRoom = closeTo.getRoom();
         int maxAttempt = Config.MAX_ATTEMPT_PIVOT;
@@ -148,15 +148,15 @@ public abstract class GameObject {
         for (SubRoom s: targetRoom.getSubRooms()) {
             minX = Math.max(minX, s.getLeft() + 1);
             maxX = Math.min(maxX, s.getRight() - 1);
-            minY = Math.max(minY, s.getLeft() + 1);
-            maxY = Math.min(maxY, s.getRight() - 1);
+            minY = Math.max(minY, s.getBottom() + 1);
+            maxY = Math.min(maxY, s.getTop() - 1);
         }
 
         for (int i = 0; i < maxAttempt; i++) {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
 
-            if (targetRoom.isInRoom(x, y) && validPos(x, y, 1, world)) {
+            if (targetRoom.isInRoom(x, y) && validPos(x, y, 1, 1, world)) {
                 // Insure it is not right next to the given object
                 if (Math.abs(x - closeToP.x) > 1 || Math.abs(y - closeToP.y) > 1) {
                     return new Point(x, y);
@@ -168,13 +168,13 @@ public abstract class GameObject {
     }
 
 
-    public static boolean validPos(int x, int y, int size,TETile[][] world) {
+    public static boolean validPos(int x, int y, int size, int nearByObjectMinimDistance, TETile[][] world) {
         if (x < 0 || y < 0 || x >= world.length || y >= world[0].length) return false;
 
 
         // Checking no other objects around current objects
-        for (int i = -2; i <= 3; i++) {
-            for (int j = -3; j <= 2; j++) {
+        for (int i = -nearByObjectMinimDistance / 2; i <= nearByObjectMinimDistance / 2; i++) {
+            for (int j = -nearByObjectMinimDistance / 2; j <= nearByObjectMinimDistance / 2; j++) {
                 if (x + i < 0 || y + j < 0 || x + i >= world.length || y + j >= world[0].length) return false;
                 if (TileType.toType(world[x + i][y + j]) == BOX || TileType.toType(world[x + i][y + j]) == COIN) {
                     return false;
