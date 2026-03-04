@@ -1,6 +1,8 @@
 package core;
 
+import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
+import tileengine.TileType;
 
 import java.awt.*;
 import java.util.Random;
@@ -35,15 +37,9 @@ public abstract class Ghost extends GameObject{
         }
 
         int leftOfPlayer = getPosition().x - playerPosition.x, topOfPlayer = getPosition().y - playerPosition.y;
-        boolean horizontalFirst = Math.abs(leftOfPlayer) > Math.abs(topOfPlayer);
 
-        if (horizontalFirst) {
-            if (leftOfPlayer < 0) currentDir = Direction.RIGHT;
-            else currentDir = Direction.LEFT;
-        } else {
-            if (topOfPlayer < 0) currentDir = Direction.UP;
-            else currentDir = Direction.DOWN;
-        }
+        if (leftOfPlayer < 0) currentDir = Direction.RIGHT;
+        else currentDir = Direction.LEFT;
     }
 
 
@@ -63,7 +59,8 @@ public abstract class Ghost extends GameObject{
         int dx = Integer.compare(p1.x, getPosition().x);
         int dy = Integer.compare(p1.y, getPosition().y);
 
-        if (validPos(getPosition().x + dx, getPosition().y + dy, 1, world)) {
+        // Only move to the passable tile
+        if (TileType.toType(world[p1.x + dx][p1.y + dy]).isPassable()) {
             setPosition(getPosition().x + dx, getPosition().y + dy);
         }
 
@@ -77,7 +74,7 @@ public abstract class Ghost extends GameObject{
 
 
     /** Update without given destination point for set route ghost*/
-    public void update() {
+    public void update(TETile[][] world) {
     }
 
 
@@ -87,4 +84,14 @@ public abstract class Ghost extends GameObject{
 
     /** Update when set to chase player */
     public void update (PacMan player) {}
+
+
+    /** Draw Ghost image on current position */
+    public void draw() {
+        StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, getImagePath(), 1, 1);
+    }
+
+
+    public Direction getDirection() {return currentDir;}
+
 }
