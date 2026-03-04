@@ -13,7 +13,8 @@ public enum TileType {
     LOCKED_DOOR(false, Integer.MAX_VALUE),
     WALL(false, Integer.MAX_VALUE),
     BOX(false, Integer.MAX_VALUE),
-    NOTHING(false, Integer.MAX_VALUE);
+    NOTHING(false, Integer.MAX_VALUE),
+    GHOST(false, Integer.MAX_VALUE);
 
 
     private final boolean passable;
