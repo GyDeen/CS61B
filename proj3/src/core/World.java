@@ -45,7 +45,7 @@ public class World {
     private ArrayList<MainRoom> majorRooms = new ArrayList<>();
     private ArrayList<MysteryBox>  mysteryBoxes = new ArrayList<>();
     private ArrayList<Gold> golds = new ArrayList<>();
-    private ArrayList<Ghost>  ghosts;
+    private ArrayList<Ghost>  ghosts = new ArrayList<>();
     private HallwayCarver carver;
     private PacMan player;
     private FinalBox finalBox;
@@ -262,15 +262,17 @@ public class World {
     }
 
     private void generateGhost() {
-        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty);
+        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty * 3 / 7) ;
+        int generationCount = 0;
         ArrayList<GameObject> approachable = new ArrayList<>();
         approachable.addAll(golds);
         approachable.addAll(mysteryBoxes);
         Collections.shuffle(approachable);
 
 
-        while (ghosts.size() < ghostNum) {
+        while (ghosts.size() < ghostNum && generationCount < GHOST_GENERATION_CAP) {
             Ghost newGhost = FixRouteGhost.generateFixRouteGhost(random, world, approachable.get(random.nextInt(approachable.size())));
+            generationCount++;
             if (newGhost == null) continue;
             ghosts.add(newGhost);
             System.out.println("Successfully generate one ghost");
@@ -328,6 +330,8 @@ public class World {
                 return PAUSE;
             }
 
+            ter.renderFrameNoShow(world);
+
             char key = '\0';
             if (StdDraw.hasNextKeyTyped()) {
                 key = Character.toLowerCase(StdDraw.nextKeyTyped());
@@ -383,7 +387,7 @@ public class World {
 
             if (!isFrozen) {
                 for (Ghost ghost : ghosts) {
-                    ghost.update(world);
+                    ((FixRouteGhost) ghost).update(world, elapsedTimeMs);
                 }
 
                 updateTimer();
@@ -396,6 +400,7 @@ public class World {
             UI.drawMoney(money);
             setting.drawSetting();
             UI.drawUIBackground();
+            StdDraw.show();
         }
 
         return PAUSE;
@@ -439,6 +444,7 @@ public class World {
 
         generateMysteryBoxes();
         generateGold();
+        generateGhost();
 
         drawTimer(remainTime);
         ter.renderFrameNoShow(world);
@@ -448,6 +454,7 @@ public class World {
 
         // start game timer
         gameStartTimeMs = System.currentTimeMillis();
+        System.out.println("Game start");
     }
 
 

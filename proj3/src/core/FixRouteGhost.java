@@ -1,5 +1,6 @@
 package core;
 
+import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
 
 import java.awt.*;
@@ -12,17 +13,16 @@ public class FixRouteGhost extends Ghost{
     private static final int STAR = 3;
 
 
-
     private Point[] route;
     private int currentIdx = 0;
 
     private FixRouteGhost(int x, int y, int width, int height, Random rand) {
         super(x, y, width, height, rand);
-        setImagePath("resources/pac man/ghost/pink ghost");
+        setImagePath("resources/pac man/ghost/pink ghost/pink_ghost_");
     }
 
     public static FixRouteGhost generateFixRouteGhost(Random rand, TETile[][] world, GameObject closeTo) {
-        Point p = findSpawnLocation(rand.nextInt(3, 5), 1, rand, world, closeTo);
+        Point p = findSpawnLocation(rand.nextInt(3, 5), rand, world, closeTo);
         if (p == null) return null;
 
         FixRouteGhost currentGhost = new FixRouteGhost(p.x, p.y, 1, 1, rand);
@@ -66,13 +66,14 @@ public class FixRouteGhost extends Ghost{
                 break;
             }
             case CIRCLE: {
+                route = new Point[8];
                 for (int i = 0; i < 8; i++) {
                     double angle = 2 * Math.PI * i / 8;
                     int x = (int) Math.round(closeTo.getPosition().x + radius * Math.cos(angle));
                     int y = (int) Math.round(closeTo.getPosition().y + radius * Math.sin(angle));
 
                     // Ensure the vertex is passable and within room bounds
-                    if (validPos(x, y, 1, world)) {
+                    if (validPos(x, y, 1, 1, world)) {
                         route[i] = new Point(x, y);
                     } else {
                         // Fallback: use anchor if a vertex is inside a wall
@@ -105,6 +106,23 @@ public class FixRouteGhost extends Ghost{
             default:
                 throw new RuntimeException("Invalid shape " + shape);
         }
+    }
+
+    @Override
+    /** Only change facing between LEFT and RIGHT*/
+    public void draw() {
+        if (getDirection() == Direction.LEFT) {
+            StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, getImagePath() + "left.png", 1, 1);
+        } else {
+            StdDraw.picture(getPosition().x + 0.5, getPosition().y + 0.5, getImagePath() + "right.png", 1, 1);
+        }
+    }
+
+
+    public void update(TETile[][] world, long worldTime) {
+        if (moveToward(route[currentIdx], world, worldTime)) currentIdx = (currentIdx + 1) % route.length;
+
+        draw();
     }
 
 

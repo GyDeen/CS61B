@@ -8,10 +8,13 @@ import java.awt.*;
 import java.util.Random;
 
 import static core.Config.DEFAULT_GHOST_CHASE_DISTANCE;
+import static core.Config.GHOST_MOVE_COOLDOWN_DEFAULT;
 
 public abstract class Ghost extends GameObject{
     private boolean chasePlayer = false;
     private Direction currentDir = null;
+    private long nextMoveTime = 0;
+    private long moveCoolDown = GHOST_MOVE_COOLDOWN_DEFAULT;
 
     protected Ghost(int x, int y, int width, int height, Random rand) {
         super(x, y, width, height);
@@ -55,21 +58,24 @@ public abstract class Ghost extends GameObject{
 
 
     /** Moving only determine by the dx and dy between the p1 and current position not by the direction */
-    private void moveToward(Point p1, TETile[][] world) {
+    public boolean moveToward(Point p1, TETile[][] world, long worldTime) {
         int dx = Integer.compare(p1.x, getPosition().x);
         int dy = Integer.compare(p1.y, getPosition().y);
 
         // Only move to the passable tile
-        if (TileType.toType(world[p1.x + dx][p1.y + dy]).isPassable()) {
+        if (TileType.toType(world[p1.x + dx][p1.y + dy]).isPassable() && worldTime >= nextMoveTime) {
             setPosition(getPosition().x + dx, getPosition().y + dy);
+            nextMoveTime = worldTime + moveCoolDown;
+
+            // Update image facing
+            if (dx != 0) {
+                this.currentDir = (dx > 0) ? Direction.RIGHT : Direction.LEFT;
+            }
+
+            return true;
         }
 
-        // Update image facing
-        if (dx != 0) {
-            this.currentDir = (dx > 0) ? Direction.RIGHT : Direction.LEFT;
-        } else if (dy != 0) {
-            this.currentDir = (dy > 0) ? Direction.UP : Direction.DOWN;
-        }
+        return false;
     }
 
 
