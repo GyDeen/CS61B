@@ -50,6 +50,7 @@ public class Config {
     public static final int FINAL_ROOM_HALLWAY_NUM = 1;
     public static final int MAX_ATTEMPT_PIVOT = 50;
     public static final int ALLOCATE_FAIL_CAP = 200;
+    public static final int GHOST_GENERATION_CAP = 500;
     public static final int PAUSE = 0;
     public static final int WIN = 1;
     public static final int LOSE = -1;
