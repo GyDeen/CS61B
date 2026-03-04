@@ -92,5 +92,5 @@ public class Config {
     public static final int TIME_SCORE_MULTIPLIER = 100;
     public static final int MONEY_SCORE_MULTIPLIER = 50;
     public static final int DESTROY_GHOST_MULTIPLIER = 500;
-
+    public static final long GHOST_MOVE_COOLDOWN_DEFAULT = 90;
 }
