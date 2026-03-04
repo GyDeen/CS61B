@@ -35,7 +35,7 @@ public abstract class LootBox extends GameObject {
             if  (pos == null) continue;
 
             // Check if this point can support a 2x2 box without overlapping
-            if (validPos(pos.x, pos.y,2, world)) {
+            if (validPos(pos.x, pos.y,2, 2, world)) {
                 return pos;
             }
         }

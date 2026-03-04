@@ -117,14 +117,14 @@ public abstract class GameObject {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
 
-            if (room.isInRoom(x, y) && validPos(x, y, objectSize, 6, world)) {
+            if (room.isInRoom(x, y) && validPos(x, y, objectSize, 3, world)) {
                 return new Point(x, y);
             }
         }
 
         for (int x = minX; x < maxX; x++) {
             for (int y = minY; y < maxY; y++) {
-                if (room.isInRoom(x, y) && validPos(x, y, objectSize, 6, world)) {
+                if (room.isInRoom(x, y) && validPos(x, y, objectSize, 3, world)) {
                     return new Point(x, y);
                 }
             }
@@ -173,8 +173,8 @@ public abstract class GameObject {
 
 
         // Checking no other objects around current objects
-        for (int i = -nearByObjectMinimDistance / 2; i <= nearByObjectMinimDistance / 2; i++) {
-            for (int j = -nearByObjectMinimDistance / 2; j <= nearByObjectMinimDistance / 2; j++) {
+        for (int i = -nearByObjectMinimDistance; i <= nearByObjectMinimDistance; i++) {
+            for (int j = -nearByObjectMinimDistance; j <= nearByObjectMinimDistance; j++) {
                 if (x + i < 0 || y + j < 0 || x + i >= world.length || y + j >= world[0].length) return false;
                 if (TileType.toType(world[x + i][y + j]) == BOX || TileType.toType(world[x + i][y + j]) == COIN) {
                     return false;
