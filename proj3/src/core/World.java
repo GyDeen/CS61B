@@ -262,7 +262,7 @@ public class World {
     }
 
     private void generateGhost() {
-        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty * 3 / 7) ;
+        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty * 1 / 7) ;
         int generationCount = 0;
         ArrayList<GameObject> approachable = new ArrayList<>();
         approachable.addAll(golds);
