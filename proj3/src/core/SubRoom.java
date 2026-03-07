@@ -44,15 +44,15 @@ public class SubRoom extends Room {
                 try {y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height);}
                 catch (IllegalArgumentException e) {return null;}
 
-                // Find the x-axis extension on base room
-                int xExtensionOnMain = x + (width / 2) - baseRoom.getLeft();
+                // Find the x-axis overlap on base room
+                int xOverlapOnMain = x + (width / 2) - baseRoom.getLeft();
                 // If the subroom is entirely contained by the base room
                 if (y + (height / 2) <= baseRoom.getTop() && y - (height / 2) >= baseRoom.getBottom()) {
-                    size -= height * xExtensionOnMain;
+                    size -= height * xOverlapOnMain;
                 } else if (y + (height / 2) > baseRoom.getTop()) { // If the subroom is "higher" than the baseRoom top
-                    size -= (baseRoom.getTop() - (y - (height / 2) ) ) * xExtensionOnMain;
+                    size -= (baseRoom.getTop() - (y - (height / 2) ) ) * xOverlapOnMain;
                 }  else { // The subroom is "lower" than the baseRoom bottom
-                    size -= (y + (height / 2) - baseRoom.getBottom()) * xExtensionOnMain;
+                    size -= (y + (height / 2) - baseRoom.getBottom()) * xOverlapOnMain;
                 }
             }
             case RIGHT -> {
@@ -61,15 +61,15 @@ public class SubRoom extends Room {
                 try {y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height);}
                 catch (IllegalArgumentException e) {return null;}
 
-                // Find the x-axis extension on base room
-                int xExtensionOnMain = x + (width / 2) - baseRoom.getRight();
+                // Find the x-axis overlap on base room
+                int xOverlapOnMain = x - (width / 2) - baseRoom.getRight();
                 // If the subroom's vertical is entirely contained by the base room
                 if (y + (height / 2) <= baseRoom.getTop() && y - (height / 2) >= baseRoom.getBottom()) {
-                    size -= height * xExtensionOnMain;
+                    size -= height * xOverlapOnMain;
                 } else if (y + (height / 2) > baseRoom.getTop()) { // If the subroom is "higher" than the baseRoom top
-                    size -= (baseRoom.getTop() - (y - (height / 2) ) ) * xExtensionOnMain;
+                    size -= (baseRoom.getTop() - (y - (height / 2) ) ) * xOverlapOnMain;
                 }  else { // The subroom is "lower" than the baseRoom bottom
-                    size -= (y + (height / 2) - baseRoom.getBottom()) * xExtensionOnMain;
+                    size -= (y + (height / 2) - baseRoom.getBottom()) * xOverlapOnMain;
                 }
             }
             case DOWN -> {
@@ -77,15 +77,15 @@ public class SubRoom extends Room {
                 try {x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width);}
                 catch (IllegalArgumentException e) {return null;}
 
-                // Find the y-extension on the baseRoom
-                int yExtensionOnMain = y - (height / 2) - baseRoom.getBottom();
+                // Find the y-overlap on the baseRoom
+                int yOverlapOnMain = y + (height / 2) - baseRoom.getBottom();
                 // If the subRoom horizontal is fully contained by the baseRoom
                 if (x - (width / 2) <= baseRoom.getLeft() && x + (width / 2) >= baseRoom.getRight()) {
-                    size -= width * yExtensionOnMain;
+                    size -= width * yOverlapOnMain;
                 } else if (x - (width / 2) <= baseRoom.getLeft()) { // If the subRoom's left is "lefter" to the baseRoom's left
-                    size -= (x + (width / 2) - baseRoom.getLeft()) * yExtensionOnMain; // x-extension = subRoom.right - baseRoom.left
+                    size -= (x + (width / 2) - baseRoom.getLeft()) * yOverlapOnMain; // x-extension = subRoom.right - baseRoom.left
                 } else { // If the subRoom's right is "righter" to the baseRoom's right
-                    size -=  (baseRoom.getRight() - (x - (width / 2) ) ) * yExtensionOnMain; // x-extension = baseRoom.right - subRoom.left
+                    size -=  (baseRoom.getRight() - (x - (width / 2) ) ) * yOverlapOnMain; // x-extension = baseRoom.right - subRoom.left
                 }
             }
             case UP -> {
@@ -94,15 +94,15 @@ public class SubRoom extends Room {
                 try {x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width);}
                 catch (IllegalArgumentException e) {return null;}
 
-                // Find the y-extension on the baseRoom
-                int yExtensionOnMain = baseRoom.getTop() - (y - (height / 2)) ;
+                // Find the y-overlap on the baseRoom
+                int yOverlapOnMain = baseRoom.getTop() - (y - (height / 2)) ;
                 // If the subRoom horizontal is fully contained by the baseRoom
                 if (x - (width / 2) <= baseRoom.getLeft() && x + (width / 2) >= baseRoom.getRight()) {
-                    size -= width * yExtensionOnMain;
+                    size -= width * yOverlapOnMain;
                 } else if (x - (width / 2) <= baseRoom.getLeft()) { // If the subRoom's left is "lefter" to the baseRoom's left
-                    size -= (x + (width / 2) - baseRoom.getLeft()) * yExtensionOnMain; // x-extension = subRoom.right - baseRoom.left
+                    size -= (x + (width / 2) - baseRoom.getLeft()) * yOverlapOnMain; // x-extension = subRoom.right - baseRoom.left
                 } else { // If the subRoom's right is "righter" to the baseRoom's right
-                    size -=  (baseRoom.getRight() - (x - (width / 2) ) ) * yExtensionOnMain; // x-extension = baseRoom.right - subRoom.left
+                    size -=  (baseRoom.getRight() - (x - (width / 2) ) ) * yOverlapOnMain; // x-extension = baseRoom.right - subRoom.left
                 }
             }
             default -> throw new IllegalStateException("Unexpected direction: " + direction);
