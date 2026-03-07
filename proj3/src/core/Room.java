@@ -21,6 +21,7 @@ public abstract class Room {
     private TileType wallType;
     private boolean isCornered;
     private int thicknessOfWall;
+    private int size;
 
 
     public Room(int height, int width, Point location, int thicknessOfWall, boolean isCornered) {
@@ -29,6 +30,7 @@ public abstract class Room {
         this.location = new Point(location);
         this.thicknessOfWall = thicknessOfWall;
         this.isCornered = isCornered;
+        size = width * height;
     }
 
     public Room(int height, int width, int x, int y, int thicknessOfWall, boolean isCornered) {
@@ -39,7 +41,6 @@ public abstract class Room {
     public int getHeight() { return height; }
     public int getWidth()  { return width; }
     public int getThicknessOfWall() { return thicknessOfWall; }
-    public int getSize() {return getWidth() * getHeight();}
     public boolean isCornered() { return isCornered; }
     public Point getLocation() { return new Point(location); }
 
@@ -216,4 +217,8 @@ public abstract class Room {
     public static double distanceBetween(Room a, Room b) {
         return Math.sqrt(Math.pow(Math.abs(a.location.x - b.location.x), 2) + Math.pow(Math.abs(a.location.y - b.location.y), 2));
     }
+
+
+    public int getSize() {return size;}
+    public void setSize(int size) {this.size = size;}
 }

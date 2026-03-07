@@ -49,6 +49,7 @@ public class MainRoom extends Room {
         MainRoom room = new MainRoom(height, width, x, y, wallThickness, isCornered, id);
         room.getRandomPassable(random);
         room.getRandomImpassable(random);
+        room.setSize(width * height);
         return room;
     }
 

@@ -36,7 +36,7 @@ public class SubRoom extends Room {
 
         width = clamp(width,  minWidth,  maxWidth);
         height = clamp(height, minHeight, maxHeight);
-        int x, y;
+        int x, y, size;
         /* + - t to make sure it will always have at least the outmost floor connected */
         switch (direction) {
             case LEFT -> {
@@ -44,28 +44,72 @@ public class SubRoom extends Room {
                 try {y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height);}
                 catch (IllegalArgumentException e) {return null;}
 
+                // Find the x-axis extension on base room
+                int xExtensionOnMain = x + (width / 2) - baseRoom.getLeft();
+                // If the subroom is entirely contained by the base room
+                if (y + (height / 2) <= baseRoom.getTop() && y - (height / 2) >= baseRoom.getBottom()) {
+                    size = height * xExtensionOnMain;
+                } else if (y + (height / 2) > baseRoom.getTop()) { // If the subroom is "higher" than the baseRoom top
+                    size = (baseRoom.getTop() - (y - (height / 2) ) ) * xExtensionOnMain;
+                }  else { // The subroom is "lower" than the baseRoom bottom
+                    size = (y + (height / 2) - baseRoom.getBottom()) * xExtensionOnMain;
+                }
             }
             case RIGHT -> {
                 // - 1 due to allocation is open range
                 x = baseRoom.getRight() + (width / 2) - RandomUtils.uniform(random, 2, width / 2 + 1) - 1 - t;
                 try {y = RandomUtils.uniform(random, baseRoom.getBottom(), baseRoom.getTop() - height);}
                 catch (IllegalArgumentException e) {return null;}
+
+                // Find the x-axis extension on base room
+                int xExtensionOnMain = x + (width / 2) - baseRoom.getRight();
+                // If the subroom's vertical is entirely contained by the base room
+                if (y + (height / 2) <= baseRoom.getTop() && y - (height / 2) >= baseRoom.getBottom()) {
+                    size = height * xExtensionOnMain;
+                } else if (y + (height / 2) > baseRoom.getTop()) { // If the subroom is "higher" than the baseRoom top
+                    size = (baseRoom.getTop() - (y - (height / 2) ) ) * xExtensionOnMain;
+                }  else { // The subroom is "lower" than the baseRoom bottom
+                    size = (y + (height / 2) - baseRoom.getBottom()) * xExtensionOnMain;
+                }
             }
             case DOWN -> {
                 y = baseRoom.getBottom() - (height / 2) + RandomUtils.uniform(random, 2, height / 2 + 1) + t;
                 try {x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width);}
                 catch (IllegalArgumentException e) {return null;}
+
+                // Find the y-extension on the baseRoom
+                int yExtensionOnMain = y - (height / 2) - baseRoom.getBottom();
+                // If the subRoom horizontal is fully contained by the baseRoom
+                if (x - (width / 2) <= baseRoom.getLeft() && x + (width / 2) >= baseRoom.getRight()) {
+                    size = width * yExtensionOnMain;
+                } else if (x - (width / 2) <= baseRoom.getLeft()) { // If the subRoom's left is "lefter" to the baseRoom's left
+                    size = (x + (width / 2) - baseRoom.getLeft()) * yExtensionOnMain; // x-extension = subRoom.right - baseRoom.left
+                } else { // If the subRoom's right is "righter" to the baseRoom's right
+                    size =  (baseRoom.getRight() - (x - (width / 2) ) ) * yExtensionOnMain; // x-extension = baseRoom.right - subRoom.left
+                }
             }
             case UP -> {
                 // - 1 due to allocation is open range
                 y = baseRoom.getTop() + (height / 2) - RandomUtils.uniform(random, 2, height / 2 + 1) - 1 - t;
                 try {x = RandomUtils.uniform(random, baseRoom.getLeft(), baseRoom.getRight() - width);}
                 catch (IllegalArgumentException e) {return null;}
+
+                // Find the y-extension on the baseRoom
+                int yExtensionOnMain = baseRoom.getTop() - (y - (height / 2)) ;
+                // If the subRoom horizontal is fully contained by the baseRoom
+                if (x - (width / 2) <= baseRoom.getLeft() && x + (width / 2) >= baseRoom.getRight()) {
+                    size = width * yExtensionOnMain;
+                } else if (x - (width / 2) <= baseRoom.getLeft()) { // If the subRoom's left is "lefter" to the baseRoom's left
+                    size = (x + (width / 2) - baseRoom.getLeft()) * yExtensionOnMain; // x-extension = subRoom.right - baseRoom.left
+                } else { // If the subRoom's right is "righter" to the baseRoom's right
+                    size =  (baseRoom.getRight() - (x - (width / 2) ) ) * yExtensionOnMain; // x-extension = baseRoom.right - subRoom.left
+                }
             }
             default -> throw new IllegalStateException("Unexpected direction: " + direction);
         }
 
         SubRoom sub = new SubRoom(height, width, x, y, baseRoom.getThicknessOfWall(), baseRoom.isCornered(), baseRoom, direction);
+        sub.setSize(size);
         sub.setFloorType(baseRoom.getFloorType());
         sub.setWallType(baseRoom.getWallType());
         return sub;
