@@ -145,13 +145,6 @@ public abstract class GameObject {
                 minY = Math.max(targetRoom.getBottom() + 1, closeToP.y - radius),
                 maxY = Math.min(targetRoom.getTop() - 1, closeToP.y + radius);
 
-        for (SubRoom s: targetRoom.getSubRooms()) {
-            minX = Math.min(minX, s.getLeft() + 1);
-            maxX = Math.max(maxX, s.getRight() - 1);
-            minY = Math.min(minY, s.getBottom() + 1);
-            maxY = Math.max(maxY, s.getTop() - 1);
-        }
-
         for (int i = 0; i < maxAttempt; i++) {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
