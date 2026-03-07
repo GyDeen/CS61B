@@ -397,9 +397,10 @@ public class World {
                 stopTimeFreeze();
             }
 
+            UI.drawUIBackground();
             UI.drawMoney(money);
             setting.drawSetting();
-            UI.drawUIBackground();
+            drawTimer(remainTime);
             StdDraw.show();
         }
 
