@@ -10,6 +10,7 @@ import java.util.Random;
 import static core.Config.DEFAULT_GHOST_CHASE_DISTANCE;
 import static core.Config.GHOST_MOVE_COOLDOWN_DEFAULT;
 import static tileengine.Tileset.GHOST;
+import static tileengine.Tileset.MOUNTAIN;
 
 public abstract class Ghost extends GameObject{
     private boolean chasePlayer = false;
@@ -60,18 +61,34 @@ public abstract class Ghost extends GameObject{
 
     /** Moving only determine by the dx and dy between the p1 and current position not by the direction */
     public boolean moveToward(Point p1, TETile[][] world, long worldTime) {
+        if (worldTime < nextMoveTime) return false;
+
         int dx = Integer.compare(p1.x, getPosition().x);
         int dy = Integer.compare(p1.y, getPosition().y);
-        int nextX = getPosition().x + dx;
-        int nextY = getPosition().y + dy;
+        int currentX = getPosition().x;
+        int currentY = getPosition().y;
 
-        TileType targetTile = TileType.toType(world[nextX][nextY]);
+        boolean moved = false;
 
-        // Will only be blocked by WALL type
-        if (targetTile != TileType.WALL && worldTime >= nextMoveTime) {
-            setPosition(nextX, nextY);
+        // try move directly first
+        if (canGhostEnter(currentX + dx, currentY + dy, world)) {
+            setPosition(currentX + dx, currentY + dy);
+            moved = true;
+        }
+        // if being blocked, try move horizontally first
+        else if (dx != 0 && canGhostEnter(currentX + dx, currentY, world)) {
+            setPosition(currentX + dx, currentY);
+            moved = true;
+        }
+        // try move vertically
+        else if (dy != 0 && canGhostEnter(currentX, currentY + dy, world)) {
+            setPosition(currentX, currentY + dy);
+            moved = true;
+        }
+
+        // Only update cooldown and facing direction if we actually moved
+        if (moved) {
             nextMoveTime = worldTime + moveCoolDown;
-
             if (dx != 0) {
                 this.currentDir = (dx > 0) ? Direction.RIGHT : Direction.LEFT;
             }
@@ -79,6 +96,14 @@ public abstract class Ghost extends GameObject{
         }
 
         return false;
+    }
+
+    private boolean canGhostEnter(int x, int y, TETile[][] world) {
+        if (x < 0 || y < 0 || x >= world.length || y >= world[0].length) return false;
+        TileType targetTile = TileType.toType(world[x][y]);
+
+        // Ghost can step anywhere EXCEPT walls and the void
+        return !targetTile.isWallType() && targetTile != TileType.NOTHING;
     }
 
 
