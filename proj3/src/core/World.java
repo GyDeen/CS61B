@@ -262,20 +262,51 @@ public class World {
     }
 
     private void generateGhost() {
-        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty * 1 / 7) ;
+        int ghostNum = (int) Math.round((golds.size() + mysteryBoxes.size() + random.nextInt(-2, 4)) * difficulty * 2 / 7) ;
         int generationCount = 0;
+
         ArrayList<GameObject> approachable = new ArrayList<>();
         approachable.addAll(golds);
         approachable.addAll(mysteryBoxes);
-        Collections.shuffle(approachable);
+        Collections.shuffle(approachable, random);
 
+        // Track how many ghosts are currently in each room
+        java.util.HashMap<MainRoom, Integer> roomGhostCount = new java.util.HashMap<>();
 
-        while (ghosts.size() < ghostNum && generationCount < GHOST_GENERATION_CAP) {
-            Ghost newGhost = FixRouteGhost.generateFixRouteGhost(random, world, approachable.get(random.nextInt(approachable.size())));
+        // Keep generating ghost if we haven't reached desire ghost number until we reach it or run out of anchor
+        while (ghosts.size() < ghostNum && generationCount < Config.GHOST_GENERATION_CAP && !approachable.isEmpty()) {
+
+            GameObject bestAnchor = null;
+            int minGhosts = Integer.MAX_VALUE;
+
+            // Find an anchor in the room with the fewest ghosts
+            for (GameObject obj : approachable) {
+                MainRoom room = obj.getRoom();
+
+                // Skip rooms that are too small
+                if (room.getSize() <= 80) continue;
+
+                int count = roomGhostCount.getOrDefault(room, 0);
+                if (count < minGhosts) {
+                    minGhosts = count;
+                    bestAnchor = obj;
+                }
+            }
+
+            // No object to be the anchor
+            if (bestAnchor == null) break;
+
+            // Remove the chosen anchor so we never spawn two ghosts on the exact same coin
+            approachable.remove(bestAnchor);
             generationCount++;
+
+            // generate the ghost
+            Ghost newGhost = FixRouteGhost.generateFixRouteGhost(random, world, bestAnchor);
             if (newGhost == null) continue;
+
             ghosts.add(newGhost);
-            System.out.println("Successfully generate one ghost");
+            roomGhostCount.put(bestAnchor.getRoom(), minGhosts + 1);
+            System.out.println("Successfully generated one ghost in room @" + bestAnchor.getRoom().getLocation());
         }
     }
 
