@@ -39,6 +39,7 @@ public enum TileType {
             case LOCKED_DOOR -> Tileset.LOCKED_DOOR;
             case WALL -> Tileset.WALL;
             case BOX -> Tileset.CELL;
+            case GHOST -> Tileset.GHOST;
             default -> throw new IllegalArgumentException("Unrecognized tile type: " + this);
         };
     }
@@ -59,6 +60,7 @@ public enum TileType {
         if (tile == Tileset.WALL) return WALL;
         if (tile == Tileset.CELL) return BOX;
         if (tile == Tileset.NOTHING) return NOTHING;
+        if (tile == Tileset.GHOST) return GHOST;
         throw new IllegalArgumentException("Unrecognized tile: " + tile);
     }
 
