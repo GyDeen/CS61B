@@ -67,4 +67,8 @@ public enum TileType {
     public boolean isPassable(){
         return passable;
     }
+
+    public boolean isWallType() {
+        return this == WALL || this == MOUNTAIN;
+    }
 }
