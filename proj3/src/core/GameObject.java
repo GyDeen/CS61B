@@ -149,7 +149,9 @@ public abstract class GameObject {
             int x = rand.nextInt(minX, maxX);
             int y = rand.nextInt(minY, maxY);
 
-            if (targetRoom.isInRoom(x, y) && validPos(x, y, 1, 1, world)) {
+            double distance = Math.sqrt(Math.pow(x - closeToP.x, 2) + Math.pow(y - closeToP.y, 2));
+
+            if (distance > radius * 0.7 && targetRoom.isInRoom(x, y) && validPos(x, y, 1, 1, world)) {
                 // Insure it is not right next to the given object
                 if (Math.abs(x - closeToP.x) > 1 || Math.abs(y - closeToP.y) > 1) {
                     return new Point(x, y);
