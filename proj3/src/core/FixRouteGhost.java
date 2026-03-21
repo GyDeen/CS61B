@@ -22,7 +22,7 @@ public class FixRouteGhost extends Ghost{
     }
 
     public static FixRouteGhost generateFixRouteGhost(Random rand, TETile[][] world, GameObject closeTo) {
-        Point p = findSpawnLocation(rand.nextInt(3, 5), rand, world, closeTo);
+        Point p = findSpawnLocation(rand.nextInt(8, 15), rand, world, closeTo);
         if (p == null) return null;
 
         FixRouteGhost currentGhost = new FixRouteGhost(p.x, p.y, 1, 1, rand);
@@ -106,6 +106,17 @@ public class FixRouteGhost extends Ghost{
             default:
                 throw new RuntimeException("Invalid shape " + shape);
         }
+
+        for (int i = 0; i < route.length; i++) {
+            Point p = route[i];
+
+            // Check if point is in the room and on a passable tile
+            if (!closeTo.getRoom().isInRoom(p.x, p.y) || !validPos(p.x, p.y, 1, 0, world)) {
+                // FALLBACK: If outside, snap to the anchor (closeTo) or spawn point
+                // This prevents the ghost from targeting a wall index
+                route[i] = new Point(closeTo.getPosition());
+            }
+        }
     }
 
     @Override
@@ -120,8 +131,13 @@ public class FixRouteGhost extends Ghost{
 
 
     public void update(TETile[][] world, long worldTime) {
-        if (moveToward(route[currentIdx], world, worldTime)) currentIdx = (currentIdx + 1) % route.length;
+        Point target = route[currentIdx];
+        moveToward(target, world, worldTime);
 
+        // Only switch to the next point if we have arrived
+        if (getPosition().x == target.x && getPosition().y == target.y) {
+            currentIdx = (currentIdx + 1) % route.length;
+        }
         draw();
     }
 
