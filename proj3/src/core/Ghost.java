@@ -9,6 +9,7 @@ import java.util.Random;
 
 import static core.Config.DEFAULT_GHOST_CHASE_DISTANCE;
 import static core.Config.GHOST_MOVE_COOLDOWN_DEFAULT;
+import static tileengine.Tileset.GHOST;
 
 public abstract class Ghost extends GameObject{
     private boolean chasePlayer = false;
@@ -61,17 +62,19 @@ public abstract class Ghost extends GameObject{
     public boolean moveToward(Point p1, TETile[][] world, long worldTime) {
         int dx = Integer.compare(p1.x, getPosition().x);
         int dy = Integer.compare(p1.y, getPosition().y);
+        int nextX = getPosition().x + dx;
+        int nextY = getPosition().y + dy;
 
-        // Only move to the passable tile
-        if (TileType.toType(world[p1.x + dx][p1.y + dy]).isPassable() && worldTime >= nextMoveTime) {
-            setPosition(getPosition().x + dx, getPosition().y + dy);
+        TileType targetTile = TileType.toType(world[nextX][nextY]);
+
+        // Will only be blocked by WALL type
+        if (targetTile != TileType.WALL && worldTime >= nextMoveTime) {
+            setPosition(nextX, nextY);
             nextMoveTime = worldTime + moveCoolDown;
 
-            // Update image facing
             if (dx != 0) {
                 this.currentDir = (dx > 0) ? Direction.RIGHT : Direction.LEFT;
             }
-
             return true;
         }
 
@@ -81,6 +84,7 @@ public abstract class Ghost extends GameObject{
 
     /** Update without given destination point for set route ghost*/
     public void update(TETile[][] world) {
+
     }
 
 
