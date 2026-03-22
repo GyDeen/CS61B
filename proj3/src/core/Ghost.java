@@ -86,6 +86,27 @@ public abstract class Ghost extends GameObject{
             moved = true;
         }
 
+        // If perfectly horizontal (dy == 0) but blocked, force a vertical step around the wall
+        else if (dy == 0 && dx != 0) {
+            if (canGhostEnter(currentX, currentY + 1, world)) {
+                setPosition(currentX, currentY + 1);
+                moved = true;
+            } else if (canGhostEnter(currentX, currentY - 1, world)) {
+                setPosition(currentX, currentY - 1);
+                moved = true;
+            }
+        }
+        // If perfectly vertical (dx == 0) but blocked, force a horizontal step around the wall
+        else if (dx == 0 && dy != 0) {
+            if (canGhostEnter(currentX + 1, currentY, world)) {
+                setPosition(currentX + 1, currentY);
+                moved = true;
+            } else if (canGhostEnter(currentX - 1, currentY, world)) {
+                setPosition(currentX - 1, currentY);
+                moved = true;
+            }
+        }
+
         // Only update cooldown and facing direction if we actually moved
         if (moved) {
             nextMoveTime = worldTime + moveCoolDown;
