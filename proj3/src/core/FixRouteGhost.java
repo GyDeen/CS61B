@@ -2,6 +2,7 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
+import tileengine.TileType;
 
 import java.awt.*;
 import java.util.Random;
@@ -72,13 +73,7 @@ public class FixRouteGhost extends Ghost{
                     int x = (int) Math.round(closeTo.getPosition().x + radius * Math.cos(angle));
                     int y = (int) Math.round(closeTo.getPosition().y + radius * Math.sin(angle));
 
-                    // Ensure the vertex is passable and within room bounds
-                    if (validPos(x, y, 1, 1, world)) {
-                        route[i] = new Point(x, y);
-                    } else {
-                        // Fallback: use anchor if a vertex is inside a wall
-                        route[i] = closeTo.getPosition();
-                    }
+                    route[i] = new Point(x, y);
                 }
                 break;
             }
@@ -99,7 +94,6 @@ public class FixRouteGhost extends Ghost{
                 route[2] = vertices[4];
                 route[3] = vertices[1];
                 route[4] = vertices[3];
-
                 break;
             }
 
@@ -109,13 +103,20 @@ public class FixRouteGhost extends Ghost{
 
         for (int i = 0; i < route.length; i++) {
             Point p = route[i];
-
-            // Check if point is in the room and on a passable tile
-            if (!closeTo.getRoom().isInRoom(p.x, p.y) || !validPos(p.x, p.y, 1, 0, world)) {
-                // FALLBACK: If outside, snap to the anchor (closeTo) or spawn point
-                // This prevents the ghost from targeting a wall index
-                route[i] = new Point(closeTo.getPosition());
+            int counter = 15;
+            // Check if point is in the room and on a non wall type tile. If not, move the route point towards the guarded object
+            while ((!closeTo.getRoom().isInRoom(p.x, p.y) ||
+                    !validPos(p.x, p.y, 1, 0, world) ||
+                    TileType.toType(world[p.x][p.y]).isWallType()
+            ) && counter > 0) {
+                int stepX = Integer.compare(closeTo.getPosition().x, p.x);
+                int stepY = Integer.compare(closeTo.getPosition().getLocation().y, p.y);
+                p.x += stepX;
+                p.y += stepY;
+                counter--;
             }
+
+            route[i] = p;
         }
     }
 
