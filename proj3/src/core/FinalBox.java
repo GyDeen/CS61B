@@ -2,12 +2,10 @@ package core;
 
 import edu.princeton.cs.algs4.StdDraw;
 import tileengine.TETile;
-import tileengine.TileType;
 
 import java.awt.*;
 import java.util.Random;
 
-import static core.Config.*;
 
 public class FinalBox extends LootBox {
     private String[] openFinalBox;
