@@ -311,7 +311,7 @@ public class World {
     }
 
 
-    private boolean nextToGameObject(GameObject object) {
+    private boolean playerCloseToGameObject (GameObject object) {
         Point pPos = player.getPosition();
         Point cPos = object.getPosition();
 
@@ -379,8 +379,8 @@ public class World {
 
             int finalBoxStatus = finalBox.update(this);
             if (finalBoxStatus == FINISHED) { playerWin(); }
-            if (nextToGameObject(finalBox)) {
-                if (nextToGameObject(finalBox) && key == 'f') {
+            if (playerCloseToGameObject(finalBox)) {
+                if (playerCloseToGameObject(finalBox) && key == 'f') {
                     finalBox.startOpening();
                 }
             }
@@ -401,7 +401,7 @@ public class World {
             for (int i = 0; i < golds.size(); i++) {
                 Gold gold = golds.get(i);
 
-                if (nextToGameObject(gold)) {
+                if (playerCloseToGameObject(gold)) {
                     this.money += gold.getWorth();
 
                     removeCollected(gold);
@@ -416,15 +416,20 @@ public class World {
                 gold.drawImage();
             }
 
-            if (!isFrozen) {
+
                 for (Ghost ghost : ghosts) {
-                    ((FixRouteGhost) ghost).update(world, elapsedTimeMs);
+                    if (playerCloseToGameObject(ghost)) {
+                        player.destroy();
+                    }
+                    if (!isFrozen) {
+                        ((FixRouteGhost) ghost).update(world, elapsedTimeMs);
+                    }
                 }
 
-                updateTimer();
-            }
 
-            if (isFrozen && System.currentTimeMillis() >= frozenFrom + DEFAULT_FROZEN_DURATION) {
+            if (!isFrozen) {
+                updateTimer();
+            } else if (System.currentTimeMillis() >= frozenFrom + DEFAULT_FROZEN_DURATION) {
                 stopTimeFreeze();
             }
 

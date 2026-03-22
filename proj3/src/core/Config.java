@@ -64,6 +64,7 @@ public class Config {
 
     // PacMan config
     public static final int IMAGE_SWITCHING_PERIOD = 500;
+    public static final int DYING_INTERVAL = 700;
 
 
     // Ghost config

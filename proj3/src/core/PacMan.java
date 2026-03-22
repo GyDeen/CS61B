@@ -8,8 +8,7 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Random;
 
-import static core.Config.IMAGE_SWITCHING_PERIOD;
-import static core.Config.PAC_MAN_MOVE_COOLDOWN_DEFAULT;
+import static core.Config.*;
 
 public class PacMan extends GameObject{
     private final String[] activeImage;
@@ -78,8 +77,28 @@ public class PacMan extends GameObject{
     public Direction getDirection() {return curDirection;}
 
 
-    public void dying() {
+    public int dying(Long currentElapsedTimeMs) {
+        Point p = getPosition();
+        currentImage = dyingImage[frameIndex];
+        if (currentElapsedTimeMs >= nextSwitchTimeMs) {
+            if (frameIndex < 2) {
+                StdDraw.picture(p.x + 0.5, p.y + 0.5, currentImage, 1, 1);
+                frameIndex++;
+                nextSwitchTimeMs = nextSwitchTimeMs + DYING_INTERVAL;
 
+                return FADING;
+            }
+
+            return FINISHED;
+        }
+
+        return FADING;
+    }
+
+
+    @Override
+    public void destroy() {
+        frameIndex = 0;
     }
 
 
